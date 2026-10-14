@@ -1,0 +1,45 @@
+{
+  "schema": "safetytool.bowtie/1",
+  "meta": {
+    "title": "ตัวอย่าง: สัตว์ป่าในบริเวณสนามบิน (Wildlife on the aerodrome)",
+    "scope": "ตัวอย่างประกอบการสอนที่เขียนขึ้นใหม่จากหลักการทั่วไป ไม่ใช่ข้อมูลของ CAA, CASA, ICAO หรือหน่วยงานใด และไม่ได้อ้างอิงข้อมูลสถิติจริง ต้องปรับให้ตรงกับสนามบินและข้อมูลของคุณก่อนใช้",
+    "author": "Safetytool",
+    "illustrative": true,
+    "createdAt": "2026-10-14T00:00:00.000Z",
+    "updatedAt": "2026-10-14T00:00:00.000Z"
+  },
+  "hazard": { "id": "hz_1", "text": "สัตว์ป่าที่อยู่ในและรอบพื้นที่สนามบิน (Wildlife on and around the aerodrome)", "notes": "" },
+  "topEvent": { "id": "te_1", "text": "สัตว์ป่าอยู่ในเส้นทางของอากาศยานขณะขึ้น-ลงหรือเคลื่อนที่บนพื้นที่เคลื่อนไหว (Wildlife in the path of an aircraft on the movement area or in the climb/approach)", "notes": "" },
+  "threats": [
+    { "id": "th_1", "text": "ฝูงนกเข้ามาหาอาหารหรือพักบนพื้นที่หญ้าของสนามบิน", "exposure": 4, "notes": "" },
+    { "id": "th_2", "text": "แหล่งดึงดูดสัตว์นอกรั้วสนามบิน เช่น บ่อขยะหรือบ่อเลี้ยงสัตว์น้ำ ดึงสัตว์ให้บินผ่านแนวบิน", "exposure": 3, "notes": "" },
+    { "id": "th_3", "text": "สัตว์บกเข้าสู่พื้นที่เคลื่อนไหวผ่านรั้วที่ชำรุดหรือช่องใต้รั้ว", "exposure": 2, "notes": "" },
+    { "id": "th_4", "text": "การอพยพตามฤดูกาลทำให้จำนวนนกในพื้นที่เพิ่มขึ้นฉับพลัน", "exposure": 3, "notes": "" }
+  ],
+  "consequences": [
+    { "id": "co_1", "text": "อากาศยานชนสัตว์ระหว่างวิ่งขึ้นหรือลง จนต้องยกเลิกการขึ้นหรือออกนอกทางวิ่ง", "severity": 4, "notes": "" },
+    { "id": "co_2", "text": "สัตว์ถูกดูดเข้าเครื่องยนต์ขณะบิน ทำให้แรงขับลดลงหรือเครื่องยนต์ดับ", "severity": 5, "notes": "" },
+    { "id": "co_3", "text": "ชนสัตว์แล้วเกิดความเสียหายต่อโครงสร้างหรือกระจกหน้า ต้องซ่อมและหยุดบิน", "severity": 3, "notes": "" }
+  ],
+  "controls": [
+    { "id": "ct_1", "side": "prevent", "threatId": "th_1", "consequenceId": null, "order": 0, "text": "จัดการพื้นที่หญ้าให้ไม่ดึงดูดนก เช่น ควบคุมความสูงของหญ้าและแหล่งอาหาร", "function": "eliminate", "type": "equipment", "critical": false, "adequacy": 3, "reliability": 3, "owner": "หัวหน้างานบำรุงรักษาสนามบิน", "notes": "" },
+    { "id": "ct_2", "side": "prevent", "threatId": "th_1", "consequenceId": null, "order": 1, "text": "เจ้าหน้าที่ลาดตระเวนไล่สัตว์ตามตารางและก่อนเที่ยวบินในช่วงเสี่ยง", "function": "prevent", "type": "human", "critical": true, "adequacy": 3, "reliability": 2, "owner": "หัวหน้างานควบคุมสัตว์ป่า", "notes": "" },
+    { "id": "ct_3", "side": "prevent", "threatId": "th_2", "consequenceId": null, "order": 0, "text": "ประสานเจ้าของพื้นที่และหน่วยงานท้องถิ่นเพื่อลดแหล่งดึงดูดสัตว์ในรัศมีรอบสนามบิน", "function": "eliminate", "type": "policy", "critical": false, "adequacy": 2, "reliability": 2, "owner": "คณะกรรมการจัดการสัตว์ป่า", "notes": "" },
+    { "id": "ct_4", "side": "prevent", "threatId": "th_3", "consequenceId": null, "order": 0, "text": "ตรวจและซ่อมรั้วสนามบินตามรอบ พร้อมบันทึกจุดชำรุด", "function": "prevent", "type": "equipment", "critical": false, "adequacy": 3, "reliability": 3, "owner": "หัวหน้างานบำรุงรักษาสนามบิน", "notes": "" },
+    { "id": "ct_5", "side": "prevent", "threatId": "th_4", "consequenceId": null, "order": 0, "text": "ติดตามกิจกรรมนกและออก NOTAM หรือแจ้งเตือนนักบินในช่วงที่มีความเสี่ยงสูง", "function": "prevent", "type": "warning", "critical": true, "adequacy": 3, "reliability": 3, "owner": "หัวหน้าหอบังคับการบิน", "notes": "" },
+    { "id": "ct_6", "side": "prevent", "threatId": "th_4", "consequenceId": null, "order": 1, "text": "ปรับตารางเวลาปฏิบัติการหรือเพิ่มกำลังไล่สัตว์ในช่วงอพยพ", "function": "reduce", "type": "policy", "critical": false, "adequacy": 2, "reliability": 3, "owner": "ผู้จัดการสนามบิน", "notes": "" },
+    { "id": "ct_7", "side": "recover", "threatId": null, "consequenceId": "co_1", "order": 0, "text": "ผู้ควบคุมจราจรและนักบินแจ้งกันทันทีเมื่อพบสัตว์ เพื่อชะลอหรือยกเลิกการขึ้นลง", "function": "reduce", "type": "human", "critical": true, "adequacy": 3, "reliability": 2, "owner": "หัวหน้าหอบังคับการบิน", "notes": "" },
+    { "id": "ct_8", "side": "recover", "threatId": null, "consequenceId": "co_1", "order": 1, "text": "ทางวิ่งและพื้นที่ปลอดภัยปลายทางวิ่ง (RESA) ที่ออกแบบและบำรุงรักษาตามข้อกำหนด", "function": "mitigate", "type": "equipment", "critical": false, "adequacy": 3, "reliability": 4, "owner": "ผู้จัดการสนามบิน", "notes": "" },
+    { "id": "ct_9", "side": "recover", "threatId": null, "consequenceId": "co_2", "order": 0, "text": "ขั้นตอนฉุกเฉินเมื่อเครื่องยนต์เสียหายและการฝึกนักบินตามรอบ", "function": "mitigate", "type": "policy", "critical": true, "adequacy": 4, "reliability": 3, "owner": "หัวหน้านักบินของสายการบิน", "notes": "" },
+    { "id": "ct_10", "side": "recover", "threatId": null, "consequenceId": "co_3", "order": 0, "text": "ตรวจสภาพอากาศยานหลังพบหรือสงสัยว่าชนสัตว์ก่อนปล่อยบินต่อ", "function": "reduce", "type": "policy", "critical": false, "adequacy": 3, "reliability": 3, "owner": "หัวหน้างานซ่อมบำรุง", "notes": "" }
+  ],
+  "escalations": [
+    { "id": "ef_1", "controlId": "ct_2", "text": "กำลังคนไม่พอในช่วงกลางคืนหรือวันหยุด ทำให้ลาดตระเวนไม่ครบตามตาราง", "notes": "" },
+    { "id": "ef_2", "controlId": "ct_2", "text": "หมอกหรือแสงน้อย ทำให้เจ้าหน้าที่มองเห็นฝูงนกได้ช้า", "notes": "" },
+    { "id": "ef_3", "controlId": "ct_7", "text": "นักบินมีภาระงานสูงช่วงวิ่งขึ้นจึงไม่ทันรับข้อมูลเตือนเรื่องสัตว์", "notes": "" }
+  ],
+  "escalationControls": [
+    { "id": "ec_1", "escalationId": "ef_1", "text": "จัดตารางเวรให้ครอบคลุมช่วงเสี่ยงและมีเจ้าหน้าที่สำรอง", "owner": "หัวหน้างานควบคุมสัตว์ป่า", "notes": "" },
+    { "id": "ec_2", "escalationId": "ef_3", "text": "กำหนดวลีมาตรฐานและจังหวะการแจ้งเตือนที่สั้นและชัดเจนก่อนเริ่มวิ่งขึ้น", "owner": "หัวหน้าหอบังคับการบิน", "notes": "" }
+  ]
+}

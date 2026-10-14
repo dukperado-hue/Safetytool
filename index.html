@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safetytool — Bowtie</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<a class="skip" href="#main">ข้ามไปเนื้อหา / Skip to content</a>
+<header>
+  <div class="brand"><strong>Safetytool</strong> <span id="tagline"></span></div>
+  <div class="tools" role="toolbar" aria-label="Tools">
+    <button id="b-example" type="button"></button>
+    <button id="b-new" type="button"></button>
+    <button id="b-open" type="button"></button>
+    <button id="b-save" type="button"></button>
+    <button id="b-svg" type="button"></button>
+    <button id="b-png" type="button"></button>
+    <button id="b-csv" type="button"></button>
+    <span class="sep" aria-hidden="true"></span>
+    <button id="b-undo" type="button" disabled></button>
+    <button id="b-redo" type="button" disabled></button>
+    <button id="b-fit" type="button"></button>
+    <label class="chk"><input id="chk-esc" type="checkbox" checked> <span id="lbl-esc"></span></label>
+    <span class="sep" aria-hidden="true"></span>
+    <button id="b-theme" type="button"></button>
+    <button id="b-lang" type="button"></button>
+  </div>
+  <input id="file" type="file" accept="application/json,.json" hidden>
+</header>
+
+<main id="main">
+  <section class="work" aria-label="Workspace">
+    <div class="tabs" role="tablist">
+      <button id="tab-diagram" role="tab" aria-selected="true" aria-controls="pane-diagram" type="button"></button>
+      <button id="tab-table" role="tab" aria-selected="false" aria-controls="pane-table" type="button"></button>
+      <button id="tab-meta" role="tab" aria-selected="false" aria-controls="pane-meta" type="button"></button>
+      <span class="grow"></span>
+      <button id="b-addthreat" type="button"></button>
+      <button id="b-addcons" type="button"></button>
+    </div>
+    <div id="pane-diagram" role="tabpanel">
+      <div id="stage"><svg id="svg" role="img" aria-label="Bowtie diagram"></svg></div>
+      <div id="legend" class="legend"></div>
+    </div>
+    <div id="pane-table" role="tabpanel" hidden><div id="table" class="scroll"></div></div>
+    <div id="pane-meta" role="tabpanel" hidden><div id="meta" class="panel"></div></div>
+  </section>
+  <aside class="side" aria-label="Inspector and checks">
+    <h2 id="h-inspector"></h2>
+    <div id="inspector" class="panel"></div>
+    <div id="lint" class="panel lint"></div>
+  </aside>
+</main>
+<footer id="footer"></footer>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

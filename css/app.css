@@ -1,0 +1,55 @@
+:root{--bg:#f4f6f9;--panel:#fff;--ink:#1b2430;--muted:#5b6675;--line:#d5dbe3;--accent:#0b57d0;--danger:#b3261e;
+ --poor:#d64545;--weak:#e8883a;--fair:#e6c230;--strong:#3a9d5d;--none:#b9c0c9}
+:root[data-theme="dark"]{--bg:#0c1117;--panel:#141b24;--ink:#e6ebf2;--muted:#9aa6b5;--line:#2b3644;--accent:#7fb0ff;--danger:#ff8a80;--none:#586270}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI","Noto Sans Thai","Leelawadee UI",sans-serif;display:flex;flex-direction:column}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:var(--panel);padding:6px 10px;z-index:10}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.brand span{color:var(--muted);margin-left:6px}
+.tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+button,select,input,textarea{font:inherit;color:inherit}
+button{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button.danger{color:var(--danger);border-color:var(--danger)}
+.chk{display:inline-flex;gap:6px;align-items:center}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px}
+.work{display:flex;flex-direction:column;min-width:0;min-height:0}
+.tabs{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+.tabs .grow{flex:1}
+.tabs [role=tab][aria-selected=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
+[role=tabpanel]{flex:1;min-height:0;display:flex;flex-direction:column}
+[role=tabpanel][hidden]{display:none}
+#stage{flex:1;min-height:320px;overflow:hidden;background:var(--panel);cursor:grab;touch-action:none}
+#stage:active{cursor:grabbing}
+#svg{display:block}
+.legend{padding:6px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.legend .lg{display:inline-block;padding:1px 8px;margin-left:6px;border-radius:10px;color:#fff;font-size:11px}
+.lg.b-poor{background:var(--poor)}.lg.b-weak{background:var(--weak)}.lg.b-fair{background:var(--fair);color:#222}.lg.b-strong{background:var(--strong)}.lg.b-none{background:var(--none)}
+.scroll{overflow:auto;padding:12px}
+table{border-collapse:collapse;width:100%;background:var(--panel)}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+thead th{position:sticky;top:0;background:var(--panel)}
+tr.sel{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+tbody th{font-weight:400;white-space:nowrap}
+tbody th button{border:0;background:none;padding:0;color:var(--accent);text-decoration:underline}
+.side{border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.side h2{margin:0;font-size:15px}
+.panel{padding:2px 0}
+.panel h3{margin:4px 0 8px;font-size:14px}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.fld span{color:var(--muted);font-size:12px}
+.fld.chk{flex-direction:row;align-items:center;gap:8px}
+.fld input:not([type=checkbox]),.fld textarea,.fld select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.btnrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.muted{color:var(--muted)}
+.lint{border-top:1px solid var(--line);padding-top:8px}
+.lint-head{font-weight:600;margin-bottom:6px}
+.lint ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.lint li button{width:100%;text-align:left;border-left-width:4px}
+.sev-error button{border-left-color:var(--danger)}.sev-warn button{border-left-color:var(--weak)}.sev-info button{border-left-color:var(--accent)}
+footer{padding:6px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;background:var(--panel)}
+@media (max-width:900px){main{grid-template-columns:1fr;grid-auto-rows:minmax(0,auto)}.side{border-left:0;border-top:1px solid var(--line)}#stage{min-height:360px}}

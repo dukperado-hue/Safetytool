@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/safetytool/bowtie.schema.json",
+  "title": "Safetytool bowtie model",
+  "description": "Schema for safetytool.bowtie/1. Structural rules beyond this schema (dangling references, duplicate ids) are checked by `node cli/safetytool.js validate`.",
+  "type": "object",
+  "required": ["schema", "meta", "hazard", "topEvent", "threats", "consequences", "controls", "escalations", "escalationControls"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "safetytool.bowtie/1" },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "scope": { "type": "string" },
+        "author": { "type": "string" },
+        "illustrative": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "hazard": { "$ref": "#/$defs/textNode" },
+    "topEvent": { "$ref": "#/$defs/textNode" },
+    "threats": { "type": "array", "items": { "$ref": "#/$defs/threat" } },
+    "consequences": { "type": "array", "items": { "$ref": "#/$defs/consequence" } },
+    "controls": { "type": "array", "items": { "$ref": "#/$defs/control" } },
+    "escalations": { "type": "array", "items": { "$ref": "#/$defs/escalation" } },
+    "escalationControls": { "type": "array", "items": { "$ref": "#/$defs/escalationControl" } }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1 },
+    "rating5": { "type": ["integer", "null"], "minimum": 1, "maximum": 5 },
+    "rating4": { "type": ["integer", "null"], "minimum": 1, "maximum": 4 },
+    "textNode": {
+      "type": "object",
+      "required": ["id", "text"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "notes": { "type": "string" } }
+    },
+    "threat": {
+      "type": "object",
+      "required": ["id", "text"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "exposure": { "$ref": "#/$defs/rating5" }, "notes": { "type": "string" } }
+    },
+    "consequence": {
+      "type": "object",
+      "required": ["id", "text"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "severity": { "$ref": "#/$defs/rating5" }, "notes": { "type": "string" } }
+    },
+    "control": {
+      "type": "object",
+      "required": ["id", "side", "text", "order"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "side": { "enum": ["prevent", "recover"] },
+        "threatId": { "type": ["string", "null"] },
+        "consequenceId": { "type": ["string", "null"] },
+        "order": { "type": "integer", "minimum": 0 },
+        "text": { "type": "string" },
+        "function": { "enum": ["eliminate", "prevent", "reduce", "mitigate", null] },
+        "type": { "enum": ["policy", "equipment", "warning", "human", "automated", null] },
+        "critical": { "type": "boolean" },
+        "adequacy": { "$ref": "#/$defs/rating4" },
+        "reliability": { "$ref": "#/$defs/rating4" },
+        "owner": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "escalation": {
+      "type": "object",
+      "required": ["id", "controlId", "text"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "controlId": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "notes": { "type": "string" } }
+    },
+    "escalationControl": {
+      "type": "object",
+      "required": ["id", "escalationId", "text"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "escalationId": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "owner": { "type": "string" }, "notes": { "type": "string" } }
+    }
+  }
+}
