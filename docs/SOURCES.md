@@ -20,6 +20,13 @@ Principle: **we use the public method and general safety knowledge; we do not co
 | SKYbrary "Bow Tie Risk Management Methodology" | — | **Not read**: page content did not load for the fetching tools (bot check). Please read it manually and add notes here. |
 | IATA/UKCA "Bowtie model — carriage of lithium batteries" PDF | — | Image-only PDF; **not analysed**. |
 
+## Models added in v0.2 (concepts from general knowledge — sources NOT re-read this session)
+
+| Model | Concept | Status / caveat |
+|---|---|---|
+| Swiss cheese | J. Reason's layered-defence model; active failures vs latent conditions; optional layer categories echo HFACS-style groupings (Shappell & Wiegmann) | Written from general knowledge of the public concept; **cite Reason (1990, 1997) directly in any paper and verify our wording**. |
+| SHELL | Human-factors SHELL model (Edwards 1972, Hawkins 1975; used in ICAO human-factors guidance) | Same caveat. "Shell" may also mean the company's bowtie style; we implemented the human-factors model. |
+
 ## Materials deliberately NOT used
 
 - BowTieXP software (MSI) and manual — © Enablon Netherlands B.V.; the manual's own terms restrict use to BowTieXP training and forbid public distribution. We did not install or decompile the MSI. One read-only attempt to list its metadata tables failed and returned nothing, so no information from the installer was used. Nothing from it is in this repo.

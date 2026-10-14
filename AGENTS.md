@@ -23,7 +23,19 @@ npm test                                         # when code (js/, cli/) changed
 ```
 Report findings from these commands, not from memory of the file. When summarising a model, quote element text exactly and cite ids.
 
-## Data model in one paragraph
+## Model types (detected from the file's `schema` field; all CLI commands work on all of them)
+
+| `schema` | Model | JSON Schema | Key idea |
+|---|---|---|---|
+| `safetytool.bowtie/1` | Bowtie | `schema/bowtie.schema.json` | hazard · top event · threats · preventive/recovery controls · escalation factors |
+| `safetytool.swiss/1` | Swiss cheese (J. Reason) | `schema/swiss.schema.json` | defence layers with holes (`active` failure vs `latent` condition); `trajectory` = aligned holes, one per layer |
+| `safetytool.shell/1` | SHELL (human factors; Liveware at centre) | `schema/shell.schema.json` | components S/H/E/L + interfaces LS/LH/LE/LL with `status` (unknown/match/mismatch) and findings (severity 1–5, action, owner) |
+
+"Shell" is ambiguous (the human-factors SHELL model vs Shell the company's bowtie style). The tool implements the **human-factors SHELL model**; confirm with the user if they meant something else. Fault tree is planned, not built.
+
+Swiss cheese writing rules: layers are defences between hazard and loss; a hole is a weakness of that layer. Prefer finding **latent conditions** behind each active failure; do not blame individuals. Only mark holes as aligned on the trajectory when the user's facts support it. SHELL writing rules: describe roles not names; every mismatch finding gets an action, severe ones (4–5) an owner.
+
+## Data model in one paragraph (bowtie)
 
 `hazard` and `topEvent` (one each) · `threats[]` (left) · `consequences[]` (right) · `controls[]` each with `side` (`prevent` → `threatId`, `recover` → `consequenceId`) and `order` (position along the path, 0 = nearest the threat/top event as built) · `escalations[]` (each → one `controlId`) · `escalationControls[]` (each → one `escalationId`; we deliberately go only one escalation level deep). Control attributes: `function` (eliminate/prevent/reduce/mitigate), `type` (policy/equipment/warning/human/automated), `critical`, `adequacy` and `reliability` (1–4 each; effectiveness = product), `owner` (a real post, not "CEO"). Threats carry `exposure` (1–5, assessed *before* controls), consequences carry `severity` (1–5). The effectiveness bands and 1–4 scales are **our own convention**, not taken from any regulator.
 

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/safetytool/swiss.schema.json",
+  "title": "Safetytool Swiss cheese model",
+  "description": "safetytool.swiss/1. `trajectory` lists the hole ids that line up (at most one hole per layer). Cross-reference rules are checked by `node cli/safetytool.js validate`.",
+  "type": "object",
+  "required": ["schema", "meta", "hazard", "loss", "layers", "trajectory"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "safetytool.swiss/1" },
+    "meta": { "type": "object", "properties": { "title": { "type": "string" }, "scope": { "type": "string" }, "author": { "type": "string" }, "illustrative": { "type": "boolean" }, "createdAt": { "type": "string" }, "updatedAt": { "type": "string" } } },
+    "hazard": { "$ref": "#/$defs/node" },
+    "loss": { "$ref": "#/$defs/node" },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "holes"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string" },
+          "defence": { "type": "string" },
+          "category": { "enum": ["organisation", "supervision", "preconditions", "acts", "engineered", "procedural", "other", null] },
+          "notes": { "type": "string" },
+          "holes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "text"],
+              "properties": { "id": { "type": "string", "minLength": 1 }, "text": { "type": "string" }, "type": { "enum": ["active", "latent", null] }, "notes": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "trajectory": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": { "node": { "type": "object", "required": ["id", "text"], "properties": { "id": { "type": "string", "minLength": 1 }, "text": { "type": "string" } } } }
+}

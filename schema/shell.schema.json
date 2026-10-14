@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/safetytool/shell.schema.json",
+  "title": "Safetytool SHELL (human factors) model",
+  "description": "safetytool.shell/1. Central Liveware `subject`, the analysed `focus`, four component lists (S, H, E, L) and four interfaces (LS, LH, LE, LL) each with a status and findings. This is the human-factors SHELL model.",
+  "type": "object",
+  "required": ["schema", "meta", "subject", "focus", "components", "interfaces"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "safetytool.shell/1" },
+    "meta": { "type": "object", "properties": { "title": { "type": "string" }, "scope": { "type": "string" }, "author": { "type": "string" }, "illustrative": { "type": "boolean" }, "createdAt": { "type": "string" }, "updatedAt": { "type": "string" } } },
+    "subject": { "$ref": "#/$defs/node" },
+    "focus": { "$ref": "#/$defs/node" },
+    "components": {
+      "type": "object",
+      "required": ["S", "H", "E", "L"],
+      "additionalProperties": false,
+      "properties": {
+        "S": { "$ref": "#/$defs/items" }, "H": { "$ref": "#/$defs/items" }, "E": { "$ref": "#/$defs/items" }, "L": { "$ref": "#/$defs/items" }
+      }
+    },
+    "interfaces": {
+      "type": "object",
+      "required": ["LS", "LH", "LE", "LL"],
+      "additionalProperties": false,
+      "properties": {
+        "LS": { "$ref": "#/$defs/interface" }, "LH": { "$ref": "#/$defs/interface" }, "LE": { "$ref": "#/$defs/interface" }, "LL": { "$ref": "#/$defs/interface" }
+      }
+    }
+  },
+  "$defs": {
+    "node": { "type": "object", "required": ["id", "text"], "properties": { "id": { "type": "string", "minLength": 1 }, "text": { "type": "string" } } },
+    "items": { "type": "array", "items": { "$ref": "#/$defs/node" } },
+    "interface": {
+      "type": "object",
+      "required": ["status", "findings"],
+      "properties": {
+        "status": { "enum": ["unknown", "match", "mismatch"] },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "text"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 }, "text": { "type": "string" },
+              "severity": { "type": ["integer", "null"], "minimum": 1, "maximum": 5 },
+              "action": { "type": "string" }, "owner": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

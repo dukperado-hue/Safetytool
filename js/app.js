@@ -1,95 +1,140 @@
-// Safetytool — browser UI for the bowtie editor.
+// Safetytool — browser UI: bowtie (click-to-edit diagram), Swiss cheese and SHELL (form + diagram).
 import * as M from './model.js';
-import { lint, summarize } from './lint.js';
-import { renderBowtie, exportSvgString, exportPngBlob } from './render.js';
+import * as SW from './swiss.js';
+import * as SH from './shell.js';
+import { lint as lintBowtie, summarize } from './lint.js';
+import { renderModel, exportSvgString, exportPngBlob, installCanvasMeasurer } from './render.js';
+import { buildSwissForm, buildShellForm } from './forms.js';
 import { STR } from './i18n.js';
+import { HELP, GLOSSARY_ORDER, MODEL_INTRO, helpFor, explainShort } from './help.js';
 
 const $ = (s) => document.querySelector(s);
-const KEY = 'safetytool.bowtie.current';
 const PREF = 'safetytool.prefs';
 
+// ---------- model-type registry ----------
+const TYPES = {
+  bowtie: { schema: M.SCHEMA, empty: M.emptyModel, validate: M.validateShape, normalize: M.normalize, lint: lintBowtie, find: M.findNode, example: 'data/example-wildlife.json', tabs: ['diagram', 'table', 'meta'] },
+  swiss: { schema: SW.SCHEMA, empty: SW.emptySwiss, validate: SW.validateSwiss, normalize: SW.normalizeSwiss, lint: SW.lintSwiss, find: SW.findSwiss, example: 'data/example-swiss.json', tabs: ['form', 'diagram', 'table', 'meta'] },
+  shell: { schema: SH.SCHEMA, empty: SH.emptyShell, validate: SH.validateShell, normalize: SH.normalizeShell, lint: SH.lintShell, find: SH.findShell, example: 'data/example-shell.json', tabs: ['form', 'diagram', 'table', 'meta'] },
+};
+const TYPE_IDS = Object.keys(TYPES);
+
 const state = {
-  model: M.emptyModel(),
+  type: 'bowtie',
+  models: {},
+  undo: { bowtie: [], swiss: [], shell: [] },
+  redo: { bowtie: [], swiss: [], shell: [] },
   selectedId: null,
+  selectedKind: null,
   showEsc: true,
+  help: false,
   lang: 'th',
   dark: false,
   tab: 'diagram',
-  undo: [],
-  redo: [],
+  rtab: 'inspector',
   view: { x: 0, y: 0, k: 1 },
   last: null,
 };
 
 const t = (k) => k.split('.').reduce((o, p) => (o ? o[p] : undefined), STR[state.lang]) ?? k;
+const cur = () => state.models[state.type];
+const spec = () => TYPES[state.type];
+const keyOf = (type) => 'safetytool.' + type + '.current';
 
-// ---------- persistence (all wrapped: storage can be unavailable) ----------
+// ---------- persistence (storage can be unavailable) ----------
 function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch { /* ignore */ } }
-
-function save() { lsSet(KEY, JSON.stringify(state.model)); }
-function savePrefs() { lsSet(PREF, JSON.stringify({ lang: state.lang, dark: state.dark, showEsc: state.showEsc })); }
+const save = () => lsSet(keyOf(state.type), JSON.stringify(cur()));
+const savePrefs = () => lsSet(PREF, JSON.stringify({ lang: state.lang, dark: state.dark, showEsc: state.showEsc, help: state.help, type: state.type }));
 
 // ---------- mutations with undo ----------
 function snapshot() {
-  state.undo.push(JSON.stringify(state.model));
-  if (state.undo.length > 100) state.undo.shift();
-  state.redo = [];
+  const u = state.undo[state.type];
+  u.push(JSON.stringify(cur()));
+  if (u.length > 100) u.shift();
+  state.redo[state.type] = [];
 }
-function mutate(fn, { rebuildInspector = false } = {}) {
+function mutate(fn, { rebuild = false } = {}) {
   snapshot();
-  fn(state.model);
-  M.touch(state.model);
+  fn(cur());
+  M.touch(cur());
   save();
-  refresh({ inspector: rebuildInspector });
+  refresh({ inspector: rebuild, form: rebuild });
 }
 function restore(json) {
-  state.model = JSON.parse(json);
-  if (!M.findNode(state.model, state.selectedId || '')) state.selectedId = null;
+  state.models[state.type] = JSON.parse(json);
+  if (state.selectedId && !spec().find(cur(), state.selectedId)) state.selectedId = null;
   save();
-  refresh({ inspector: true });
+  refresh({ inspector: true, form: true });
 }
-function doUndo() { if (!state.undo.length) return; state.redo.push(JSON.stringify(state.model)); restore(state.undo.pop()); }
-function doRedo() { if (!state.redo.length) return; state.undo.push(JSON.stringify(state.model)); restore(state.redo.pop()); }
+function doUndo() { const u = state.undo[state.type]; if (!u.length) return; state.redo[state.type].push(JSON.stringify(cur())); restore(u.pop()); }
+function doRedo() { const r = state.redo[state.type]; if (!r.length) return; state.undo[state.type].push(JSON.stringify(cur())); restore(r.pop()); }
 
-function loadModel(m, { keepUndo = false } = {}) {
-  const errs = M.validateShape(m);
+function detectType(m) {
+  const found = TYPE_IDS.find((id) => TYPES[id].schema === (m && m.schema));
+  return found || null;
+}
+
+/** Load a parsed file into its own model type (switching type if needed). */
+function loadModel(m, { fit = true } = {}) {
+  const type = detectType(m);
+  if (!type) { alert(t('badFile') + 'unsupported schema: ' + String(m && m.schema)); return false; }
+  const errs = TYPES[type].validate(m);
   if (errs.length) { alert(t('badFile') + errs.slice(0, 5).join('; ')); return false; }
-  if (!keepUndo) { state.undo = []; state.redo = []; }
-  state.model = M.normalize(m);
+  const switched = type !== state.type;
+  state.type = type;
+  state.undo[type] = [];
+  state.redo[type] = [];
+  state.models[type] = TYPES[type].normalize(m);
   state.selectedId = null;
+  state.selectedKind = null;
   save();
-  refresh({ inspector: true, fit: true });
+  savePrefs();
+  applyType({ fit });
+  if (switched) flash(t('wrongType'));
   return true;
 }
 
-// ---------- rendering ----------
+let flashTimer = null;
+function flash(msg) {
+  const f = $('#flash');
+  f.textContent = msg;
+  f.hidden = false;
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { f.hidden = true; }, 3500);
+}
+
+// ---------- diagram ----------
 function stageSize() {
   const r = $('#stage').getBoundingClientRect();
   return { w: Math.max(200, r.width), h: Math.max(200, r.height) };
 }
-
 function applyView() {
   const g = $('#st-viewport');
   if (g) g.setAttribute('transform', `translate(${state.view.x} ${state.view.y}) scale(${state.view.k})`);
 }
-
 function fitView() {
   if (!state.last) return;
   const { w, h } = stageSize();
   const k = Math.min(w / state.last.width, h / state.last.height, 1.4);
-  state.view.k = k;
-  state.view.x = (w - state.last.width * k) / 2;
-  state.view.y = (h - state.last.height * k) / 2;
+  state.view = { k, x: (w - state.last.width * k) / 2, y: (h - state.last.height * k) / 2 };
   applyView();
+}
+const explain = (kind) => (state.help ? explainShort(state.type, kind, state.lang) : '');
+
+function onSelect(id, kind) {
+  state.selectedId = id;
+  state.selectedKind = kind || (spec().find(cur(), id) || {}).kind || null;
+  if (state.help) state.rtab = 'help';
+  else if (state.type === 'bowtie') state.rtab = 'inspector';
+  refresh({ inspector: true });
 }
 
 function drawDiagram({ fit = false } = {}) {
   const svg = $('#svg');
   const { w, h } = stageSize();
-  state.last = renderBowtie(svg, state.model, {
-    showEsc: state.showEsc, selectedId: state.selectedId, dark: state.dark,
-    onSelect: (id) => { state.selectedId = id; refresh({ inspector: true }); },
+  state.last = renderModel(svg, state.type, cur(), {
+    showEsc: state.showEsc, selectedId: state.selectedId, dark: state.dark, kindTags: state.help, explain, onSelect,
   });
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
   svg.setAttribute('width', w);
@@ -97,15 +142,17 @@ function drawDiagram({ fit = false } = {}) {
   if (fit) fitView(); else applyView();
 }
 
+// ---------- quality panel ----------
 function drawLint() {
-  const issues = lint(state.model);
+  const issues = spec().lint(cur());
   const s = summarize(issues);
   const box = $('#lint');
   box.textContent = '';
   const head = document.createElement('div');
   head.className = 'lint-head';
-  head.textContent = `${t('quality')} — ${s.error} ${t('errors')} · ${s.warn} ${t('warns')} · ${s.info} ${t('infos')}`;
+  head.textContent = `${s.error} ${t('errors')} · ${s.warn} ${t('warns')} · ${s.info} ${t('infos')}`;
   box.appendChild(head);
+  $('#r-quality').textContent = `${t('rQuality')} (${s.error + s.warn + s.info})`;
   if (!issues.length) {
     const ok = document.createElement('p');
     ok.className = 'muted';
@@ -119,73 +166,104 @@ function drawLint() {
     li.className = 'sev-' + i.severity;
     const b = document.createElement('button');
     b.type = 'button';
-    const node = M.findNode(state.model, i.targetId);
+    const node = spec().find(cur(), i.targetId);
     const label = node ? `${t('kind.' + node.kind)}${node.ref.text ? ': ' + node.ref.text.slice(0, 40) : ''}` : '';
     b.textContent = `[${i.rule}] ${i[state.lang]}${label ? ' — ' + label : ''}`;
-    b.addEventListener('click', () => { state.selectedId = i.targetId; refresh({ inspector: true }); });
+    b.addEventListener('click', () => gotoTarget(i.targetId, node));
     li.appendChild(b);
     ul.appendChild(li);
   });
   box.appendChild(ul);
 }
 
+/** Jump to an element: select it (bowtie) or focus its form field (swiss/shell). */
+function gotoTarget(id, node) {
+  state.selectedId = id;
+  state.selectedKind = node ? node.kind : null;
+  if (state.type === 'bowtie') {
+    state.rtab = 'inspector';
+    refresh({ inspector: true });
+    return;
+  }
+  setTab('form');
+  requestAnimationFrame(() => {
+    const el = $('#form').querySelector(`[data-id="${CSS.escape(id)}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el.classList.add('hit');
+    setTimeout(() => el.classList.remove('hit'), 1800);
+    const inp = el.matches('input,textarea,select') ? el : el.querySelector('input,textarea,select');
+    if (inp) inp.focus({ preventScroll: true });
+  });
+}
+
+// ---------- table (read-only, equivalent to the diagram) ----------
+function tableRows() {
+  const m = cur();
+  const rows = [];
+  const add = (kind, ref, detail = '', indent = 0, textOverride) => rows.push({ id: ref.id, kind, text: textOverride ?? ref.text, detail, indent });
+  if (state.type === 'bowtie') {
+    const ctlDetail = (c) => {
+      const bits = [];
+      if (c.function) bits.push(t('fn.' + c.function));
+      if (c.type) bits.push(t('ty.' + c.type));
+      if (c.critical) bits.push('★ critical');
+      const e = M.effectiveness(c);
+      if (e != null) bits.push(`A${c.adequacy}×R${c.reliability}=${e}`);
+      if (c.owner) bits.push(c.owner);
+      return bits.join(' · ');
+    };
+    const escRows = (c, ind) => m.escalations.filter((e) => e.controlId === c.id).forEach((e) => {
+      add('escalation', e, '', ind);
+      m.escalationControls.filter((x) => x.escalationId === e.id).forEach((x) => add('escalationControl', x, x.owner || '', ind + 1));
+    });
+    add('hazard', m.hazard); add('topEvent', m.topEvent);
+    m.threats.forEach((th) => { add('threat', th, th.exposure ? 'exposure ' + th.exposure : ''); M.controlsOf(m, 'prevent', th.id).forEach((c) => { add('control', c, ctlDetail(c), 1); escRows(c, 2); }); });
+    m.consequences.forEach((co) => { add('consequence', co, co.severity ? 'severity ' + co.severity : ''); M.controlsOf(m, 'recover', co.id).forEach((c) => { add('control', c, ctlDetail(c), 1); escRows(c, 2); }); });
+  } else if (state.type === 'swiss') {
+    add('hazard', m.hazard); add('loss', m.loss);
+    m.layers.forEach((l) => {
+      add('layer', l, [l.category ? t('sw.cat.' + l.category) : '', l.defence].filter(Boolean).join(' — '), 0, l.name);
+      l.holes.forEach((h) => add(h.type === 'latent' ? 'holeLatent' : 'holeActive', h, m.trajectory.includes(h.id) ? '★ aligned' : '', 1));
+    });
+  } else {
+    add('subject', m.subject); add('focus', m.focus);
+    SH.COMPONENTS.forEach((c) => m.components[c].forEach((x) => add('comp' + c, x, '', 0)));
+    SH.INTERFACES.forEach((i) => {
+      const f = m.interfaces[i];
+      rows.push({ id: 'sec_' + i, kind: 'iface', text: t('sh.' + i) + ' — ' + t('sh.st.' + f.status), detail: '', indent: 0 });
+      f.findings.forEach((x) => add('finding', x, [x.severity ? 'sev ' + x.severity : '', x.action ? '→ ' + x.action : '', x.owner].filter(Boolean).join(' · '), 1));
+    });
+  }
+  return rows;
+}
+
 function drawTable() {
-  const m = state.model;
   const host = $('#table');
   host.textContent = '';
   const mk = (tag, txt, cls) => { const e = document.createElement(tag); if (txt != null) e.textContent = txt; if (cls) e.className = cls; return e; };
   const table = mk('table');
-  const thead = mk('thead');
   const hr = mk('tr');
   [t('colElement'), t('colText'), t('colDetail')].forEach((x) => hr.appendChild(mk('th', x)));
-  thead.appendChild(hr);
-  table.appendChild(thead);
+  table.appendChild(mk('thead')).appendChild(hr);
   const tb = mk('tbody');
-  const row = (kind, ref, detail, indent = 0) => {
-    const tr = mk('tr', null, state.selectedId === ref.id ? 'sel' : '');
-    const th = mk('th', null);
+  tableRows().forEach((r) => {
+    const tr = mk('tr', null, state.selectedId === r.id ? 'sel' : '');
+    const th = mk('th');
     th.scope = 'row';
-    const btn = mk('button', t('kind.' + kind));
-    btn.type = 'button';
-    btn.style.marginLeft = indent * 14 + 'px';
-    btn.addEventListener('click', () => { state.selectedId = ref.id; refresh({ inspector: true }); });
-    th.appendChild(btn);
-    tr.appendChild(th);
-    tr.appendChild(mk('td', ref.text || '—'));
-    tr.appendChild(mk('td', detail));
+    const b = mk('button', t('kind.' + r.kind));
+    b.type = 'button';
+    b.style.marginLeft = r.indent * 14 + 'px';
+    b.addEventListener('click', () => gotoTarget(r.id, spec().find(cur(), r.id)));
+    th.appendChild(b);
+    tr.append(th, mk('td', r.text || '—'), mk('td', r.detail));
     tb.appendChild(tr);
-  };
-  const ctlDetail = (c) => {
-    const bits = [];
-    if (c.function) bits.push(t('fn.' + c.function));
-    if (c.type) bits.push(t('ty.' + c.type));
-    if (c.critical) bits.push('★ critical');
-    const e = M.effectiveness(c);
-    if (e != null) bits.push(`A${c.adequacy}×R${c.reliability}=${e}`);
-    if (c.owner) bits.push(c.owner);
-    return bits.join(' · ');
-  };
-  const escRows = (c, indent) => {
-    m.escalations.filter((e) => e.controlId === c.id).forEach((e) => {
-      row('escalation', e, '', indent);
-      m.escalationControls.filter((x) => x.escalationId === e.id).forEach((x) => row('escalationControl', x, x.owner || '', indent + 1));
-    });
-  };
-  row('hazard', m.hazard, '');
-  row('topEvent', m.topEvent, '');
-  m.threats.forEach((th) => {
-    row('threat', th, th.exposure ? 'exposure ' + th.exposure : '');
-    M.controlsOf(m, 'prevent', th.id).forEach((c) => { row('control', c, ctlDetail(c), 1); escRows(c, 2); });
-  });
-  m.consequences.forEach((co) => {
-    row('consequence', co, co.severity ? 'severity ' + co.severity : '');
-    M.controlsOf(m, 'recover', co.id).forEach((c) => { row('control', c, ctlDetail(c), 1); escRows(c, 2); });
   });
   table.appendChild(tb);
   host.appendChild(table);
 }
 
-// ---------- inspector ----------
+// ---------- inspector (bowtie) ----------
 const SPECS = {
   hazard: [['text', 'area'], ['notes', 'area']],
   topEvent: [['text', 'area'], ['notes', 'area']],
@@ -196,7 +274,7 @@ const SPECS = {
   escalationControl: [['text', 'area'], ['owner', 'line'], ['notes', 'area']],
 };
 
-function fieldEl(kind, ref, key, type) {
+function fieldEl(ref, key, type) {
   const wrap = document.createElement('label');
   wrap.className = 'fld';
   const cap = document.createElement('span');
@@ -229,10 +307,7 @@ function fieldEl(kind, ref, key, type) {
       input.appendChild(op);
     });
     input.value = ref[key] == null ? '' : String(ref[key]);
-    input.addEventListener('change', () => {
-      const v = input.value;
-      commit(v === '' ? null : (type === 'fn' || type === 'ty') ? v : Number(v));
-    });
+    input.addEventListener('change', () => commit(input.value === '' ? null : (type === 'fn' || type === 'ty') ? input.value : Number(input.value)));
   }
   wrap.appendChild(input);
   return wrap;
@@ -247,34 +322,39 @@ function btn(label, fn, cls) {
   return b;
 }
 
+function callout(kind) {
+  const h = helpFor(state.type, kind, state.lang);
+  if (!h) return null;
+  const d = document.createElement('div');
+  d.className = 'callout';
+  d.textContent = h.what;
+  return d;
+}
+
 function drawInspector() {
   const host = $('#inspector');
   host.textContent = '';
-  const node = state.selectedId ? M.findNode(state.model, state.selectedId) : null;
-  if (!node) {
-    const p = document.createElement('p');
-    p.className = 'muted';
-    p.textContent = t('nothingSelected');
-    host.appendChild(p);
-    return;
-  }
+  const mkp = (txt) => { const p = document.createElement('p'); p.className = 'muted'; p.textContent = txt; return p; };
+  if (state.type !== 'bowtie') { host.appendChild(mkp(t('formHint'))); return; }
+  const node = state.selectedId ? M.findNode(cur(), state.selectedId) : null;
+  if (!node) { host.appendChild(mkp(t('nothingSelected'))); return; }
   const { kind, ref } = node;
   const h = document.createElement('h3');
   h.textContent = t('kind.' + kind);
   host.appendChild(h);
-  SPECS[kind].forEach(([k, ty]) => host.appendChild(fieldEl(kind, ref, k, ty)));
-
+  if (state.help) { const c = callout(kind); if (c) host.appendChild(c); }
+  SPECS[kind].forEach(([k, ty]) => host.appendChild(fieldEl(ref, k, ty)));
   const row = document.createElement('div');
   row.className = 'btnrow';
-  const select = (id) => { state.selectedId = id; };
-  if (kind === 'threat') row.appendChild(btn(t('addControl'), () => { let id; mutate((m) => { id = M.addControl(m, 'prevent', ref.id).id; }); select(id); refresh({ inspector: true }); }));
-  if (kind === 'consequence') row.appendChild(btn(t('addControl'), () => { let id; mutate((m) => { id = M.addControl(m, 'recover', ref.id).id; }); select(id); refresh({ inspector: true }); }));
+  const pick = (id, kd) => { state.selectedId = id; state.selectedKind = kd; refresh({ inspector: true }); };
+  if (kind === 'threat') row.appendChild(btn(t('addControl'), () => { let id; mutate((m) => { id = M.addControl(m, 'prevent', ref.id).id; }); pick(id, 'control'); }));
+  if (kind === 'consequence') row.appendChild(btn(t('addControl'), () => { let id; mutate((m) => { id = M.addControl(m, 'recover', ref.id).id; }); pick(id, 'control'); }));
   if (kind === 'control') {
-    row.appendChild(btn(t('addEscalation'), () => { let id; mutate((m) => { id = M.addEscalation(m, ref.id).id; }); select(id); refresh({ inspector: true }); }));
-    row.appendChild(btn('↑ ' + t('moveUp'), () => mutate((m) => { M.moveControl(m, ref.id, -1); }, { rebuildInspector: true })));
-    row.appendChild(btn('↓ ' + t('moveDown'), () => mutate((m) => { M.moveControl(m, ref.id, 1); }, { rebuildInspector: true })));
+    row.appendChild(btn(t('addEscalation'), () => { let id; mutate((m) => { id = M.addEscalation(m, ref.id).id; }); pick(id, 'escalation'); }));
+    row.appendChild(btn('↑ ' + t('moveUp'), () => mutate((m) => { M.moveControl(m, ref.id, -1); }, { rebuild: true })));
+    row.appendChild(btn('↓ ' + t('moveDown'), () => mutate((m) => { M.moveControl(m, ref.id, 1); }, { rebuild: true })));
   }
-  if (kind === 'escalation') row.appendChild(btn(t('addEscControl'), () => { let id; mutate((m) => { id = M.addEscalationControl(m, ref.id).id; }); select(id); refresh({ inspector: true }); }));
+  if (kind === 'escalation') row.appendChild(btn(t('addEscControl'), () => { let id; mutate((m) => { id = M.addEscalationControl(m, ref.id).id; }); pick(id, 'escalationControl'); }));
   if (!['hazard', 'topEvent'].includes(kind)) {
     row.appendChild(btn(t('delete'), () => {
       if (!confirm(t('confirmDelete'))) return;
@@ -286,64 +366,187 @@ function drawInspector() {
   host.appendChild(row);
 }
 
+// ---------- help tab ----------
+function drawHelp() {
+  const host = $('#help');
+  host.textContent = '';
+  const mk = (tag, txt, cls) => { const e = document.createElement(tag); if (txt != null) e.textContent = txt; if (cls) e.className = cls; return e; };
+
+  const sw = mk('label', null, 'fld chk helpswitch');
+  const cb = mk('input');
+  cb.type = 'checkbox';
+  cb.checked = state.help;
+  cb.addEventListener('change', () => setHelp(cb.checked));
+  sw.append(cb, mk('span', t('helpMode')));
+  host.appendChild(sw);
+  host.appendChild(mk('p', t('helpModeHint'), 'muted'));
+
+  host.appendChild(mk('h3', t('helpAbout')));
+  host.appendChild(mk('p', MODEL_INTRO[state.type][state.lang]));
+
+  const entry = (kind, open) => {
+    const h = helpFor(state.type, kind, state.lang);
+    if (!h) return null;
+    const d = mk('details', null, 'gloss');
+    if (open) d.open = true;
+    const s = mk('summary');
+    s.append(Object.assign(mk('span', null, 'sw k-' + kind), { 'aria-hidden': 'true' }), mk('span', h.name));
+    d.appendChild(s);
+    const row = (label, txt) => { if (!txt) return; const p = mk('p'); p.append(mk('strong', label + ': '), document.createTextNode(txt)); d.appendChild(p); };
+    row(t('helpWhat'), h.what); row(t('helpHow'), h.how); row(t('helpEg'), h.eg); row(t('helpAvoid'), h.avoid);
+    return d;
+  };
+
+  const selKind = state.selectedKind || (state.selectedId && (spec().find(cur(), state.selectedId) || {}).kind);
+  if (selKind) {
+    const e = entry(selKind, true);
+    if (e) { host.appendChild(mk('h3', t('helpSelected'))); e.classList.add('picked'); host.appendChild(e); }
+  }
+  host.appendChild(mk('h3', t('helpBoxes')));
+  GLOSSARY_ORDER[state.type].forEach((k) => { if (k !== selKind) { const e = entry(k, false); if (e) host.appendChild(e); } });
+  host.appendChild(mk('p', t('helpTips'), 'muted'));
+}
+
+function setHelp(on) {
+  state.help = on;
+  if (on) state.rtab = 'help';
+  savePrefs();
+  syncHelpButton();
+  setRightTab(state.rtab);
+  refresh({ inspector: true });
+}
+function syncHelpButton() { $('#b-help').setAttribute('aria-pressed', String(state.help)); }
+
+function setRightTab(name) {
+  state.rtab = name;
+  ['inspector', 'quality', 'help'].forEach((n) => {
+    $('#rp-' + n).hidden = n !== name;
+    const b = $('#r-' + n);
+    b.setAttribute('aria-selected', String(n === name));
+    b.tabIndex = n === name ? 0 : -1;
+  });
+  if (name === 'help') drawHelp();
+}
+
+// ---------- meta tab ----------
 function drawMeta() {
   const host = $('#meta');
   host.textContent = '';
-  const m = state.model.meta;
-  [['title', 'line'], ['scope', 'area'], ['author', 'line']].forEach(([k, ty]) => host.appendChild(fieldEl('meta', m, k, ty)));
-  host.appendChild(fieldEl('meta', m, 'illustrative', 'bool'));
+  const m = cur().meta;
+  [['title', 'line'], ['scope', 'area'], ['author', 'line']].forEach(([k, ty]) => host.appendChild(fieldEl(m, k, ty)));
+  host.appendChild(fieldEl(m, 'illustrative', 'bool'));
   const p = document.createElement('p');
   p.className = 'muted';
   p.textContent = t('disclaimer');
   host.appendChild(p);
 }
 
-// ---------- static labels ----------
+// ---------- form tab ----------
+function drawForm() {
+  const host = $('#form');
+  const api = { t, mutate };
+  const top = host.scrollTop;
+  if (state.type === 'swiss') buildSwissForm(host, cur(), api);
+  else if (state.type === 'shell') buildShellForm(host, cur(), api);
+  else host.textContent = '';
+  host.scrollTop = top;
+}
+
+// ---------- labels / layout ----------
 function labels() {
   document.documentElement.lang = state.lang;
-  document.title = `${t('app')} — Bowtie`;
+  document.title = `${t('app')} — ${t('m' + state.type[0].toUpperCase() + state.type.slice(1))}`;
   $('#tagline').textContent = t('tagline');
   const map = {
-    '#b-example': 'example', '#b-new': 'new', '#b-open': 'open', '#b-save': 'save', '#b-svg': 'svg', '#b-png': 'png', '#b-csv': 'csv',
-    '#b-undo': 'undo', '#b-redo': 'redo', '#b-fit': 'fit', '#b-lang': 'lang', '#b-theme': 'theme',
-    '#b-addthreat': 'addThreat', '#b-addcons': 'addConsequence', '#tab-diagram': 'tabDiagram', '#tab-table': 'tabTable', '#tab-meta': 'tabMeta',
+    '#b-example': 'example', '#b-new': 'new', '#b-open': 'open', '#b-save': 'save', '#b-svg': 'svg', '#b-png': 'png', '#b-csv': 'csv', '#b-print': 'print',
+    '#b-undo': 'undo', '#b-redo': 'redo', '#b-fit': 'fit', '#b-lang': 'lang', '#b-theme': 'theme', '#b-help': 'help',
+    '#tab-diagram': 'tabDiagram', '#tab-table': 'tabTable', '#tab-meta': 'tabMeta', '#tab-form': 'tabForm',
+    '#r-inspector': 'rInspector', '#r-help': 'rHelp',
+    '#m-bowtie': 'mBowtie', '#m-swiss': 'mSwiss', '#m-shell': 'mShell',
   };
   Object.entries(map).forEach(([sel, key]) => { $(sel).textContent = t(key); });
   $('#lbl-esc').textContent = t('esc');
-  $('#h-inspector').textContent = t('inspector');
   $('#footer').textContent = t('disclaimer');
+  $('#models-label').textContent = t('models');
+  $('#b-addthreat').textContent = t('addThreat');
+  $('#b-addcons').textContent = t('addConsequence');
+  $('#b-addthreat').hidden = state.type !== 'bowtie';
+  $('#b-addcons').hidden = state.type !== 'bowtie';
   const lg = $('#legend');
-  lg.textContent = t('legendTitle') + ': ';
-  [['poor', 'poor'], ['weak', 'weak'], ['fair', 'fair'], ['strong', 'strong'], ['none', 'unrated']].forEach(([cls, key]) => {
-    const s = document.createElement('span');
-    s.className = 'lg b-' + cls;
-    s.textContent = t(key);
-    lg.appendChild(s);
-  });
+  lg.textContent = '';
+  if (state.type === 'bowtie') {
+    lg.append(t('legendTitle') + ': ');
+    [['poor', 'poor'], ['weak', 'weak'], ['fair', 'fair'], ['strong', 'strong'], ['none', 'unrated']].forEach(([cls, key]) => {
+      const s = document.createElement('span');
+      s.className = 'lg b-' + cls;
+      s.textContent = t(key);
+      lg.appendChild(s);
+    });
+  }
 }
 
-function refresh({ inspector = false, fit = false } = {}) {
+function applyTheme() { document.documentElement.dataset.theme = state.dark ? 'dark' : 'light'; }
+
+function refresh({ inspector = false, fit = false, form = false } = {}) {
   drawLint();
   if (state.tab === 'diagram') drawDiagram({ fit });
   if (state.tab === 'table') drawTable();
   if (state.tab === 'meta') drawMeta();
+  if (state.tab === 'form' && form) drawForm();
   if (inspector) drawInspector();
-  $('#b-undo').disabled = !state.undo.length;
-  $('#b-redo').disabled = !state.redo.length;
+  if (state.rtab === 'help') drawHelp();
+  $('#b-undo').disabled = !state.undo[state.type].length;
+  $('#b-redo').disabled = !state.redo[state.type].length;
 }
 
 function setTab(name) {
+  const allowed = spec().tabs;
+  if (!allowed.includes(name)) name = allowed[0];
   state.tab = name;
-  ['diagram', 'table', 'meta'].forEach((n) => {
+  ['form', 'diagram', 'table', 'meta'].forEach((n) => {
+    const show = allowed.includes(n);
+    $('#tab-' + n).hidden = !show;
     $('#pane-' + n).hidden = n !== name;
     const tb = $('#tab-' + n);
     tb.setAttribute('aria-selected', String(n === name));
     tb.tabIndex = n === name ? 0 : -1;
   });
-  refresh({ fit: name === 'diagram' });
+  refresh({ fit: name === 'diagram', form: name === 'form' });
 }
 
-// ---------- files ----------
+/** Switch model type (or reload the current one after loading a file). */
+function applyType({ fit = true } = {}) {
+  ['bowtie', 'swiss', 'shell'].forEach((id) => {
+    const b = $('#m-' + id);
+    b.setAttribute('aria-pressed', String(id === state.type));
+  });
+  $('#chk-esc').closest('label').hidden = state.type !== 'bowtie';
+  labels();
+  const first = spec().tabs[0] === 'form' ? 'form' : 'diagram';
+  setTab(state.tab && spec().tabs.includes(state.tab) && fit === false ? state.tab : first);
+  drawInspector();
+  if (state.rtab === 'help') drawHelp();
+  if (state.rtab === 'inspector' && state.type !== 'bowtie') setRightTab('quality');
+  savePrefs();
+}
+
+async function switchType(type) {
+  if (type === state.type) return;
+  state.type = type;
+  state.selectedId = null;
+  state.selectedKind = null;
+  if (!state.models[type]) {
+    let loaded = false;
+    const saved = lsGet(keyOf(type));
+    if (saved) {
+      try { const m = JSON.parse(saved); if (!TYPES[type].validate(m).length) { state.models[type] = TYPES[type].normalize(m); loaded = true; } } catch { /* ignore */ }
+    }
+    if (!loaded) { await loadExample(); return; }
+  }
+  applyType();
+}
+
+// ---------- files / export ----------
 function download(name, blob) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -353,34 +556,42 @@ function download(name, blob) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
-const fileBase = () => (state.model.meta.title || 'bowtie').replace(/[^\p{L}\p{N}_-]+/gu, '_').slice(0, 60) || 'bowtie';
+const fileBase = () => (cur().meta.title || state.type).replace(/[^\p{L}\p{N}_-]+/gu, '_').slice(0, 60) || state.type;
+const csvQ = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
 
-function toCsv(m) {
-  const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-  const head = ['side', 'parent', 'order', 'control', 'function', 'type', 'critical', 'adequacy', 'reliability', 'effectiveness', 'owner', 'escalation_factors', 'escalation_controls'];
-  const rows = [head.map(q).join(',')];
-  const emit = (side, parent, c) => {
-    const efs = m.escalations.filter((e) => e.controlId === c.id);
-    const ecs = efs.flatMap((e) => m.escalationControls.filter((x) => x.escalationId === e.id));
-    rows.push([side, parent.text, c.order + 1, c.text, c.function, c.type, c.critical ? 'yes' : '', c.adequacy, c.reliability, M.effectiveness(c), c.owner,
-      efs.map((e) => e.text).join(' | '), ecs.map((x) => x.text).join(' | ')].map(q).join(','));
-  };
-  m.threats.forEach((th) => {
-    const cs = M.controlsOf(m, 'prevent', th.id);
-    if (!cs.length) rows.push(['prevent', th.text, '', '', '', '', '', '', '', '', '', '', ''].map(q).join(','));
-    cs.forEach((c) => emit('prevent', th, c));
-  });
-  m.consequences.forEach((co) => {
-    const cs = M.controlsOf(m, 'recover', co.id);
-    if (!cs.length) rows.push(['recover', co.text, '', '', '', '', '', '', '', '', '', '', ''].map(q).join(','));
-    cs.forEach((c) => emit('recover', co, c));
-  });
+function toCsv() {
+  const m = cur();
+  const rows = [];
+  if (state.type === 'bowtie') {
+    rows.push(['side', 'parent', 'order', 'control', 'function', 'type', 'critical', 'adequacy', 'reliability', 'effectiveness', 'owner', 'escalation_factors', 'escalation_controls'].map(csvQ).join(','));
+    const emit = (side, parent, c) => {
+      const efs = m.escalations.filter((e) => e.controlId === c.id);
+      const ecs = efs.flatMap((e) => m.escalationControls.filter((x) => x.escalationId === e.id));
+      rows.push([side, parent.text, c.order + 1, c.text, c.function, c.type, c.critical ? 'yes' : '', c.adequacy, c.reliability, M.effectiveness(c), c.owner, efs.map((e) => e.text).join(' | '), ecs.map((x) => x.text).join(' | ')].map(csvQ).join(','));
+    };
+    m.threats.forEach((th) => { const cs = M.controlsOf(m, 'prevent', th.id); if (!cs.length) rows.push(['prevent', th.text].map(csvQ).join(',')); cs.forEach((c) => emit('prevent', th, c)); });
+    m.consequences.forEach((co) => { const cs = M.controlsOf(m, 'recover', co.id); if (!cs.length) rows.push(['recover', co.text].map(csvQ).join(',')); cs.forEach((c) => emit('recover', co, c)); });
+  } else if (state.type === 'swiss') {
+    rows.push(['layer_no', 'layer', 'category', 'defence', 'hole', 'type', 'aligned'].map(csvQ).join(','));
+    m.layers.forEach((l, i) => {
+      if (!l.holes.length) rows.push([i + 1, l.name, l.category, l.defence].map(csvQ).join(','));
+      l.holes.forEach((h) => rows.push([i + 1, l.name, l.category, l.defence, h.text, h.type, m.trajectory.includes(h.id) ? 'yes' : ''].map(csvQ).join(',')));
+    });
+  } else {
+    rows.push(['section', 'status', 'item_or_finding', 'severity', 'action', 'owner'].map(csvQ).join(','));
+    SH.COMPONENTS.forEach((c) => m.components[c].forEach((x) => rows.push([c, '', x.text].map(csvQ).join(','))));
+    SH.INTERFACES.forEach((i) => {
+      const f = m.interfaces[i];
+      if (!f.findings.length) rows.push([i, f.status].map(csvQ).join(','));
+      f.findings.forEach((x) => rows.push([i, f.status, x.text, x.severity, x.action, x.owner].map(csvQ).join(',')));
+    });
+  }
   return '﻿' + rows.join('\r\n');
 }
 
 async function loadExample() {
   try {
-    const r = await fetch('data/example-wildlife.json', { cache: 'no-cache' });
+    const r = await fetch(spec().example, { cache: 'no-cache' });
     if (!r.ok) throw new Error(String(r.status));
     loadModel(await r.json());
   } catch (e) {
@@ -388,10 +599,37 @@ async function loadExample() {
   }
 }
 
+/** Print / save as PDF: a clean vector copy of the diagram scaled to the page. */
+function printDiagram() {
+  const root = $('#print-root');
+  root.textContent = '';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const out = renderModel(svg, state.type, cur(), { showEsc: state.showEsc, forExport: true, dark: false, kindTags: state.help });
+  svg.setAttribute('viewBox', `0 0 ${Math.ceil(out.width)} ${Math.ceil(out.height)}`);
+  svg.removeAttribute('width');
+  svg.removeAttribute('height');
+  root.appendChild(svg);
+  const cap = document.createElement('p');
+  cap.className = 'print-cap';
+  cap.textContent = `${cur().meta.title || ''} · Safetytool · ${new Date().toLocaleDateString(state.lang === 'th' ? 'th-TH' : 'en-GB')} · ${t('disclaimer')}`;
+  root.appendChild(cap);
+  document.body.classList.add('printing');
+  const done = () => { document.body.classList.remove('printing'); root.textContent = ''; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  window.print();
+}
+
 // ---------- wiring ----------
 function bind() {
   $('#b-example').addEventListener('click', loadExample);
-  $('#b-new').addEventListener('click', () => { if (confirm('?')) loadModel(M.emptyModel()); });
+  $('#b-new').addEventListener('click', () => {
+    if (!confirm(t('confirmNew'))) return;
+    snapshot();
+    state.models[state.type] = spec().empty();
+    state.selectedId = null; state.selectedKind = null;
+    save();
+    applyType();
+  });
   $('#b-open').addEventListener('click', () => $('#file').click());
   $('#file').addEventListener('change', async (ev) => {
     const f = ev.target.files[0];
@@ -399,25 +637,26 @@ function bind() {
     if (!f) return;
     try { loadModel(JSON.parse(await f.text())); } catch (e) { alert(t('badFile') + e.message); }
   });
-  $('#b-save').addEventListener('click', () => download(fileBase() + '.bowtie.json', new Blob([JSON.stringify(state.model, null, 2)], { type: 'application/json' })));
-  $('#b-svg').addEventListener('click', () => download(fileBase() + '.svg', new Blob([exportSvgString(state.model, state.showEsc)], { type: 'image/svg+xml' })));
-  $('#b-png').addEventListener('click', async () => download(fileBase() + '.png', await exportPngBlob(state.model, state.showEsc, 2)));
-  $('#b-csv').addEventListener('click', () => download(fileBase() + '.csv', new Blob([toCsv(state.model)], { type: 'text/csv;charset=utf-8' })));
+  $('#b-save').addEventListener('click', () => download(fileBase() + '.' + state.type + '.json', new Blob([JSON.stringify(cur(), null, 2)], { type: 'application/json' })));
+  $('#b-svg').addEventListener('click', () => download(fileBase() + '.svg', new Blob([exportSvgString(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help })], { type: 'image/svg+xml' })));
+  $('#b-png').addEventListener('click', async () => download(fileBase() + '.png', await exportPngBlob(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help }, 3)));
+  $('#b-csv').addEventListener('click', () => download(fileBase() + '.csv', new Blob([toCsv()], { type: 'text/csv;charset=utf-8' })));
+  $('#b-print').addEventListener('click', printDiagram);
   $('#b-undo').addEventListener('click', doUndo);
   $('#b-redo').addEventListener('click', doRedo);
   $('#b-fit').addEventListener('click', fitView);
-  $('#b-lang').addEventListener('click', () => { state.lang = state.lang === 'th' ? 'en' : 'th'; savePrefs(); labels(); refresh({ inspector: true }); });
+  $('#b-lang').addEventListener('click', () => { state.lang = state.lang === 'th' ? 'en' : 'th'; savePrefs(); labels(); refresh({ inspector: true, form: true }); });
   $('#b-theme').addEventListener('click', () => { state.dark = !state.dark; applyTheme(); savePrefs(); refresh(); });
+  $('#b-help').addEventListener('click', () => setHelp(!state.help));
   $('#chk-esc').addEventListener('change', (ev) => { state.showEsc = ev.target.checked; savePrefs(); drawDiagram({ fit: true }); });
-  $('#b-addthreat').addEventListener('click', () => { let id; mutate((m) => { id = M.addThreat(m).id; }); state.selectedId = id; setTab('diagram'); drawInspector(); });
-  $('#b-addcons').addEventListener('click', () => { let id; mutate((m) => { id = M.addConsequence(m).id; }); state.selectedId = id; setTab('diagram'); drawInspector(); });
-  ['diagram', 'table', 'meta'].forEach((n) => $('#tab-' + n).addEventListener('click', () => setTab(n)));
+  $('#b-addthreat').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addThreat(m).id; }); state.selectedId = id; state.selectedKind = 'threat'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
+  $('#b-addcons').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addConsequence(m).id; }); state.selectedId = id; state.selectedKind = 'consequence'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
+  ['form', 'diagram', 'table', 'meta'].forEach((n) => $('#tab-' + n).addEventListener('click', () => setTab(n)));
+  ['inspector', 'quality', 'help'].forEach((n) => $('#r-' + n).addEventListener('click', () => setRightTab(n)));
+  TYPE_IDS.forEach((id) => $('#m-' + id).addEventListener('click', () => { switchType(id); }));
 
-  // select hazard / top event by clicking them is handled via onSelect; background click clears selection
   const stage = $('#stage');
-  stage.addEventListener('click', () => { if (state.selectedId) { state.selectedId = null; refresh({ inspector: true }); } });
-
-  // pan & zoom
+  stage.addEventListener('click', () => { if (state.selectedId) { state.selectedId = null; state.selectedKind = null; refresh({ inspector: true }); } });
   let drag = null;
   stage.addEventListener('pointerdown', (ev) => {
     if (ev.target.closest('.st-node')) return;
@@ -451,28 +690,30 @@ function bind() {
   });
 }
 
-function applyTheme() { document.documentElement.dataset.theme = state.dark ? 'dark' : 'light'; }
-
-function init() {
+async function init() {
+  installCanvasMeasurer();
   try {
     const p = JSON.parse(lsGet(PREF) || '{}');
     if (p.lang) state.lang = p.lang;
-    if (typeof p.dark === 'boolean') state.dark = p.dark;
-    else state.dark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+    state.dark = typeof p.dark === 'boolean' ? p.dark : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
     if (typeof p.showEsc === 'boolean') state.showEsc = p.showEsc;
+    if (typeof p.help === 'boolean') state.help = p.help;
+    if (TYPE_IDS.includes(p.type)) state.type = p.type;
   } catch { /* ignore */ }
   $('#chk-esc').checked = state.showEsc;
   applyTheme();
-  labels();
+  syncHelpButton();
   bind();
-  const saved = lsGet(KEY);
+  if (state.help) state.rtab = 'help';
   let loaded = false;
+  const saved = lsGet(keyOf(state.type));
   if (saved) {
-    try { const m = JSON.parse(saved); if (!M.validateShape(m).length) { state.model = M.normalize(m); loaded = true; } } catch { /* ignore */ }
+    try { const m = JSON.parse(saved); if (!spec().validate(m).length) { state.models[state.type] = spec().normalize(m); loaded = true; } } catch { /* ignore */ }
   }
-  setTab('diagram');
-  if (!loaded) loadExample();
-  else drawInspector();
+  setRightTab(state.rtab === 'inspector' && state.type !== 'bowtie' ? 'quality' : state.rtab);
+  if (!loaded) { await loadExample(); return; }
+  state.tab = null;
+  applyType({ fit: true });
 }
 
 init();

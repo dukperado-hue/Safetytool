@@ -8,8 +8,12 @@ A free, browser-based workbench for aviation-safety models (bowtie first). No se
 > เครื่องมือช่วยคิดและสื่อสาร ผลลัพธ์ต้องผ่านการพิจารณาโดยผู้เชี่ยวชาญ ไม่ใช่คำแนะนำด้านความปลอดภัยที่รับรองแล้ว
 > A thinking and communication aid, not certified safety advice.
 
-## สถานะ (v0.1.0 — MVP)
+## สถานะ (v0.2.0)
 
+- **3 โมเดล:** Bowtie · **Swiss cheese** (ชั้นป้องกัน, active failure / latent condition, เส้นทางอุบัติเหตุ) · **SHELL** (ปัจจัยมนุษย์: Liveware ตรงกลาง + Software/Hardware/Environment/Liveware อื่น และ interface L–S, L–H, L–E, L–L) — Fault tree ยังไม่ได้ทำ
+- **โหมดช่วยเหลือ** (แท็บ "ช่วยเหลือ" ด้านขวา เปิด-ปิดได้): ป้ายชนิดบนทุกกล่อง, คำอธิบายเมื่อชี้/เลือกกล่อง, อภิธานศัพท์ว่าแต่ละกล่องคืออะไร เขียนอย่างไร ตัวอย่าง และสิ่งที่ควรหลีกเลี่ยง
+- **การตัดคำภาษาไทย:** ใช้ `Intl.Segmenter` + กติกาการขึ้นบรรทัด (ไม่ทิ้ง "(" ท้ายบรรทัด, ไม่ขึ้นบรรทัดด้วยสระ/วรรณยุกต์/ๆ) + ตัวสำรองเมื่อเบราว์เซอร์ไม่มี Segmenter + วัดความกว้างด้วย canvas จริง
+- พิมพ์/บันทึก PDF แบบ vector (ปุ่ม "พิมพ์ / PDF") และ PNG ความละเอียด 3 เท่า
 - ตัวแก้ไข Bowtie: Hazard, Top event, Threats, Consequences, Preventive/Recovery controls, Escalation factors และ controls ของมัน
 - จัดวางแผนภาพอัตโนมัติ รองรับข้อความไทย ซูม/เลื่อนได้ มีมุมมอง **ตาราง** ที่เทียบเท่าแผนภาพ (สำหรับโปรแกรมอ่านหน้าจอ)
 - ประเมิน control ด้วย Adequacy × Reliability (สเกล 1–4 ของเราเอง), critical, function, type, owner

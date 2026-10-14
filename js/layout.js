@@ -7,14 +7,14 @@ import { controlsOf } from './model.js';
 export const DIM = {
   fs: 12, lh: 15, padX: 10, padY: 9,
   wThreat: 190, wCtrl: 170, wTop: 220, wCons: 190, wHaz: 240, wEsc: 170,
-  gapX: 46, gapY: 16, badgeH: 14, minH: 52, hazGap: 70, margin: 24, escGap: 10,
+  gapX: 46, gapY: 16, badgeH: 14, tagH: 12, minH: 56, hazGap: 70, margin: 24, escGap: 10,
 };
 
 const r1 = (v) => Math.round(v * 10) / 10;
 
 function boxH(text, w, extra = 0) {
   const n = wrapText(text, w - 2 * DIM.padX, DIM.fs).length;
-  return Math.max(DIM.minH, n * DIM.lh + 2 * DIM.padY + extra);
+  return Math.max(DIM.minH, n * DIM.lh + 2 * DIM.padY + extra + DIM.tagH);
 }
 
 /**
