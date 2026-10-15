@@ -9,6 +9,8 @@ export const EXAMPLES = [
   { type: 'bowtie', file: 'data/example-wildlife.json' },
   { type: 'swiss', file: 'data/example-swiss.json' },
   { type: 'shell', file: 'data/example-shell.json' },
+  { type: 'hfacs', file: 'data/example-hfacs.json' },
+  { type: 'stamp', file: 'data/example-stamp.json' },
 ];
 
 /** Parse stored JSON defensively: anything malformed becomes []. */
@@ -51,14 +53,14 @@ const S = {
     empty: 'ยังไม่มีงานที่บันทึก กด "บันทึกงานปัจจุบันลงคลัง" ด้านบน', open: 'เปิด', del: 'ลบ', confirmDel: 'ลบงานนี้ออกจากคลัง?',
     note: 'งานในคลังเก็บในเบราว์เซอร์นี้เท่านั้น ใช้ได้ทั้งออนไลน์และออฟไลน์ ถ้าล้างข้อมูลเบราว์เซอร์งานจะหาย จึงควรกด "บันทึก" ที่แถบบนเพื่อเก็บเป็นไฟล์สำรอง',
     savedOk: 'บันทึกแล้ว', savedFail: 'บันทึกไม่ได้ (พื้นที่เบราว์เซอร์เต็มหรือถูกปิดไว้) ให้ใช้ปุ่ม "บันทึก" เป็นไฟล์แทน', untitled: '(ไม่มีชื่อ)',
-    types: { bowtie: 'Bowtie', swiss: 'Swiss cheese', shell: 'SHELL' }, illustrative: 'ตัวอย่างประกอบ', loadFail: 'โหลดไม่ได้',
+    types: { bowtie: 'Bowtie', swiss: 'Swiss cheese', shell: 'SHELL', hfacs: 'HFACS', stamp: 'STAMP / STPA' }, illustrative: 'ตัวอย่างประกอบ', loadFail: 'โหลดไม่ได้',
   },
   en: {
     saveNow: 'Save current work to gallery', saveNew: 'Save as a new work', myWork: 'My work (stored in this browser)', examples: 'Examples',
     empty: 'Nothing saved yet. Press "Save current work to gallery" above.', open: 'Open', del: 'Delete', confirmDel: 'Remove this work from the gallery?',
     note: 'Gallery work is stored in this browser only, online or offline. Clearing browser data erases it, so also use "Save" in the top bar to keep a file copy.',
     savedOk: 'Saved', savedFail: 'Could not save (browser storage full or blocked). Use the "Save" button to download a file instead.', untitled: '(untitled)',
-    types: { bowtie: 'Bowtie', swiss: 'Swiss cheese', shell: 'SHELL' }, illustrative: 'illustrative example', loadFail: 'Could not load',
+    types: { bowtie: 'Bowtie', swiss: 'Swiss cheese', shell: 'SHELL', hfacs: 'HFACS', stamp: 'STAMP / STPA' }, illustrative: 'illustrative example', loadFail: 'Could not load',
   },
 };
 

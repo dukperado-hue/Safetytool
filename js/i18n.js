@@ -92,3 +92,39 @@ export const STR = {
     },
   },
 };
+
+// HFACS and STAMP/STPA strings
+Object.assign(STR.th, { mHfacs: 'HFACS', mStamp: 'STAMP / STPA' });
+Object.assign(STR.en, { mHfacs: 'HFACS', mStamp: 'STAMP / STPA' });
+Object.assign(STR.th.kind, {
+  hfEvent: 'เหตุการณ์ที่วิเคราะห์', hfFactor: 'ปัจจัย (factor)', hfViolation: 'ปัจจัย (การฝ่าฝืน)', hfLevel: 'ระดับ HFACS', hfCell: 'หมวด HFACS',
+  stSystem: 'ระบบ/ขอบเขต', stLoss: 'Loss', stHazard: 'Hazard (ระดับระบบ)', stController: 'Controller', stProcess: 'Controlled process', stAction: 'Control action', stFeedback: 'Feedback', stUca: 'Unsafe control action (UCA)', stScenario: 'Causal scenario', stRow: 'ระดับ',
+});
+Object.assign(STR.en.kind, {
+  hfEvent: 'Occurrence analysed', hfFactor: 'Factor', hfViolation: 'Factor (violation)', hfLevel: 'HFACS level', hfCell: 'HFACS category',
+  stSystem: 'System / boundary', stLoss: 'Loss', stHazard: 'Hazard (system-level)', stController: 'Controller', stProcess: 'Controlled process', stAction: 'Control action', stFeedback: 'Feedback', stUca: 'Unsafe control action (UCA)', stScenario: 'Causal scenario', stRow: 'Level',
+});
+STR.th.hf = {
+  event: 'เหตุการณ์ (occurrence) ที่นำมาจัดหมวด', factor: 'ปัจจัย: เงื่อนไขหรือข้อเท็จจริงที่พบ (เขียนเป็นสภาพของระบบ ไม่ใช่การโทษบุคคล)', category: 'หมวด HFACS', unclassified: 'ยังไม่จัดหมวด',
+  evidence: 'หลักฐานที่สนับสนุนการจัดหมวด (แหล่งข้อมูล)', influences: 'ปัจจัยนี้ส่งผลต่อ (ปัจจัยในระดับที่ต่ำกว่า)', level: 'ระดับ', addFactor: '+ เพิ่มปัจจัย',
+};
+STR.en.hf = {
+  event: 'The occurrence being classified', factor: 'Factor: the condition or fact found (write the state of the system, not blame on a person)', category: 'HFACS category', unclassified: 'Unclassified',
+  evidence: 'Evidence for this classification (source)', influences: 'This factor contributed to (factors at a lower level)', level: 'Level', addFactor: '+ Add factor',
+};
+STR.th.stm = {
+  system: 'ระบบและขอบเขตที่วิเคราะห์', losses: 'Losses (ความสูญเสียที่ไม่ยอมรับ)', addLoss: '+ เพิ่ม Loss', hazards: 'Hazards (ระดับระบบ)', hazard: 'Hazard: สถานะของระบบที่ร่วมกับสภาพแวดล้อมที่แย่ที่สุดจะนำไปสู่ Loss', addHazard: '+ เพิ่ม Hazard',
+  leadsTo: 'นำไปสู่ Loss', constraint: 'ข้อกำหนดความปลอดภัยระดับระบบ (system-level constraint)', structure: 'โครงสร้างการควบคุม (controller และ controlled process)',
+  role: { controller: 'Controller', process: 'Controlled process' }, nodeText: 'ชื่อ (บทบาท/ส่วนประกอบ)', level: 'ระดับ (0 = บนสุด)', processModel: 'Process model: สิ่งที่ controller เชื่อว่าเป็นสถานะของกระบวนการ',
+  addController: '+ เพิ่ม Controller', addProcess: '+ เพิ่ม Controlled process', actions: 'Control action (ลงล่าง) และ Feedback (ขึ้นบน)', kind: { control: 'Control action', feedback: 'Feedback' },
+  actionText: 'ข้อความ', from: 'จาก', to: 'ถึง', addControl: '+ Control action', addFeedback: '+ Feedback', ucas: 'Unsafe control actions (UCA)', noActions: 'เพิ่ม control action ก่อน แล้วจึงวิเคราะห์ UCA',
+  addUca: '+ เพิ่ม UCA', ucaType: 'ชนิด UCA', context: 'บริบท: เงื่อนไขที่ทำให้การสั่ง/ไม่สั่งนี้ไม่ปลอดภัย', ucaConstraint: 'ข้อกำหนดของ controller (controller constraint)', scenario: 'Causal scenario: ทำไม UCA นี้จึงเกิดได้', addScenario: '+ เพิ่ม scenario',
+};
+STR.en.stm = {
+  system: 'The system and its boundary', losses: 'Losses (unacceptable outcomes)', addLoss: '+ Add loss', hazards: 'Hazards (system-level)', hazard: 'Hazard: a system state that, with worst-case conditions, leads to a loss', addHazard: '+ Add hazard',
+  leadsTo: 'Leads to loss', constraint: 'System-level safety constraint', structure: 'Control structure (controllers and controlled process)',
+  role: { controller: 'Controller', process: 'Controlled process' }, nodeText: 'Name (role / component)', level: 'Level (0 = top)', processModel: 'Process model: what the controller believes about the state of the process',
+  addController: '+ Add controller', addProcess: '+ Add controlled process', actions: 'Control actions (down) and feedback (up)', kind: { control: 'Control action', feedback: 'Feedback' },
+  actionText: 'Text', from: 'From', to: 'To', addControl: '+ Control action', addFeedback: '+ Feedback', ucas: 'Unsafe control actions (UCAs)', noActions: 'Add a control action first, then analyse its UCAs',
+  addUca: '+ Add UCA', ucaType: 'UCA type', context: 'Context: the condition that makes giving / not giving it unsafe', ucaConstraint: 'Controller constraint', scenario: 'Causal scenario: why could this UCA happen', addScenario: '+ Add scenario',
+};

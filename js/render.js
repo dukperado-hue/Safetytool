@@ -6,6 +6,8 @@ import { wrapText, setMeasurer, textWidth } from './textmetrics.js';
 import { effectivenessBand } from './model.js';
 import { layoutSwiss } from './swiss.js';
 import { layoutShell } from './shell.js';
+import { layoutHfacs } from './hfacs.js';
+import { layoutStamp } from './stamp.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const FONT = 'system-ui,-apple-system,"Segoe UI","Noto Sans Thai","Leelawadee UI",sans-serif';
@@ -102,6 +104,25 @@ export const SVG_CSS = `
 .b-poor{fill:var(--poor)}.b-weak{fill:var(--weak)}.b-fair{fill:var(--fair)}.b-strong{fill:var(--strong)}.b-none{fill:var(--none)}
 .crit{fill:var(--top-b);font-weight:700}
 .st-title{font:600 14px ${FONT};fill:var(--ink)}
+.mk-c{fill:var(--ink)}.mk-f{fill:var(--muted)}.mk-i{fill:var(--esc-b)}
+.st-link.ctl{stroke:var(--ink);stroke-width:1.8;marker-end:url(#st-arr)}
+.st-link.fb{stroke:var(--muted);stroke-width:1.6;stroke-dasharray:6 4;marker-end:url(#st-arr-f)}
+.st-link.infl{stroke:var(--esc-b);stroke-width:1.5;opacity:.85;marker-end:url(#st-arr-i)}
+.st-node .lab{font-size:11px;fill:var(--ink)}
+.st-node .code{font-weight:700}
+.k-hfLevel rect.box{stroke:none}.k-hfCell rect.box{fill:var(--bg);stroke-width:1.2}
+.k-hfLevel.L4 rect.box{fill:var(--esc)}.k-hfLevel.L3 rect.box{fill:var(--thr)}.k-hfLevel.L2 rect.box{fill:var(--haz)}.k-hfLevel.L1 rect.box{fill:var(--act)}
+.k-hfCell.L4 rect.box{stroke:var(--esc-b)}.k-hfCell.L3 rect.box{stroke:var(--thr-b)}.k-hfCell.L2 rect.box{stroke:var(--haz-b)}.k-hfCell.L1 rect.box{stroke:var(--act-b)}
+.k-hfCell.L0 rect.box{stroke:var(--line);stroke-dasharray:5 3}
+.k-hfFactor rect.box{fill:var(--sub);stroke:var(--ctl-b);stroke-width:1.2}
+.k-hfViolation rect.box{fill:var(--sub);stroke:var(--act-b);stroke-width:1.6;stroke-dasharray:5 3}
+.k-hfEvent rect.box{fill:var(--top);stroke:var(--top-b);stroke-width:2.2}
+.k-stController rect.box{fill:var(--bg);stroke:var(--thr-b);stroke-width:1.8}
+.k-stProcess rect.box{fill:var(--cE);stroke:var(--weak);stroke-width:1.8}
+.k-stRow rect.box{fill:none;stroke:none}
+.k-stAction rect.box,.k-stFeedback rect.box{fill:var(--bg);fill-opacity:.9;stroke:none;rx:4}
+.k-stFeedback .lab{font-style:italic;fill:var(--muted)}
+.st-node:hover .lab{text-decoration:underline}
 `;
 
 const KIND_LABEL = {
@@ -109,6 +130,8 @@ const KIND_LABEL = {
   control: 'CONTROL', escalation: 'ESCALATION', escalationControl: 'ESC. CONTROL',
   loss: 'LOSS', layer: 'LAYER', holeActive: 'ACTIVE FAILURE', holeLatent: 'LATENT CONDITION', wall: 'DEFENCE HOLDS',
   subject: 'LIVEWARE', compS: 'SOFTWARE', compH: 'HARDWARE', compE: 'ENVIRONMENT', compL: 'OTHER LIVEWARE', iface: 'INTERFACE',
+  hfEvent: 'OCCURRENCE', hfFactor: 'FACTOR', hfViolation: 'FACTOR (VIOLATION)', hfLevel: 'HFACS LEVEL', hfCell: 'HFACS CATEGORY',
+  stController: 'CONTROLLER', stProcess: 'CONTROLLED PROCESS', stAction: 'CONTROL ACTION', stFeedback: 'FEEDBACK', stRow: 'LEVEL',
 };
 
 // control state chip text [th, en]; glyph + word so state never depends on colour alone
@@ -150,6 +173,11 @@ function begin(svg, width, height, opts) {
   svg.setAttribute('class', 'st-root' + (opts.dark ? ' dark' : ''));
   svg.setAttribute('viewBox', `0 0 ${Math.ceil(width)} ${Math.ceil(height)}`);
   el('style', {}, svg).textContent = SVG_CSS;
+  const defs = el('defs', {}, svg);
+  [['st-arr', 'mk-c'], ['st-arr-f', 'mk-f'], ['st-arr-i', 'mk-i']].forEach(([id, cls]) => {
+    const mkr = el('marker', { id, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 9, markerHeight: 9, orient: 'auto', markerUnits: 'userSpaceOnUse' }, defs);
+    el('path', { d: 'M0,0 L10,5 L0,10 z', class: cls }, mkr);
+  });
   el('rect', { class: 'st-bg', x: 0, y: 0, width: Math.ceil(width), height: Math.ceil(height) }, svg);
   return el('g', { id: 'st-viewport' }, svg);
 }
@@ -251,7 +279,7 @@ function renderGeometry(svg, model, G, opts) {
     const cls = `st-node k-${it.kind}` + (it.status ? ' ' + it.status : '') + (it.aligned ? ' al' : '') + (it.inert ? ' inert' : '') + (opts.selectedId === it.id ? ' sel' : '');
     const grp = el('g', { class: cls, 'data-id': it.id }, g);
     const label = KIND_LABEL[it.kind] || it.kind;
-    const tip = opts.explain && !opts.forExport ? opts.explain(it.kind) : '';
+    const tip = it.tip || (opts.explain && !opts.forExport ? opts.explain(it.kind) : '');
     el('title', {}, grp).textContent = tip ? `${label}\n— ${tip}` : label;
     if (it.prims) {
       el('rect', { class: 'box', x: it.x, y: it.y, width: it.w, height: it.kind === 'layer' ? it.fullH : it.h, rx: it.kind === 'layer' ? 16 : 10 }, grp);
@@ -285,11 +313,15 @@ function renderGeometry(svg, model, G, opts) {
 
 export function renderSwiss(svg, model, opts = {}) { return renderGeometry(svg, model, layoutSwiss(model, { lang: opts.lang }), opts); }
 export function renderShell(svg, model, opts = {}) { return renderGeometry(svg, model, layoutShell(model), opts); }
+export function renderHfacs(svg, model, opts = {}) { return renderGeometry(svg, model, layoutHfacs(model, { lang: opts.lang }), opts); }
+export function renderStamp(svg, model, opts = {}) { return renderGeometry(svg, model, layoutStamp(model, { lang: opts.lang }), opts); }
 
-/** type: 'bowtie' | 'swiss' | 'shell' */
+/** type: 'bowtie' | 'swiss' | 'shell' | 'hfacs' | 'stamp' */
 export function renderModel(svg, type, model, opts = {}) {
   if (type === 'swiss') return renderSwiss(svg, model, opts);
   if (type === 'shell') return renderShell(svg, model, opts);
+  if (type === 'hfacs') return renderHfacs(svg, model, opts);
+  if (type === 'stamp') return renderStamp(svg, model, opts);
   return renderBowtie(svg, model, opts);
 }
 

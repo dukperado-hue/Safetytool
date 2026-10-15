@@ -5,11 +5,13 @@
 import * as M from './model.js';
 import * as SW from './swiss.js';
 import * as SH from './shell.js';
+import * as HF from './hfacs.js';
+import * as ST from './stamp.js';
 import { helpFor } from './help.js';
 
 const T = {
   th: {
-    guide: 'คู่มือทีละขั้น', step: 'ขั้นที่', of: 'จาก', back: 'ย้อนกลับ', next: 'ถัดไป', done: 'จบคู่มือ', close: 'ปิดคู่มือ', start: 'เริ่มคู่มือทีละขั้น',
+    lang: 'th', evidence: 'หลักฐานที่สนับสนุน (แหล่งข้อมูล)', ucaType: 'ชนิด UCA', fromTo: 'จาก', toTo: 'ถึง', pickNode: '— เลือก —', guide: 'คู่มือทีละขั้น', step: 'ขั้นที่', of: 'จาก', back: 'ย้อนกลับ', next: 'ถัดไป', done: 'จบคู่มือ', close: 'ปิดคู่มือ', start: 'เริ่มคู่มือทีละขั้น',
     what: 'คืออะไร', how: 'เขียนอย่างไร', eg: 'ตัวอย่าง (เพื่อประกอบ)', avoid: 'ที่ควรเลี่ยง', yourText: 'ของคุณ', filled: 'กรอกแล้ว', todo: 'ยังไม่ได้กรอก',
     addMore: 'เพิ่ม', placeholder: 'พิมพ์ที่นี่แล้วกด Enter หรือคลิกที่อื่น',
     openSim: 'เปิดแท็บจำลอง (Simulate)', saveGallery: 'บันทึกลงคลังผลงาน', saved: 'บันทึกแล้ว — ดูได้ที่แท็บ "คลังผลงาน"',
@@ -17,7 +19,7 @@ const T = {
     needFirst: 'ยังไม่มีรายการให้ผูก — ย้อนกลับไปเพิ่มในขั้นก่อนหน้าก่อน', prevent: 'มาตรการป้องกัน (preventive)', recover: 'มาตรการแก้ไข (recovery)', holeType: 'ชนิดของรู', unclassified: '— ยังไม่ระบุ —', tActive: 'Active failure (ความล้มเหลวหน้างาน)', tLatent: 'Latent condition (เงื่อนไขแฝง)', pickHole: 'รูที่เรียงตัวบนเส้นทาง (เลือกเมื่อข้อเท็จจริงสนับสนุน)', noHole: '— ไม่เลือก —', ifaceStatus: 'สถานะ', stUnknown: 'ไม่ทราบ', stMatch: 'เข้ากัน', stMismatch: 'ไม่เข้ากัน', ctlOf: 'Control', escOf: 'Escalation factor ของ',
   },
   en: {
-    guide: 'Step-by-step guide', step: 'Step', of: 'of', back: 'Back', next: 'Next', done: 'Finish guide', close: 'Close guide', start: 'Start the step-by-step guide',
+    lang: 'en', evidence: 'Evidence (source)', ucaType: 'UCA type', fromTo: 'From', toTo: 'To', pickNode: '— choose —', guide: 'Step-by-step guide', step: 'Step', of: 'of', back: 'Back', next: 'Next', done: 'Finish guide', close: 'Close guide', start: 'Start the step-by-step guide',
     what: 'What it is', how: 'How to write it', eg: 'Example (illustration only)', avoid: 'Avoid', yourText: 'Yours', filled: 'filled in', todo: 'not filled in yet',
     addMore: 'Add', placeholder: 'Type here, then press Enter or click elsewhere',
     openSim: 'Open the Simulate tab', saveGallery: 'Save to gallery', saved: 'Saved — see the "Gallery" tab',
@@ -68,6 +70,34 @@ export const STEPS = {
     { id: 'save', done: () => true, action: 'gallery', body: { th: 'บันทึกงานลงคลังผลงานและกด "บันทึก" เพื่อเก็บเป็นไฟล์', en: 'Save to the gallery and use "Save" to download a file.' } },
   ],
 };
+
+STEPS.hfacs = [
+  { id: 'overview', title: { th: 'ภาพรวม: HFACS', en: 'Overview: HFACS' }, body: { th: 'HFACS ใช้จัดหมวดปัจจัยมนุษย์ของเหตุการณ์หนึ่งเหตุการณ์ใน 4 ระดับ เราเริ่มจากเหตุการณ์ แล้วเขียนปัจจัยที่พบ จากระดับองค์กรลงมาถึงการกระทำหน้างาน แต่ละปัจจัยควรมีหลักฐาน และอย่าหยุดที่การกระทำของคนหน้างาน', en: 'HFACS classifies the human factors of one occurrence in four levels. Start with the occurrence, then write the factors found, from the organisation down to the act at the sharp end. Each factor should have evidence; do not stop at the act of the person at the sharp end.' }, done: () => true },
+  { id: 'event', kind: 'hfEvent', field: ['event', 'text'], done: (m) => !!m.event.text.trim() },
+  ...HF.LEVELS.map((lv) => ({
+    id: 'lvl-' + lv, kind: 'hfFactor', groups: hfacsLevelGroups(lv), done: (m) => m.factors.some((f) => f.category && HF.levelOf(m, f) === lv && f.text.trim()), optional: lv !== 'unsafe-acts',
+    title: { th: 'ระดับ ' + HF.LEVEL_INFO[lv].n + ': ' + HF.LEVEL_INFO[lv].th, en: 'Level ' + HF.LEVEL_INFO[lv].n + ': ' + HF.LEVEL_INFO[lv].en },
+    body: { th: 'เขียนปัจจัยในหมวดที่เกี่ยวข้อง (ข้ามหมวดที่ไม่พบได้ ช่องว่างหมายถึงยังไม่ได้ตรวจหรือไม่พบ) การเชื่อมปัจจัยข้ามระดับทำได้ในแท็บ "ฟอร์มกรอกข้อมูล"', en: 'Write factors in the categories that apply (skip the ones with none; empty means not examined or none found). Links between levels are set in the "Data entry form" tab.' },
+  })),
+  { id: 'review', done: () => true, body: { th: 'ดูแท็บ "วิเคราะห์" เพื่อดูสายเหตุที่ผูกไว้ และแท็บ "คุณภาพ" เพื่อดูว่าขาดหลักฐานหรือระดับใดยังไม่ได้ตรวจ', en: 'Open the "Analysis" tab for the linked chains and the "Quality" tab for missing evidence and levels not yet examined.' } },
+  { id: 'save', done: () => true, action: 'gallery', body: { th: 'บันทึกงานลงคลังผลงานและกด "บันทึก" เพื่อเก็บเป็นไฟล์', en: 'Save to the gallery and use "Save" to download a file.' } },
+];
+STEPS.stamp = [
+  { id: 'overview', title: { th: 'ภาพรวม: STAMP / STPA', en: 'Overview: STAMP / STPA' }, body: { th: 'STAMP มองความปลอดภัยเป็นปัญหาการควบคุม เราจะสร้าง: ระบบ → Loss → Hazard → โครงสร้างการควบคุม → Control action และ Feedback → Unsafe control action (UCA) → Causal scenario ไม่มีความน่าจะเป็นในโมเดลนี้', en: 'STAMP sees safety as a control problem. We build: system → losses → hazards → control structure → control actions and feedback → unsafe control actions (UCAs) → causal scenarios. There are no probabilities in this model.' }, done: () => true },
+  { id: 'system', kind: 'stSystem', field: ['system', 'text'], done: (m) => !!m.system.text.trim() },
+  { id: 'loss', kind: 'stLoss', list: { key: 'losses', add: (m) => ST.addLoss(m) }, done: (m) => m.losses.some((x) => x.text.trim()) },
+  { id: 'hazard', kind: 'stHazard', list: { key: 'hazards', add: (m) => ST.addHazard(m) }, done: (m) => m.hazards.some((x) => x.text.trim()),
+    body: { th: 'เขียน hazard เป็นสถานะของระบบ การผูกกับ Loss และข้อกำหนดความปลอดภัย (constraint) ตั้งในแท็บ "ฟอร์มกรอกข้อมูล"', en: 'Write each hazard as a system state. Linking it to losses and writing its safety constraint is done in the "Data entry form" tab.' } },
+  { id: 'controllers', kind: 'stController', groups: stampNodeGroups('controller'), done: (m) => m.nodes.some((n) => n.role === 'controller' && n.text.trim()),
+    body: { th: 'เพิ่ม controller ทีละแถว จากบนลงล่าง (คน ซอฟต์แวร์ หรือองค์กรที่ตัดสินใจ) process model และระดับแก้ได้ในแท็บ "ฟอร์มกรอกข้อมูล"', en: 'Add controllers one row at a time, top to bottom (the people, software or organisations that decide). Process model and level are edited in the "Data entry form" tab.' } },
+  { id: 'process', kind: 'stProcess', groups: stampNodeGroups('process'), done: (m) => m.nodes.some((n) => n.role === 'process' && n.text.trim()) },
+  { id: 'actions', kind: 'stAction', groups: stampActionGroups, done: (m) => m.actions.some((a) => a.kind === 'control' && a.text.trim()),
+    body: { th: 'เขียน control action (ลูกศรลง) และ feedback (ลูกศรขึ้น) แล้วเลือกต้นทางและปลายทางของแต่ละเส้น controller ที่ไม่มี feedback จะถูกแจ้งในแท็บ "คุณภาพ"', en: 'Write the control actions (arrows down) and feedback (arrows up) and pick each one’s source and target. A controller with no feedback is flagged in the "Quality" tab.' } },
+  { id: 'ucas', kind: 'stUca', groups: stampUcaGroups, done: (m) => m.ucas.some((u) => u.context.trim()),
+    body: { th: 'ถามกับ control action แต่ละตัวว่า ไม่สั่ง สั่งแล้วไม่ปลอดภัย เร็ว/ช้า/ผิดลำดับ หรือหยุดเร็ว/นานเกิน จะเป็นอันตรายเมื่อไร เขียนเป็นบริบท การผูกกับ hazard ทำในแท็บ "ฟอร์มกรอกข้อมูล"', en: 'For each control action ask: if it is not given, given unsafely, given too early/late/out of order, or stopped too soon / applied too long, when is that hazardous? Write the context. Linking to hazards is done in the "Data entry form" tab.' } },
+  { id: 'scenarios', kind: 'stScenario', groups: stampScenarioGroups, optional: true, done: (m) => m.scenarios.some((x) => x.text.trim()) },
+  { id: 'save', done: () => true, action: 'gallery', body: { th: 'บันทึกงานลงคลังผลงานและกด "บันทึก" เพื่อเก็บเป็นไฟล์', en: 'Save to the gallery and use "Save" to download a file.' } },
+];
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
@@ -129,6 +159,79 @@ function shellIfaceGroups(m, L) {
     items: m.interfaces[k].findings.map((f) => ({ id: f.id, text: f.text, ref: f })),
     add: (x) => SH.addFinding(x, k),
     find: (x, id) => x.interfaces[k].findings.find((f) => f.id === id),
+  }));
+}
+function hfacsLevelGroups(level) {
+  return (m, L) => HF.categoriesOf(level).map((c) => ({
+    heading: c[L.lang] + ' — ' + c.def[L.lang],
+    items: m.factors.filter((f) => f.category === c.id).map((f) => ({ id: f.id, text: f.text, ref: f })),
+    add: (x) => HF.addFactor(x, c.id),
+    find: (x, id) => x.factors.find((f) => f.id === id),
+    extra: (it, ctx) => {
+      const inp = el('textarea', 'guide-input');
+      inp.rows = 1; inp.value = it.ref.evidence || ''; inp.placeholder = L.evidence; inp.setAttribute('aria-label', L.evidence);
+      inp.addEventListener('change', () => ctx.mutate((x) => { const f = x.factors.find((y) => y.id === it.id); if (f) f.evidence = inp.value; }));
+      return inp;
+    },
+  }));
+}
+const nodeSelect = (m, value, label, onChange, L) => {
+  const sel = el('select', 'guide-input');
+  sel.setAttribute('aria-label', label);
+  const none = el('option', null, L.pickNode); none.value = ''; sel.appendChild(none);
+  const codes = ST.stampCodes(m);
+  m.nodes.forEach((n) => { const o = el('option', null, codes[n.id] + ' ' + short(n.text)); o.value = n.id; sel.appendChild(o); });
+  sel.value = value || '';
+  sel.addEventListener('change', () => onChange(sel.value || null));
+  return sel;
+};
+function stampNodeGroups(role) {
+  return (m, L) => [{
+    heading: role === 'process' ? 'Controlled process' : 'Controllers',
+    items: m.nodes.filter((n) => n.role === role).map((n) => ({ id: n.id, text: n.text, ref: n })),
+    add: (x) => ST.addNode(x, role),
+    find: (x, id) => x.nodes.find((n) => n.id === id),
+  }];
+}
+function stampActionGroups(m, L) {
+  return ['control', 'feedback'].map((kind) => ({
+    heading: kind === 'control' ? 'Control actions (↓)' : 'Feedback (↑)',
+    items: m.actions.filter((a) => a.kind === kind).map((a) => ({ id: a.id, text: a.text, ref: a })),
+    add: (x) => ST.addAction(x, kind),
+    find: (x, id) => x.actions.find((a) => a.id === id),
+    extra: (it, ctx) => {
+      const box = el('div', 'guide-pair');
+      box.appendChild(nodeSelect(ctx.model, it.ref.from, L.fromTo, (v) => ctx.mutate((x) => { const a = x.actions.find((y) => y.id === it.id); if (a) a.from = v; }), L));
+      box.appendChild(nodeSelect(ctx.model, it.ref.to, L.toTo, (v) => ctx.mutate((x) => { const a = x.actions.find((y) => y.id === it.id); if (a) a.to = v; }), L));
+      return box;
+    },
+  }));
+}
+function stampUcaGroups(m, L) {
+  const codes = ST.stampCodes(m);
+  return m.actions.filter((a) => a.kind === 'control').map((a) => ({
+    heading: codes[a.id] + ' ' + short(a.text),
+    prop: 'context',
+    items: m.ucas.filter((u) => u.actionId === a.id).map((u) => ({ id: u.id, text: u.context, ref: u })),
+    add: (x) => ST.addUca(x, a.id),
+    find: (x, id) => x.ucas.find((u) => u.id === id),
+    extra: (it, ctx) => {
+      const sel = el('select', 'guide-input');
+      sel.setAttribute('aria-label', L.ucaType);
+      ST.UCA_TYPES.forEach((k) => { const o = el('option', null, ST.UCA_INFO[k][L.lang]); o.value = k; sel.appendChild(o); });
+      sel.value = it.ref.type;
+      sel.addEventListener('change', () => ctx.mutate((x) => { const u = x.ucas.find((y) => y.id === it.id); if (u) u.type = sel.value; }));
+      return sel;
+    },
+  }));
+}
+function stampScenarioGroups(m) {
+  const codes = ST.stampCodes(m);
+  return m.ucas.map((u) => ({
+    heading: codes[u.id] + ' ' + short(u.context),
+    items: m.scenarios.filter((s) => s.ucaId === u.id).map((s) => ({ id: s.id, text: s.text, ref: s })),
+    add: (x) => ST.addScenario(x, u.id),
+    find: (x, id) => x.scenarios.find((y) => y.id === id),
   }));
 }
 function typeSelect(it, ctx, L) {
@@ -214,7 +317,8 @@ export function drawGuide(host, ctx) {
       box.appendChild(el('h4', 'guide-group', g.heading));
       if (g.head) box.appendChild(g.head(ctx));
       g.items.forEach((it) => {
-        box.appendChild(field('g-' + it.id, it.text, (v) => ctx.mutate((x2) => { const node = g.find(x2, it.id); if (node) node.text = v; })));
+        const prop = g.prop || 'text';
+        box.appendChild(field('g-' + it.id, it.text, (v) => ctx.mutate((x2) => { const node = g.find(x2, it.id); if (node) node[prop] = v; })));
         if (g.extra) box.appendChild(g.extra(it, ctx));
       });
       const add = el('button', null, '+ ' + L.addMore);

@@ -4,7 +4,7 @@
 //   node cli/safetytool.js validate <file.json>      structural check (exit 1 on errors)
 //   node cli/safetytool.js lint <file.json> [--json]  quality checks (exit 1 if any error-level finding)
 //   node cli/safetytool.js outline <file.json>        plain-text outline (good for reading/quoting)
-//   node cli/safetytool.js new <bowtie|swiss|shell|scenario> [title]   print an empty model to stdout
+//   node cli/safetytool.js new <bowtie|swiss|shell|hfacs|stamp|scenario> [title]   print an empty model to stdout
 //   node cli/safetytool.js simulate <file.json> [--set id=status[:blocks|fails] ...] [--json]   bowtie or scenario
 //   node cli/safetytool.js impact <bowtie.json>       which single control failures leave paths un-cut
 //   node cli/safetytool.js register <bowtie.json> [--as-of YYYY-MM-DD]   barrier assurance register (gaps only)
@@ -14,6 +14,8 @@ import { readFileSync } from 'node:fs';
 import * as M from '../js/model.js';
 import * as SW from '../js/swiss.js';
 import * as SH from '../js/shell.js';
+import * as HF from '../js/hfacs.js';
+import * as ST from '../js/stamp.js';
 import * as SC from '../js/scenario.js';
 import * as BA from '../js/bowtie-analysis.js';
 import { lint as lintBowtie, summarize } from '../js/lint.js';
@@ -31,6 +33,8 @@ const TYPES = {
   [M.SCHEMA]: { id: 'bowtie', validate: (m) => { const e = M.validateShape(m); return e.length ? e : BA.validateBowtieExt(m).errors; }, normalize: M.normalize, lint: lintBowtie, empty: M.emptyModel },
   [SW.SCHEMA]: { id: 'swiss', validate: SW.validateSwiss, normalize: SW.normalizeSwiss, lint: SW.lintSwiss, empty: SW.emptySwiss, outline: SW.outlineSwiss },
   [SH.SCHEMA]: { id: 'shell', validate: SH.validateShell, normalize: SH.normalizeShell, lint: SH.lintShell, empty: SH.emptyShell, outline: SH.outlineShell },
+  [HF.SCHEMA]: { id: 'hfacs', validate: HF.validateHfacs, normalize: HF.normalizeHfacs, lint: HF.lintHfacs, empty: HF.emptyHfacs, outline: HF.outlineHfacs },
+  [ST.SCHEMA]: { id: 'stamp', validate: ST.validateStamp, normalize: ST.normalizeStamp, lint: ST.lintStamp, empty: ST.emptyStamp, outline: ST.outlineStamp },
 };
 const BY_ID = Object.fromEntries(Object.values(TYPES).map((t) => [t.id, t]));
 
@@ -106,7 +110,7 @@ if (cmd === 'validate') {
   console.log(type.id === 'bowtie' ? outlineBowtie(m) : type.outline(m));
 } else if (cmd === 'new') {
   const type = BY_ID[arg];
-  if (!type) { console.error('usage: new <bowtie|swiss|shell|scenario> [title]'); process.exit(2); }
+  if (!type) { console.error('usage: new <bowtie|swiss|shell|hfacs|stamp|scenario> [title]'); process.exit(2); }
   const m = type.empty();
   m.meta.title = rest.filter((x) => x !== '--json').join(' ');
   console.log(JSON.stringify(m, null, 2));

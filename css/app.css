@@ -212,3 +212,11 @@ td.erc-red::before{content:"\25B2 "}td.erc-yellow::before{content:"\25C6 "}td.er
 
 .guide-group{margin:12px 0 4px;font-size:13px;color:var(--muted)}
 .guide select.guide-input{width:100%}
+
+/* HFACS and STAMP forms */
+.guide-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fchoices{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:6px 0}
+.fchoices legend{font-size:12px;color:var(--muted);padding:0 4px}
+.fchoices .fld.chk{display:flex;gap:8px;align-items:flex-start;margin:2px 0}
+.fcat{margin:14px 0 2px;font-size:13px}
+.small{font-size:12px}

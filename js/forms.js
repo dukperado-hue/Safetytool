@@ -3,6 +3,8 @@
 // structural edits (add/remove/move) rebuild it.
 import * as SW from './swiss.js';
 import * as SH from './shell.js';
+import * as HF from './hfacs.js';
+import * as ST from './stamp.js';
 
 const mk = (tag, attrs = {}, text) => {
   const e = document.createElement(tag);
@@ -123,4 +125,152 @@ export function buildShellForm(host, m, api) {
     sec.appendChild(button(t('sh.addFinding'), () => mutate(() => SH.addFinding(m, i), { rebuild: true })));
     host.appendChild(sec);
   });
+}
+
+// ------------------------------------------------------------------ HFACS
+const short = (s, n = 46) => { const x = (s || '').trim(); return x ? (x.length > n ? x.slice(0, n) + '…' : x) : '—'; };
+
+/** A group of checkboxes (e.g. which losses a hazard leads to). */
+function choices(legend, rows, isOn, onToggle) {
+  const box = mk('fieldset', { class: 'fchoices' });
+  box.appendChild(mk('legend', {}, legend));
+  rows.forEach(([id, label]) => {
+    const l = mk('label', { class: 'fld chk' });
+    const c = mk('input', { type: 'checkbox' });
+    c.checked = isOn(id);
+    c.addEventListener('change', () => onToggle(id, c.checked));
+    l.appendChild(c);
+    l.appendChild(mk('span', {}, label));
+    box.appendChild(l);
+  });
+  return box;
+}
+
+export function buildHfacsForm(host, m, api) {
+  const { t, mutate, lang } = api;
+  host.textContent = '';
+  const codes = HF.factorCodes(m);
+  const top = section(t('kind.hfEvent'));
+  top.appendChild(field(t('hf.event'), textInput(m.event.text, (v) => mutate(() => { m.event.text = v; }), true), m.event.id));
+  host.appendChild(top);
+
+  const factorCard = (f) => {
+    const card = mk('div', { class: 'fcard', 'data-id': f.id });
+    const head = mk('div', { class: 'fhead' });
+    head.appendChild(mk('strong', {}, codes[f.id]));
+    head.appendChild(button(t('delete'), () => { if (confirm(t('confirmDelete'))) mutate(() => HF.removeFactor(m, f.id), { rebuild: true }); }, 'mini danger'));
+    card.appendChild(head);
+    card.appendChild(field(t('hf.factor'), textInput(f.text, (v) => mutate(() => { f.text = v; }), true), f.id));
+    card.appendChild(field(t('hf.category'), select(f.category, [['', t('hf.unclassified')], ...HF.CATEGORIES.map((c) => [c.id, `${HF.LEVEL_INFO[c.level].n} · ${c[lang]}`])], (v) => mutate(() => { f.category = v || null; HF.pruneInfluences(m); }, { rebuild: true }))));
+    card.appendChild(field(t('hf.evidence'), textInput(f.evidence, (v) => mutate(() => { f.evidence = v; }), true)));
+    const lower = m.factors.filter((g) => g !== f && f.category && g.category && HF.rankOf(m, f) < HF.rankOf(m, g));
+    if (lower.length) {
+      card.appendChild(choices(t('hf.influences'), lower.map((g) => [g.id, `${codes[g.id]} ${short(g.text)}`]), (id) => f.influences.includes(id),
+        (id, on) => mutate(() => { if (on) HF.link(m, f.id, id); else HF.unlink(m, f.id, id); })));
+    }
+    return card;
+  };
+
+  HF.LEVELS.forEach((lv) => {
+    const sec = section(`${t('hf.level')} ${HF.LEVEL_INFO[lv].n} — ${HF.LEVEL_INFO[lv][lang]}`, 'lvl_' + lv);
+    HF.categoriesOf(lv).forEach((c) => {
+      sec.appendChild(mk('h4', { class: 'fcat' }, c[lang]));
+      sec.appendChild(mk('p', { class: 'muted small' }, c.def[lang]));
+      m.factors.filter((f) => f.category === c.id).forEach((f) => sec.appendChild(factorCard(f)));
+      sec.appendChild(button(t('hf.addFactor'), () => mutate(() => HF.addFactor(m, c.id), { rebuild: true })));
+    });
+    host.appendChild(sec);
+  });
+  const us = section(t('hf.unclassified'), 'sec_unclassified');
+  m.factors.filter((f) => !f.category).forEach((f) => us.appendChild(factorCard(f)));
+  us.appendChild(button(t('hf.addFactor'), () => mutate(() => HF.addFactor(m, null), { rebuild: true })));
+  host.appendChild(us);
+}
+
+// ------------------------------------------------------------------ STAMP / STPA
+export function buildStampForm(host, m, api) {
+  const { t, mutate, lang } = api;
+  host.textContent = '';
+  const codes = ST.stampCodes(m);
+  const nodeOpts = () => [['', t('none')], ...m.nodes.map((n) => [n.id, `${codes[n.id]} ${short(n.text, 30)}`])];
+  const del = (id) => button(t('delete'), () => { if (confirm(t('confirmDelete'))) mutate(() => ST.removeStampNode(m, id), { rebuild: true }); }, 'mini danger');
+  const head = (label, id) => { const h = mk('div', { class: 'fhead' }); h.appendChild(mk('strong', {}, label)); h.appendChild(del(id)); return h; };
+
+  const sys = section(t('kind.stSystem'));
+  sys.appendChild(field(t('stm.system'), textInput(m.system.text, (v) => mutate(() => { m.system.text = v; }), true), m.system.id));
+  host.appendChild(sys);
+
+  const ls = section(t('stm.losses'), 'sec_losses');
+  m.losses.forEach((l) => {
+    const row = mk('div', { class: 'frow', 'data-id': l.id });
+    row.appendChild(field(codes[l.id], textInput(l.text, (v) => mutate(() => { l.text = v; }), true), l.id));
+    row.appendChild(del(l.id));
+    ls.appendChild(row);
+  });
+  ls.appendChild(button(t('stm.addLoss'), () => mutate(() => ST.addLoss(m), { rebuild: true })));
+  host.appendChild(ls);
+
+  const hs = section(t('stm.hazards'), 'sec_hazards');
+  m.hazards.forEach((h) => {
+    const card = mk('div', { class: 'fcard', 'data-id': h.id });
+    card.appendChild(head(codes[h.id], h.id));
+    card.appendChild(field(t('stm.hazard'), textInput(h.text, (v) => mutate(() => { h.text = v; }), true), h.id));
+    if (m.losses.length) card.appendChild(choices(t('stm.leadsTo'), m.losses.map((l) => [l.id, `${codes[l.id]} ${short(l.text)}`]), (id) => h.lossIds.includes(id),
+      (id, on) => mutate(() => { h.lossIds = on ? [...new Set([...h.lossIds, id])] : h.lossIds.filter((x) => x !== id); })));
+    card.appendChild(field(t('stm.constraint'), textInput(h.constraint, (v) => mutate(() => { h.constraint = v; }), true)));
+    hs.appendChild(card);
+  });
+  hs.appendChild(button(t('stm.addHazard'), () => mutate(() => ST.addHazard(m), { rebuild: true })));
+  host.appendChild(hs);
+
+  const ns = section(t('stm.structure'), 'sec_nodes');
+  m.nodes.forEach((n) => {
+    const card = mk('div', { class: 'fcard', 'data-id': n.id });
+    card.appendChild(head(`${codes[n.id]} · ${t('stm.role.' + n.role)}`, n.id));
+    card.appendChild(field(t('stm.nodeText'), textInput(n.text, (v) => mutate(() => { n.text = v; }), false), n.id));
+    card.appendChild(field(t('stm.level'), textInput(String(n.level), (v) => mutate(() => { const k = Number.parseInt(v, 10); if (Number.isInteger(k) && k >= 0) n.level = k; }, { rebuild: true }), false)));
+    if (n.role === 'controller') card.appendChild(field(t('stm.processModel'), textInput(n.processModel, (v) => mutate(() => { n.processModel = v; }), true)));
+    ns.appendChild(card);
+  });
+  ns.appendChild(button(t('stm.addController'), () => mutate(() => ST.addNode(m, 'controller'), { rebuild: true })));
+  ns.appendChild(button(t('stm.addProcess'), () => mutate(() => ST.addNode(m, 'process'), { rebuild: true })));
+  host.appendChild(ns);
+
+  const as = section(t('stm.actions'), 'sec_actions');
+  m.actions.forEach((a) => {
+    const card = mk('div', { class: 'fcard', 'data-id': a.id });
+    card.appendChild(head(`${codes[a.id]} · ${t('stm.kind.' + a.kind)}`, a.id));
+    card.appendChild(field(t('stm.actionText'), textInput(a.text, (v) => mutate(() => { a.text = v; }), false), a.id));
+    card.appendChild(field(t('stm.from'), select(a.from, nodeOpts(), (v) => mutate(() => { a.from = v || null; }))));
+    card.appendChild(field(t('stm.to'), select(a.to, nodeOpts(), (v) => mutate(() => { a.to = v || null; }))));
+    as.appendChild(card);
+  });
+  as.appendChild(button(t('stm.addControl'), () => mutate(() => ST.addAction(m, 'control'), { rebuild: true })));
+  as.appendChild(button(t('stm.addFeedback'), () => mutate(() => ST.addAction(m, 'feedback'), { rebuild: true })));
+  host.appendChild(as);
+
+  const us = section(t('stm.ucas'), 'sec_ucas');
+  if (!m.actions.some((a) => a.kind === 'control')) us.appendChild(mk('p', { class: 'muted' }, t('stm.noActions')));
+  m.actions.filter((a) => a.kind === 'control').forEach((a) => {
+    us.appendChild(mk('h4', { class: 'fcat' }, `${codes[a.id]} ${short(a.text, 60)}`));
+    m.ucas.filter((u) => u.actionId === a.id).forEach((u) => {
+      const card = mk('div', { class: 'fcard', 'data-id': u.id });
+      card.appendChild(head(codes[u.id], u.id));
+      card.appendChild(field(t('stm.ucaType'), select(u.type, ST.UCA_TYPES.map((k) => [k, ST.UCA_INFO[k][lang]]), (v) => mutate(() => { u.type = v; }))));
+      card.appendChild(field(t('stm.context'), textInput(u.context, (v) => mutate(() => { u.context = v; }), true), u.id));
+      if (m.hazards.length) card.appendChild(choices(t('stm.hazards'), m.hazards.map((h) => [h.id, `${codes[h.id]} ${short(h.text)}`]), (id) => u.hazardIds.includes(id),
+        (id, on) => mutate(() => { u.hazardIds = on ? [...new Set([...u.hazardIds, id])] : u.hazardIds.filter((x) => x !== id); })));
+      card.appendChild(field(t('stm.ucaConstraint'), textInput(u.constraint, (v) => mutate(() => { u.constraint = v; }), true)));
+      m.scenarios.filter((s) => s.ucaId === u.id).forEach((s) => {
+        const row = mk('div', { class: 'frow', 'data-id': s.id });
+        row.appendChild(field(`${codes[s.id]} ${t('stm.scenario')}`, textInput(s.text, (v) => mutate(() => { s.text = v; }), true), s.id));
+        row.appendChild(del(s.id));
+        card.appendChild(row);
+      });
+      card.appendChild(button(t('stm.addScenario'), () => mutate(() => ST.addScenario(m, u.id), { rebuild: true })));
+      us.appendChild(card);
+    });
+    us.appendChild(button(t('stm.addUca'), () => mutate(() => ST.addUca(m, a.id), { rebuild: true })));
+  });
+  host.appendChild(us);
 }

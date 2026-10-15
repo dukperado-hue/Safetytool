@@ -1,0 +1,169 @@
+{
+  "schema": "safetytool.stamp/1",
+  "meta": {
+    "title": "Illustrative STPA: landing deceleration",
+    "scope": "Invented teaching example, not a real aircraft or system. Structure after STPA (Leveson, Engineering a Safer World, 2012; MIT 16.63J notes). Empty UCA cells mean not analysed, not safe.",
+    "author": "",
+    "illustrative": true,
+    "createdAt": "2026-10-15T00:00:00.000Z",
+    "updatedAt": "2026-10-15T00:00:00.000Z"
+  },
+  "system": {
+    "id": "sy_tekhja",
+    "text": "Deceleration of an aircraft on the runway after touchdown (invented example)"
+  },
+  "losses": [
+    {
+      "id": "ls_y4y3rb",
+      "text": "People on board are injured.",
+      "notes": ""
+    },
+    {
+      "id": "ls_kzdfoc",
+      "text": "The aircraft is damaged.",
+      "notes": ""
+    }
+  ],
+  "hazards": [
+    {
+      "id": "hz_4489rd",
+      "text": "The aircraft does not decelerate enough to stop within the runway.",
+      "lossIds": [
+        "ls_y4y3rb",
+        "ls_kzdfoc"
+      ],
+      "constraint": "The aircraft must decelerate to a stop within the runway length.",
+      "notes": ""
+    },
+    {
+      "id": "hz_oq8yje",
+      "text": "The aircraft leaves the runway at speed.",
+      "lossIds": [
+        "ls_y4y3rb",
+        "ls_kzdfoc"
+      ],
+      "constraint": "The aircraft must stay on the runway surface until it is stopped or at taxi speed.",
+      "notes": ""
+    }
+  ],
+  "nodes": [
+    {
+      "id": "nd_zeihnf",
+      "role": "controller",
+      "text": "Flight crew",
+      "level": 0,
+      "processModel": "Believes the runway is dry and braking will be effective.",
+      "notes": ""
+    },
+    {
+      "id": "nd_1z85dg",
+      "role": "controller",
+      "text": "Autobrake and anti-skid controller (software)",
+      "level": 1,
+      "processModel": "Believes the aircraft is on the ground and the wheels are rolling.",
+      "notes": ""
+    },
+    {
+      "id": "nd_za4bzh",
+      "role": "process",
+      "text": "Aircraft on the runway (wheels, brakes, spoilers)",
+      "level": 2,
+      "processModel": "",
+      "notes": ""
+    }
+  ],
+  "actions": [
+    {
+      "id": "ac_bc2c0i",
+      "kind": "control",
+      "from": "nd_zeihnf",
+      "to": "nd_1z85dg",
+      "text": "Arm autobrake and select braking level",
+      "notes": ""
+    },
+    {
+      "id": "ac_c8tsyj",
+      "kind": "control",
+      "from": "nd_zeihnf",
+      "to": "nd_za4bzh",
+      "text": "Manual braking with the pedals",
+      "notes": ""
+    },
+    {
+      "id": "ac_2yyqdk",
+      "kind": "control",
+      "from": "nd_1z85dg",
+      "to": "nd_za4bzh",
+      "text": "Apply wheel brakes",
+      "notes": ""
+    },
+    {
+      "id": "ac_xo0nkl",
+      "kind": "feedback",
+      "from": "nd_za4bzh",
+      "to": "nd_1z85dg",
+      "text": "Wheel speed and ground-contact signal",
+      "notes": ""
+    },
+    {
+      "id": "ac_ssemsm",
+      "kind": "feedback",
+      "from": "nd_1z85dg",
+      "to": "nd_zeihnf",
+      "text": "Autobrake status indication",
+      "notes": ""
+    },
+    {
+      "id": "ac_exi3cn",
+      "kind": "feedback",
+      "from": "nd_za4bzh",
+      "to": "nd_zeihnf",
+      "text": "Runway view and felt deceleration",
+      "notes": ""
+    }
+  ],
+  "ucas": [
+    {
+      "id": "uc_mcboqo",
+      "actionId": "ac_2yyqdk",
+      "type": "not-provided",
+      "context": "After touchdown, with autobrake armed and the runway wet.",
+      "hazardIds": [
+        "hz_4489rd"
+      ],
+      "constraint": "The controller must apply the brakes after touchdown whenever autobrake is armed.",
+      "notes": ""
+    },
+    {
+      "id": "uc_4y0rrq",
+      "actionId": "ac_bc2c0i",
+      "type": "wrong-timing",
+      "context": "Autobrake is armed after touchdown instead of before landing.",
+      "hazardIds": [
+        "hz_4489rd"
+      ],
+      "constraint": "Autobrake must be armed before landing.",
+      "notes": ""
+    },
+    {
+      "id": "uc_vsyker",
+      "actionId": "ac_c8tsyj",
+      "type": "wrong-duration",
+      "context": "Manual braking is released while ground speed is still high.",
+      "hazardIds": [
+        "hz_4489rd",
+        "hz_oq8yje"
+      ],
+      "constraint": "",
+      "notes": ""
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "sc_388x3p",
+      "ucaId": "uc_mcboqo",
+      "text": "The ground-contact signal is not received, so the controller believes the aircraft is still airborne (wrong process model).",
+      "notes": ""
+    }
+  ]
+}

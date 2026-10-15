@@ -1,0 +1,94 @@
+{
+  "schema": "safetytool.hfacs/1",
+  "meta": {
+    "title": "Illustrative HFACS: late touchdown on a wet runway",
+    "scope": "Invented teaching example, not a real event. Follows the four levels and 17 categories of Shappell & Wiegmann (2000), DOT/FAA/AM-00/7. Evidence fields say \"invented\" on purpose.",
+    "author": "",
+    "illustrative": true,
+    "createdAt": "2026-10-15T00:00:00.000Z",
+    "updatedAt": "2026-10-15T00:00:00.000Z"
+  },
+  "event": {
+    "id": "ev_r2n011",
+    "text": "A turboprop touches down long on a wet runway and stops beyond the runway end (invented example)"
+  },
+  "factors": [
+    {
+      "id": "hf_fc4z82",
+      "text": "Recurrent training hours for wet-runway landings were reduced to cut cost.",
+      "category": "resource-management",
+      "evidence": "Invented for this example.",
+      "influences": [
+        "hf_xocl74"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_w2zgq3",
+      "text": "The operator’s procedures had no stabilised-approach criteria and no mandatory go-around call.",
+      "category": "operational-process",
+      "evidence": "Invented for this example.",
+      "influences": [
+        "hf_xocl74"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_xocl74",
+      "text": "Line checks did not observe how crews calculated landing distance.",
+      "category": "inadequate-supervision",
+      "evidence": "Invented for this example.",
+      "influences": [
+        "hf_b0j2t6"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_npzbe5",
+      "text": "Repeated long-landing reports from the same base were filed but not acted on.",
+      "category": "failed-to-correct-known-problem",
+      "evidence": "Invented for this example.",
+      "influences": [
+        "hf_9cloj7"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_b0j2t6",
+      "text": "The crew was focused on making the scheduled gate time.",
+      "category": "adverse-mental-states",
+      "evidence": "Invented for this example.",
+      "influences": [
+        "hf_vdowg8"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_9cloj7",
+      "text": "The co-pilot’s call about excess speed was not acknowledged; go-around criteria were not briefed.",
+      "category": "crew-resource-mismanagement",
+      "evidence": "Invented for this example.",
+      "influences": [
+        "hf_vdowg8",
+        "hf_xyud59"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_vdowg8",
+      "text": "The landing was continued from an unstabilised approach.",
+      "category": "decision-errors",
+      "evidence": "Invented for this example.",
+      "influences": [],
+      "notes": ""
+    },
+    {
+      "id": "hf_xyud59",
+      "text": "Brakes were applied late after touchdown.",
+      "category": "skill-based-errors",
+      "evidence": "Invented for this example.",
+      "influences": [],
+      "notes": ""
+    }
+  ]
+}

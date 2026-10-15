@@ -7,6 +7,8 @@ import { HELP } from '../js/help.js';
 import * as M from '../js/model.js';
 import * as SW from '../js/swiss.js';
 import * as SH from '../js/shell.js';
+import * as HF from '../js/hfacs.js';
+import * as ST from '../js/stamp.js';
 
 const model = (title) => ({ schema: 'x', meta: { title }, n: 1 });
 
@@ -32,7 +34,7 @@ test('gallery: remove, cap, and defensive parsing', () => {
 });
 
 test('guide: every step refers to existing help text and works on a fresh model', () => {
-  const fresh = { bowtie: M.emptyModel(), swiss: SW.emptySwiss(), shell: SH.emptyShell() };
+  const fresh = { bowtie: M.emptyModel(), swiss: SW.emptySwiss(), shell: SH.emptyShell(), hfacs: HF.emptyHfacs(), stamp: ST.emptyStamp() };
   for (const [type, steps] of Object.entries(STEPS)) {
     assert.ok(steps.length >= 4);
     for (const s of steps) {

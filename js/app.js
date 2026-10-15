@@ -4,7 +4,10 @@ import * as SW from './swiss.js';
 import * as SH from './shell.js';
 import { lint as lintBowtie, summarize } from './lint.js';
 import { renderModel, exportSvgString, exportPngBlob, installCanvasMeasurer } from './render.js';
-import { buildSwissForm, buildShellForm } from './forms.js';
+import { buildSwissForm, buildShellForm, buildHfacsForm, buildStampForm } from './forms.js';
+import * as HF from './hfacs.js';
+import * as ST from './stamp.js';
+import * as NT from './newtabs.js';
 import { STR } from './i18n.js';
 import { drawAssurance } from './assurancepanel.js';
 import { drawSwissAnalysis } from './swisstab.js';
@@ -23,6 +26,8 @@ const TYPES = {
   bowtie: { schema: M.SCHEMA, empty: M.emptyModel, validate: M.validateShape, normalize: M.normalize, lint: lintBowtie, find: M.findNode, example: 'data/example-wildlife.json', tabs: ['diagram', 'simulate', 'compare', 'report', 'table', 'meta'] },
   swiss: { schema: SW.SCHEMA, empty: SW.emptySwiss, validate: SW.validateSwiss, normalize: SW.normalizeSwiss, lint: SW.lintSwiss, find: SW.findSwiss, example: 'data/example-swiss.json', tabs: ['form', 'diagram', 'analysis', 'table', 'meta'] },
   shell: { schema: SH.SCHEMA, empty: SH.emptyShell, validate: SH.validateShell, normalize: SH.normalizeShell, lint: SH.lintShell, find: SH.findShell, example: 'data/example-shell.json', tabs: ['form', 'diagram', 'table', 'meta'] },
+  hfacs: { schema: HF.SCHEMA, empty: HF.emptyHfacs, validate: HF.validateHfacs, normalize: HF.normalizeHfacs, lint: HF.lintHfacs, find: HF.findHfacs, example: 'data/example-hfacs.json', tabs: ['form', 'diagram', 'analysis', 'table', 'meta'] },
+  stamp: { schema: ST.SCHEMA, empty: ST.emptyStamp, validate: ST.validateStamp, normalize: ST.normalizeStamp, lint: ST.lintStamp, find: ST.findStamp, example: 'data/example-stamp.json', tabs: ['form', 'diagram', 'analysis', 'table', 'meta'] },
 };
 const TYPE_IDS = Object.keys(TYPES);
 
@@ -31,8 +36,8 @@ const state = {
   swissSource: null,
   type: 'bowtie',
   models: {},
-  undo: { bowtie: [], swiss: [], shell: [] },
-  redo: { bowtie: [], swiss: [], shell: [] },
+  undo: { bowtie: [], swiss: [], shell: [], hfacs: [], stamp: [] },
+  redo: { bowtie: [], swiss: [], shell: [], hfacs: [], stamp: [] },
   selectedId: null,
   selectedKind: null,
   showEsc: true,
@@ -217,6 +222,8 @@ function tableRows() {
   const m = cur();
   const rows = [];
   const add = (kind, ref, detail = '', indent = 0, textOverride) => rows.push({ id: ref.id, kind, text: textOverride ?? ref.text, detail, indent });
+  if (state.type === 'hfacs') return NT.hfacsRows(m, add, rows, state.lang);
+  if (state.type === 'stamp') return NT.stampRows(m, add, rows, state.lang);
   if (state.type === 'bowtie') {
     const ctlDetail = (c) => {
       const bits = [];
@@ -519,10 +526,12 @@ function drawMeta() {
 // ---------- form tab ----------
 function drawForm() {
   const host = $('#form');
-  const api = { t, mutate };
+  const api = { t, mutate, lang: state.lang };
   const top = host.scrollTop;
   if (state.type === 'swiss') buildSwissForm(host, cur(), api);
   else if (state.type === 'shell') buildShellForm(host, cur(), api);
+  else if (state.type === 'hfacs') buildHfacsForm(host, cur(), api);
+  else if (state.type === 'stamp') buildStampForm(host, cur(), api);
   else host.textContent = '';
   host.scrollTop = top;
 }
@@ -579,7 +588,7 @@ function labels() {
     '#b-undo': 'undo', '#b-redo': 'redo', '#b-fit': 'fit', '#b-lang': 'lang', '#b-theme': 'theme', '#b-help': 'help',
     '#tab-diagram': 'tabDiagram', '#tab-simulate': 'tabSimulate', '#tab-compare': 'tabCompare', '#tab-report': 'tabReport', '#tab-analysis': 'tabAnalysis', '#tab-table': 'tabTable', '#tab-meta': 'tabMeta', '#tab-form': 'tabForm',
     '#r-inspector': 'rInspector', '#r-help': 'rHelp', '#r-gallery': 'rGallery',
-    '#m-bowtie': 'mBowtie', '#m-swiss': 'mSwiss', '#m-shell': 'mShell',
+    '#m-bowtie': 'mBowtie', '#m-swiss': 'mSwiss', '#m-shell': 'mShell', '#m-hfacs': 'mHfacs', '#m-stamp': 'mStamp',
   };
   Object.entries(map).forEach(([sel, key]) => { $(sel).textContent = t(key); });
   $('#lbl-esc').textContent = t('esc');
@@ -642,7 +651,11 @@ function refresh({ inspector = false, fit = false, form = false } = {}) {
   drawLint();
   if (state.tab === 'diagram') drawDiagram({ fit });
   if (state.tab === 'simulate') drawSimulate($('#simulate'), cur(), { lang: state.lang, mutate, openSwiss });
-  if (state.tab === 'analysis') drawSwissAnalysis($('#analysis'), cur(), { lang: state.lang, bowtie: state.swissSource });
+  if (state.tab === 'analysis') {
+    if (state.type === 'hfacs') NT.drawHfacsAnalysis($('#analysis'), cur(), { lang: state.lang });
+    else if (state.type === 'stamp') NT.drawStampAnalysis($('#analysis'), cur(), { lang: state.lang });
+    else drawSwissAnalysis($('#analysis'), cur(), { lang: state.lang, bowtie: state.swissSource });
+  }
   if (state.tab === 'report') drawReport($('#report'), cur(), { lang: state.lang, baseline: state.baseline, svg: reportSvg, download, fileBase });
   if (state.tab === 'compare') drawCompare($('#compare'), cur(), { lang: state.lang, baseline: state.baseline, setBaseline });
   if (state.tab === 'table') drawTable();
@@ -671,7 +684,7 @@ function setTab(name) {
 
 /** Switch model type (or reload the current one after loading a file). */
 function applyType({ fit = true } = {}) {
-  ['bowtie', 'swiss', 'shell'].forEach((id) => {
+  TYPE_IDS.forEach((id) => {
     const b = $('#m-' + id);
     b.setAttribute('aria-pressed', String(id === state.type));
   });
@@ -715,6 +728,7 @@ const fileBase = () => (cur().meta.title || state.type).replace(/[^\p{L}\p{N}_-]
 const csvQ = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
 
 function toCsv() {
+  if (state.type === 'hfacs' || state.type === 'stamp') return NT.toCsv(state.type, cur());
   const m = cur();
   const rows = [];
   if (state.type === 'bowtie') {

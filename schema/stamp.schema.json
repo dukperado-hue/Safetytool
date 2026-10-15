@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dukperado-hue.github.io/Safetytool/schema/stamp.schema.json",
+  "title": "Safetytool STAMP / STPA model (safetytool.stamp/1)",
+  "description": "Losses, hazards, control structure, unsafe control actions and causal scenarios (STPA, after Leveson 2012). No probabilities or scores.",
+  "type": "object",
+  "required": ["schema", "meta", "system", "losses", "hazards", "nodes", "actions", "ucas", "scenarios"],
+  "properties": {
+    "schema": { "const": "safetytool.stamp/1" },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" }, "scope": { "type": "string" }, "author": { "type": "string" },
+        "illustrative": { "type": "boolean" }, "createdAt": { "type": "string" }, "updatedAt": { "type": "string" }
+      }
+    },
+    "system": { "type": "object", "required": ["id", "text"], "properties": { "id": { "type": "string" }, "text": { "type": "string" } } },
+    "losses": { "type": "array", "items": { "type": "object", "required": ["id", "text"], "properties": { "id": { "type": "string" }, "text": { "type": "string" }, "notes": { "type": "string" } } } },
+    "hazards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "lossIds"],
+        "properties": {
+          "id": { "type": "string" }, "text": { "type": "string" }, "notes": { "type": "string" },
+          "lossIds": { "type": "array", "items": { "type": "string" } },
+          "constraint": { "type": "string", "description": "system-level safety constraint" }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "text", "level"],
+        "properties": {
+          "id": { "type": "string" },
+          "role": { "enum": ["controller", "process"] },
+          "text": { "type": "string" },
+          "level": { "type": "integer", "minimum": 0, "description": "row in the control structure, 0 = top" },
+          "processModel": { "type": "string", "description": "what a controller believes about the state of the controlled process" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "from", "to", "text"],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "enum": ["control", "feedback"] },
+          "from": { "type": "string" }, "to": { "type": "string" }, "text": { "type": "string" }, "notes": { "type": "string" }
+        }
+      }
+    },
+    "ucas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "actionId", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "actionId": { "type": "string", "description": "a control action (kind=control)" },
+          "type": { "enum": ["not-provided", "provided", "wrong-timing", "wrong-duration"] },
+          "context": { "type": "string" },
+          "hazardIds": { "type": "array", "items": { "type": "string" } },
+          "constraint": { "type": "string", "description": "controller constraint" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "ucaId", "text"], "properties": { "id": { "type": "string" }, "ucaId": { "type": "string" }, "text": { "type": "string" }, "notes": { "type": "string" } } }
+    }
+  }
+}

@@ -87,7 +87,65 @@ const H = {
   },
 };
 
-export const HELP = { bowtie: B, swiss: S, shell: H };
+
+const HFH = {
+  hfEvent: {
+    th: { name: 'เหตุการณ์ที่วิเคราะห์ (occurrence)', what: 'เหตุการณ์หรือสภาพที่เรานำมาจัดหมวดปัจจัยมนุษย์ เป็นปลายทางของทุกปัจจัยในภาพ', how: 'เขียนสิ่งที่เกิดขึ้นเป็นข้อเท็จจริง สั้น ชัด ไม่ใส่สาเหตุ', eg: 'เครื่องบินไถลออกนอกปลายทางวิ่งขณะลงจอด (ตัวอย่างสมมติ)', avoid: 'อย่าเขียนข้อสรุปว่าใครผิด' },
+    en: { name: 'Occurrence analysed', what: 'The event or condition whose human factors you are classifying; the end point of every factor in the picture.', how: 'State what happened as a fact: short, clear, without causes.', eg: 'Aircraft ran off the end of the runway on landing (invented example)', avoid: 'Do not write a conclusion about who was at fault.' },
+  },
+  hfFactor: {
+    th: { name: 'ปัจจัย (factor)', what: 'เงื่อนไขหรือข้อเท็จจริงหนึ่งข้อที่พบในการสืบสวน และจัดเข้าหมวด HFACS หนึ่งหมวด', how: 'เขียนสภาพของระบบ ระบุหลักฐาน แล้วถามต่อว่า "ทำไมสิ่งนี้จึงเกิดได้" เพื่อหาปัจจัยระดับที่สูงกว่า', eg: 'ลดชั่วโมงฝึกในเครื่องฝึกบินประจำปี (ตัวอย่างสมมติ)', avoid: 'อย่าจัดหมวดโดยไม่มีหลักฐาน และอย่าหยุดที่การกระทำของคนหน้างาน' },
+    en: { name: 'Factor', what: 'One condition or fact found in the investigation, placed in one HFACS category.', how: 'Write the state of the system, record the evidence, then ask "why could this happen?" to find higher-level factors.', eg: 'Recurrent simulator hours were reduced (invented example)', avoid: 'Do not classify without evidence, and do not stop at the act of the person at the sharp end.' },
+  },
+  hfViolation: {
+    th: { name: 'ปัจจัยประเภทการฝ่าฝืน (violation)', what: 'การจงใจละเลยกฎ แยกจาก "ข้อผิดพลาด" ที่ไม่ได้ตั้งใจ ใช้ได้กับการกระทำที่ไม่ปลอดภัยและกับผู้กำกับดูแล (เส้นประสีแดง)', how: 'ใช้เมื่อมีหลักฐานว่าตั้งใจเลี่ยงกฎ และดูต่อว่ากฎถูกปล่อยผ่านโดยผู้มีอำนาจหรือไม่', eg: '', avoid: 'อย่าเรียกว่า violation ถ้าไม่มีหลักฐานเรื่องความตั้งใจ' },
+    en: { name: 'Factor classified as a violation', what: 'Wilful disregard of a rule, as opposed to an unintended error. Applies to unsafe acts and to supervisors (red dashed outline).', how: 'Use it only when evidence shows the rule was knowingly bypassed; then ask whether authority tolerated it.', eg: '', avoid: 'Do not call something a violation without evidence of intent.' },
+  },
+  hfCell: {
+    th: { name: 'หมวด HFACS', what: 'HFACS แบ่งปัจจัยมนุษย์เป็น 4 ระดับ จากบนลงล่าง: อิทธิพลระดับองค์กร → การกำกับดูแล → เงื่อนไขก่อนเกิดการกระทำ → การกระทำที่ไม่ปลอดภัย แต่ละระดับมีหมวดย่อย (รวม 17 หมวดตามรายงาน FAA ปี 2000)', how: 'วางเมาส์บนหมวดเพื่อดูคำอธิบายสั้น ๆ หมวดที่ว่างหมายถึงยังไม่ได้ตรวจหรือไม่พบ ไม่ได้แปลว่าไม่มีปัญหา', eg: '', avoid: '' },
+    en: { name: 'HFACS category', what: 'HFACS splits human factors into four levels, top to bottom: organisational influences → supervision → preconditions → unsafe acts. Each has categories (17 in the 2000 FAA report).', how: 'Hover a category for a short definition. An empty category means not examined or none found; it does not mean no problem.', eg: '', avoid: '' },
+  },
+};
+const STH = {
+  stSystem: {
+    th: { name: 'ระบบและขอบเขต', what: 'ระบบที่วิเคราะห์ และเส้นแบ่งว่าอะไรอยู่ในระบบ อะไรเป็นสภาพแวดล้อม', how: 'ระบุวัตถุประสงค์ของระบบและขอบเขตให้ชัด', eg: 'ระบบเบรกขณะลงจอดของอากาศยาน (ตัวอย่างสมมติ)', avoid: 'อย่ากว้างจนวิเคราะห์ไม่ได้' },
+    en: { name: 'System and boundary', what: 'The system analysed and the line between what is inside it and what is environment.', how: 'State the purpose of the system and its boundary clearly.', eg: 'Landing deceleration system of an aircraft (invented example)', avoid: 'Do not make it so broad it cannot be analysed.' },
+  },
+  stLoss: {
+    th: { name: 'Loss (ความสูญเสีย)', what: 'ผลลัพธ์ที่ผู้มีส่วนได้ส่วนเสียไม่ยอมรับ เช่น การเสียชีวิต ความเสียหายต่อทรัพย์สิน การเสียภารกิจ', how: 'เขียนผลลัพธ์ ไม่ใช่สาเหตุ', eg: 'ผู้โดยสารบาดเจ็บ (ตัวอย่างสมมติ)', avoid: 'อย่าเขียนเป็นความล้มเหลวของชิ้นส่วน' },
+    en: { name: 'Loss', what: 'An outcome stakeholders find unacceptable: loss of life, damage, loss of mission.', how: 'Write the outcome, not a cause.', eg: 'Passengers injured (invented example)', avoid: 'Do not write a component failure here.' },
+  },
+  stHazard: {
+    th: { name: 'Hazard (ระดับระบบ)', what: 'สถานะของระบบที่ เมื่อรวมกับสภาพแวดล้อมที่แย่ที่สุด จะนำไปสู่ Loss เป็นสิ่งที่เราควบคุมได้ในการออกแบบ', how: 'เขียนเป็นสถานะของระบบ แล้วผูกกับ Loss และเขียนข้อกำหนดความปลอดภัย (constraint) ที่คู่กัน', eg: 'อากาศยานไม่ชะลอความเร็วได้เพียงพอบนทางวิ่ง (ตัวอย่างสมมติ)', avoid: 'อย่าเขียนเป็นสาเหตุหรือเป็นการกระทำ' },
+    en: { name: 'Hazard (system-level)', what: 'A system state that, together with worst-case environment conditions, leads to a loss. It is something we can control by design.', how: 'Write a system state, link it to losses, and write the matching safety constraint.', eg: 'Aircraft cannot decelerate enough on the runway (invented example)', avoid: 'Do not write a cause or an action.' },
+  },
+  stController: {
+    th: { name: 'Controller', what: 'ผู้หรือสิ่งที่ตัดสินใจและสั่งการ อาจเป็นคน ซอฟต์แวร์ หรือองค์กร ใช้ process model ในการเลือกคำสั่ง', how: 'วางระดับ (0 = บนสุด) และเขียน process model: สิ่งที่มันเชื่อว่าเป็นสถานะของกระบวนการ', eg: 'หน่วยควบคุมเบรก (ซอฟต์แวร์)', avoid: 'อุบัติเหตุมักเกิดเมื่อ process model ผิด ไม่ใช่แค่ชิ้นส่วนเสีย' },
+    en: { name: 'Controller', what: 'Who or what decides and commands: a person, software or an organisation. It uses a process model to choose control actions.', how: 'Set its level (0 = top) and write the process model: what it believes about the state of the process.', eg: 'Brake control unit (software)', avoid: 'Accidents often arise when the process model is wrong, not only when a part breaks.' },
+  },
+  stProcess: {
+    th: { name: 'Controlled process', what: 'สิ่งที่ถูกควบคุม อยู่ล่างสุดของโครงสร้าง', how: 'ระบุกระบวนการหรืออุปกรณ์ที่ได้รับคำสั่งและส่ง feedback กลับ', eg: 'การชะลอความเร็วของอากาศยาน', avoid: '' },
+    en: { name: 'Controlled process', what: 'What is being controlled, at the bottom of the structure.', how: 'Name the process or equipment that receives commands and returns feedback.', eg: 'Aircraft deceleration', avoid: '' },
+  },
+  stAction: {
+    th: { name: 'Control action', what: 'คำสั่งจาก controller ไปยังผู้ถูกควบคุม วาดเป็นลูกศรทึบลงล่าง แต่ละคำสั่งนำไปวิเคราะห์ UCA ได้', how: 'เขียนเป็นคำสั่ง เช่น "สั่งเบรก" และเลือกต้นทาง/ปลายทาง', eg: 'ปล่อยเบรกล้อ', avoid: '' },
+    en: { name: 'Control action', what: 'A command from a controller to what it controls, drawn as a solid arrow going down. Each one can be analysed for UCAs.', how: 'Write it as a command, e.g. "apply brakes", and choose source and target.', eg: 'Apply wheel brakes', avoid: '' },
+  },
+  stFeedback: {
+    th: { name: 'Feedback', what: 'ข้อมูลที่ controller ได้รับกลับมา ใช้ปรับ process model วาดเป็นเส้นประขึ้นบน', how: 'ระบุข้อมูลที่ส่งกลับและจากใคร ถ้า controller ไม่มี feedback ให้ถามว่ามันรู้สถานะได้อย่างไร', eg: 'ความเร็วล้อ', avoid: '' },
+    en: { name: 'Feedback', what: 'Information a controller receives back; it updates the process model. Drawn as a dashed arrow going up.', how: 'Name the information and where it comes from. If a controller gets no feedback, ask how it knows the state.', eg: 'Wheel speed', avoid: '' },
+  },
+  stUca: {
+    th: { name: 'Unsafe control action (UCA)', what: 'control action ที่ในบริบทหนึ่งนำไปสู่ hazard มี 4 ชนิด: ไม่ได้สั่ง / สั่งแล้วไม่ปลอดภัย / เร็วหรือช้าหรือผิดลำดับ / หยุดเร็วหรือนานเกินไป', how: 'เลือกชนิด เขียนบริบท ผูกกับ hazard และเขียนข้อกำหนดของ controller', eg: 'ไม่สั่งเบรกหลังแตะพื้นขณะทางวิ่งเปียก (ตัวอย่างสมมติ)', avoid: 'ช่องว่างในตารางไม่ได้แปลว่าปลอดภัย แปลว่ายังไม่ได้วิเคราะห์หรือไม่พบ' },
+    en: { name: 'Unsafe control action (UCA)', what: 'A control action that, in a given context, leads to a hazard. Four types: not provided / provided and unsafe / too early, too late or out of order / stopped too soon or applied too long.', how: 'Pick the type, write the context, link the hazards and write the controller constraint.', eg: 'Brakes not commanded after touchdown on a wet runway (invented example)', avoid: 'An empty cell does not mean safe; it means not analysed or none found.' },
+  },
+  stScenario: {
+    th: { name: 'Causal scenario', what: 'คำอธิบายว่า UCA นี้เกิดได้อย่างไร เช่น process model ผิด feedback หาย หรือคำสั่งไม่ถึงปลายทาง', how: 'เขียนเป็นเรื่องสั้น ๆ ที่ตรวจสอบได้ แล้วจึงคิดมาตรการ', eg: '', avoid: 'อย่าข้ามไปที่มาตรการก่อนเข้าใจสาเหตุ' },
+    en: { name: 'Causal scenario', what: 'An explanation of how the UCA could happen: a wrong process model, missing feedback, a command that never arrives.', how: 'Write a short, checkable story, then think about measures.', eg: '', avoid: 'Do not jump to measures before understanding the cause.' },
+  },
+};
+
+export const HELP = { bowtie: B, swiss: S, shell: H, hfacs: HFH, stamp: STH };
 
 /** Short one-line explanation for tooltips. */
 export function explainShort(type, kind, lang) {
@@ -104,6 +162,8 @@ export const GLOSSARY_ORDER = {
   bowtie: ['hazard', 'topEvent', 'threat', 'consequence', 'control', 'escalation', 'escalationControl'],
   swiss: ['hazard', 'loss', 'layer', 'holeActive', 'holeLatent', 'wall'],
   shell: ['subject', 'focus', 'compS', 'compH', 'compE', 'compL', 'iface'],
+  hfacs: ['hfEvent', 'hfFactor', 'hfViolation', 'hfCell'],
+  stamp: ['stSystem', 'stLoss', 'stHazard', 'stController', 'stProcess', 'stAction', 'stFeedback', 'stUca', 'stScenario'],
 };
 
 export const MODEL_INTRO = {
@@ -119,4 +179,13 @@ export const MODEL_INTRO = {
     th: 'SHELL (ปัจจัยมนุษย์) วางคนไว้ตรงกลาง (Liveware) ล้อมด้วย Software, Hardware, Environment และ Liveware อื่น ปัญหามักอยู่ที่รอยต่อที่ไม่พอดีกัน เหมาะกับการดูปัจจัยมนุษย์ในงานหนึ่งๆ  หมายเหตุ: "Shell" นี้คือโมเดลปัจจัยมนุษย์ ไม่ใช่ bowtie ของบริษัท Shell',
     en: 'SHELL (human factors) puts the person (Liveware) at the centre, surrounded by Software, Hardware, Environment and other Liveware. Problems sit at interfaces that do not fit. Use it to examine human factors in a task. Note: this is the human-factors SHELL model, not Shell the company’s bowtie.',
   },
+};
+
+MODEL_INTRO.hfacs = {
+  th: 'HFACS (Shappell และ Wiegmann) ใช้จัดหมวดปัจจัยมนุษย์ของเหตุการณ์ 4 ระดับ: อิทธิพลระดับองค์กร → การกำกับดูแล → เงื่อนไขก่อนเกิดการกระทำ → การกระทำที่ไม่ปลอดภัย สร้างต่อจากแนวคิดเงื่อนไขแฝงของ Reason ใช้ตอบว่า "ทำไมการกระทำนี้จึงเกิดได้" ไม่ใช่โมเดลมาตรการควบคุม และไม่ให้ความน่าจะเป็น (ตามรายงาน FAA DOT/FAA/AM-00/7 ปี 2000)',
+  en: 'HFACS (Shappell and Wiegmann) classifies the human factors behind an occurrence in four levels: organisational influences → supervision → preconditions → unsafe acts. It builds on Reason’s latent-condition idea and answers "why could this act happen?". It is not a barrier model and gives no probabilities (after the 2000 FAA report DOT/FAA/AM-00/7).',
+};
+MODEL_INTRO.stamp = {
+  th: 'STAMP มองความปลอดภัยเป็นปัญหาการควบคุม: อุบัติเหตุเกิดจากการควบคุมที่ไม่เพียงพอ (สั่งผิด ไม่สั่ง หรือ process model ผิด) ไม่ใช่แค่ชิ้นส่วนเสีย STPA คือวิธีวิเคราะห์: Loss → Hazard → โครงสร้างการควบคุม → Unsafe control action → Causal scenario (อ้างอิง Leveson 2012 และเอกสาร MIT 16.63J) โมเดลนี้ไม่มีความน่าจะเป็นหรือคะแนน',
+  en: 'STAMP sees safety as a control problem: accidents come from inadequate control (wrong, missing or mistimed commands, or a wrong process model), not only from broken parts. STPA is the analysis: losses → hazards → control structure → unsafe control actions → causal scenarios (after Leveson 2012 and MIT 16.63J notes). This model has no probabilities or scores.',
 };
