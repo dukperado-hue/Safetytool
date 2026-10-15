@@ -39,3 +39,8 @@ Principle: **we use the public method and general safety knowledge; we do not co
 - [ ] Read SKYbrary and the CAA conditions-of-use PDF; record conclusions here.
 - [ ] If the UK CAA's or another regulator's templates are to be supported as *imports*, obtain written permission first; import must read the user's own files only.
 - [ ] Have a domain expert review any shipped example before it is described as anything other than illustrative.
+
+## ICAO ADREP taxonomy (data/adrep-taxonomy.json)
+- Source: ICAO, ADREP taxonomy page https://www.icao.int/safety/AIG/taxonomy , ECCAIRS Aviation Data Definition Standard 1.3.0.12 (Attribute Values: AttrID 430 Occurrence category, 431 Occurrence classes, 390 Events, 391 Event phases). Accessed 2026-10-15.
+- Only numeric ids, CICTT codes and short names were extracted by script (no definitions or usage notes). Original PDFs are kept outside this repo and must not be committed (ICAO copyright; no licence stated on the page). ICAO notes the taxonomy is being updated.
+- Extraction is automatic: spot-check an id against the PDF before citing it in a paper.

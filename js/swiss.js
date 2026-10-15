@@ -3,11 +3,14 @@
 // successive defence layers line up. Holes are active failures (unsafe acts, short-lived) or latent
 // conditions (design, management, resources, culture — present long before the event).
 
-import { uid } from './model.js';
+import { uid, controlsOf } from './model.js';
+import { checkEvidence } from './evidence.js';
 import { wrapText } from './textmetrics.js';
 
 export const SCHEMA = 'safetytool.swiss/1';
 export const HOLE_TYPES = ['active', 'latent'];
+// HFACS levels (Shappell & Wiegmann, public framework) — optional classification of a hole's root cause.
+export const HFACS_LEVELS = ['unsafe-acts', 'preconditions', 'unsafe-supervision', 'organisational-influences'];
 export const LAYER_CATEGORIES = ['organisation', 'supervision', 'preconditions', 'acts', 'engineered', 'procedural', 'other'];
 
 export function emptySwiss() {
@@ -103,6 +106,13 @@ export function validateSwiss(m) {
       if (h.type != null && !HOLE_TYPES.includes(h.type)) errs.push('hole ' + h.id + ': bad type');
     }
   }
+  for (const l of m.layers) for (const h of l.holes) {
+    if (h.hfacsLevel != null && !HFACS_LEVELS.includes(h.hfacsLevel)) errs.push('hole ' + h.id + ': bad hfacsLevel');
+  }
+  if (m.evidence || m.assumptions) {
+    const holders = [m.hazard, m.loss, ...m.layers, ...m.layers.flatMap((l) => l.holes)];
+    errs.push(...checkEvidence(m, holders).errors);
+  }
   const used = new Set();
   for (const hid of m.trajectory) {
     if (!holeLayer.has(hid)) errs.push('trajectory: unknown hole ' + hid);
@@ -120,7 +130,13 @@ export function normalizeSwiss(m) {
     l.name = l.name || '';
     l.defence = l.defence || '';
     if (l.category === undefined) l.category = null;
-    l.holes.forEach((h) => { h.text = h.text || ''; if (h.type === undefined) h.type = null; });
+    if (l.controlId === undefined) l.controlId = null;
+    l.holes.forEach((h) => {
+      h.text = h.text || '';
+      if (h.type === undefined) h.type = null;
+      if (h.hfacsLevel === undefined) h.hfacsLevel = null;
+      if (h.commonCauseId === undefined) h.commonCauseId = null;
+    });
   });
   return m;
 }
@@ -303,4 +319,66 @@ export function outlineSwiss(m) {
   });
   out.push('', `TRAJECTORY: ${m.trajectory.length ? m.trajectory.join(' -> ') : '(none selected)'}`);
   return out.join('\n');
+}
+
+// ---------------- analysis & bowtie bridge ----------------
+/**
+ * Cross-layer reading of a Swiss model. `commonCause` lists latent conditions the user has tagged with the
+ * same `commonCauseId` in 2+ layers: those layers are NOT independent, so never multiply their reliabilities.
+ * Pass the source bowtie to also list holes that come from an escalation factor with no escalation control.
+ */
+export function analyzeSwiss(m, bowtie = null) {
+  const groups = new Map();
+  const hfacs = Object.fromEntries(HFACS_LEVELS.map((k) => [k, 0]));
+  let unclassified = 0;
+  const uncontrolled = new Set(bowtie ? bowtie.escalations.filter((e) => !bowtie.escalationControls.some((x) => x.escalationId === e.id)).map((e) => e.id) : []);
+  const uncontrolledHoles = [];
+  for (const l of m.layers) {
+    for (const h of l.holes) {
+      if (h.commonCauseId) {
+        if (!groups.has(h.commonCauseId)) groups.set(h.commonCauseId, []);
+        groups.get(h.commonCauseId).push({ layerId: l.id, holeId: h.id });
+      }
+      if (h.hfacsLevel) hfacs[h.hfacsLevel] += 1; else unclassified += 1;
+      if (h.escalationId && uncontrolled.has(h.escalationId)) uncontrolledHoles.push({ layerId: l.id, holeId: h.id, escalationId: h.escalationId });
+    }
+  }
+  const commonCause = [...groups].map(([id, hs]) => ({ id, holes: hs, layerIds: [...new Set(hs.map((x) => x.layerId))] })).filter((g) => g.layerIds.length >= 2);
+  const blockedAt = m.trajectory.length ? m.layers.filter((l) => !l.holes.some((h) => m.trajectory.includes(h.id))).map((l) => l.id) : null;
+  return {
+    commonCause,
+    hfacs: { counts: hfacs, unclassified },
+    uncontrolledHoles,
+    layersWithoutHoles: m.layers.filter((l) => !l.holes.length).map((l) => l.id),
+    trajectory: { selected: m.trajectory.length > 0, complete: blockedAt ? blockedAt.length === 0 : null, blockedAt },
+    note: 'Layers sharing a common cause are not independent. This model is a picture of weaknesses, not a probability.',
+  };
+}
+
+/**
+ * Deep-dive view of a bowtie: one layer per control on a threat's route (and optionally a consequence's recovery
+ * route); every escalation factor of that control becomes a latent hole. The trajectory is left EMPTY: only the
+ * analyst, using facts, may say which holes lined up.
+ */
+export function swissFromBowtie(b, { threatId, consequenceId = null }) {
+  const m = emptySwiss();
+  m.meta.title = (b.meta && b.meta.title ? b.meta.title : '') + ' — Swiss cheese view';
+  m.meta.illustrative = !!(b.meta && b.meta.illustrative);
+  m.hazard.text = b.hazard.text;
+  const cons = consequenceId ? b.consequences.find((c) => c.id === consequenceId) : null;
+  m.loss.text = cons ? cons.text : b.topEvent.text;
+  const ctrls = controlsOf(b, 'prevent', threatId).concat(consequenceId ? controlsOf(b, 'recover', consequenceId) : []);
+  for (const c of ctrls) {
+    const layer = addLayer(m, c.text);
+    layer.defence = c.text;
+    layer.controlId = c.id;
+    for (const e of b.escalations.filter((x) => x.controlId === c.id)) {
+      const ecs = b.escalationControls.filter((x) => x.escalationId === e.id);
+      const h = addHole(m, layer.id, e.text);
+      h.type = 'latent';
+      h.escalationId = e.id;
+      h.notes = ecs.length ? 'Escalation control(s): ' + ecs.map((x) => x.text).join('; ') : 'No escalation control recorded in the bowtie.';
+    }
+  }
+  return m;
 }

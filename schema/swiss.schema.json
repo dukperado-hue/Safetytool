@@ -4,36 +4,299 @@
   "title": "Safetytool Swiss cheese model",
   "description": "safetytool.swiss/1. `trajectory` lists the hole ids that line up (at most one hole per layer). Cross-reference rules are checked by `node cli/safetytool.js validate`.",
   "type": "object",
-  "required": ["schema", "meta", "hazard", "loss", "layers", "trajectory"],
+  "required": [
+    "schema",
+    "meta",
+    "hazard",
+    "loss",
+    "layers",
+    "trajectory"
+  ],
   "additionalProperties": false,
   "properties": {
-    "schema": { "const": "safetytool.swiss/1" },
-    "meta": { "type": "object", "properties": { "title": { "type": "string" }, "scope": { "type": "string" }, "author": { "type": "string" }, "illustrative": { "type": "boolean" }, "createdAt": { "type": "string" }, "updatedAt": { "type": "string" } } },
-    "hazard": { "$ref": "#/$defs/node" },
-    "loss": { "$ref": "#/$defs/node" },
+    "schema": {
+      "const": "safetytool.swiss/1"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "illustrative": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "hazard": {
+      "$ref": "#/$defs/node"
+    },
+    "loss": {
+      "$ref": "#/$defs/node"
+    },
     "layers": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "holes"],
+        "required": [
+          "id",
+          "name",
+          "holes"
+        ],
         "properties": {
-          "id": { "type": "string", "minLength": 1 },
-          "name": { "type": "string" },
-          "defence": { "type": "string" },
-          "category": { "enum": ["organisation", "supervision", "preconditions", "acts", "engineered", "procedural", "other", null] },
-          "notes": { "type": "string" },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "defence": {
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "organisation",
+              "supervision",
+              "preconditions",
+              "acts",
+              "engineered",
+              "procedural",
+              "other",
+              null
+            ]
+          },
+          "notes": {
+            "type": "string"
+          },
           "holes": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["id", "text"],
-              "properties": { "id": { "type": "string", "minLength": 1 }, "text": { "type": "string" }, "type": { "enum": ["active", "latent", null] }, "notes": { "type": "string" } }
+              "required": [
+                "id",
+                "text"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "text": {
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "active",
+                    "latent",
+                    null
+                  ]
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "hfacsLevel": {
+                  "enum": [
+                    "unsafe-acts",
+                    "preconditions",
+                    "unsafe-supervision",
+                    "organisational-influences",
+                    null
+                  ]
+                },
+                "commonCauseId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "escalationId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "controlId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         }
       }
     },
-    "trajectory": { "type": "array", "items": { "type": "string" } }
+    "trajectory": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/assumption"
+      }
+    },
+    "adrep": {
+      "$ref": "#/$defs/adrep"
+    }
   },
-  "$defs": { "node": { "type": "object", "required": ["id", "text"], "properties": { "id": { "type": "string", "minLength": 1 }, "text": { "type": "string" } } } }
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": [
+        "id",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "OBSERVED",
+            "ASSESSED",
+            "HYPOTHESISED"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "limitation": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            null
+          ]
+        }
+      }
+    },
+    "assumption": {
+      "type": "object",
+      "required": [
+        "id",
+        "statement"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statement": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "OBSERVED",
+            "ASSESSED",
+            "HYPOTHESISED"
+          ]
+        },
+        "owner": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "howToVerify": {
+          "type": "string"
+        },
+        "impactIfFalse": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            null
+          ]
+        }
+      }
+    },
+    "adrep": {
+      "type": "object",
+      "properties": {
+        "occurrenceCategoryIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "eventTypeIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
 }

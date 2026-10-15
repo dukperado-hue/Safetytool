@@ -4,77 +4,455 @@
   "title": "Safetytool bowtie model",
   "description": "Schema for safetytool.bowtie/1. Structural rules beyond this schema (dangling references, duplicate ids) are checked by `node cli/safetytool.js validate`.",
   "type": "object",
-  "required": ["schema", "meta", "hazard", "topEvent", "threats", "consequences", "controls", "escalations", "escalationControls"],
+  "required": [
+    "schema",
+    "meta",
+    "hazard",
+    "topEvent",
+    "threats",
+    "consequences",
+    "controls",
+    "escalations",
+    "escalationControls"
+  ],
   "additionalProperties": false,
   "properties": {
-    "schema": { "const": "safetytool.bowtie/1" },
+    "schema": {
+      "const": "safetytool.bowtie/1"
+    },
     "meta": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "title": { "type": "string" },
-        "scope": { "type": "string" },
-        "author": { "type": "string" },
-        "illustrative": { "type": "boolean" },
-        "createdAt": { "type": "string" },
-        "updatedAt": { "type": "string" }
+        "title": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "illustrative": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
       }
     },
-    "hazard": { "$ref": "#/$defs/textNode" },
-    "topEvent": { "$ref": "#/$defs/textNode" },
-    "threats": { "type": "array", "items": { "$ref": "#/$defs/threat" } },
-    "consequences": { "type": "array", "items": { "$ref": "#/$defs/consequence" } },
-    "controls": { "type": "array", "items": { "$ref": "#/$defs/control" } },
-    "escalations": { "type": "array", "items": { "$ref": "#/$defs/escalation" } },
-    "escalationControls": { "type": "array", "items": { "$ref": "#/$defs/escalationControl" } }
+    "hazard": {
+      "$ref": "#/$defs/textNode"
+    },
+    "topEvent": {
+      "$ref": "#/$defs/textNode"
+    },
+    "threats": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/threat"
+      }
+    },
+    "consequences": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/consequence"
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/control"
+      }
+    },
+    "escalations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/escalation"
+      }
+    },
+    "escalationControls": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/escalationControl"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/assumption"
+      }
+    },
+    "adrep": {
+      "$ref": "#/$defs/adrep"
+    }
   },
   "$defs": {
-    "id": { "type": "string", "minLength": 1 },
-    "rating5": { "type": ["integer", "null"], "minimum": 1, "maximum": 5 },
-    "rating4": { "type": ["integer", "null"], "minimum": 1, "maximum": 4 },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rating5": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 5
+    },
+    "rating4": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 4
+    },
     "textNode": {
       "type": "object",
-      "required": ["id", "text"],
-      "properties": { "id": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "notes": { "type": "string" } }
+      "required": [
+        "id",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "observableCriteria": {
+          "type": "string"
+        }
+      }
     },
     "threat": {
       "type": "object",
-      "required": ["id", "text"],
-      "properties": { "id": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "exposure": { "$ref": "#/$defs/rating5" }, "notes": { "type": "string" } }
+      "required": [
+        "id",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string"
+        },
+        "exposure": {
+          "$ref": "#/$defs/rating5"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
     },
     "consequence": {
       "type": "object",
-      "required": ["id", "text"],
-      "properties": { "id": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "severity": { "$ref": "#/$defs/rating5" }, "notes": { "type": "string" } }
+      "required": [
+        "id",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/rating5"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
     },
     "control": {
       "type": "object",
-      "required": ["id", "side", "text", "order"],
+      "required": [
+        "id",
+        "side",
+        "text",
+        "order"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "side": { "enum": ["prevent", "recover"] },
-        "threatId": { "type": ["string", "null"] },
-        "consequenceId": { "type": ["string", "null"] },
-        "order": { "type": "integer", "minimum": 0 },
-        "text": { "type": "string" },
-        "function": { "enum": ["eliminate", "prevent", "reduce", "mitigate", null] },
-        "type": { "enum": ["policy", "equipment", "warning", "human", "automated", null] },
-        "critical": { "type": "boolean" },
-        "adequacy": { "$ref": "#/$defs/rating4" },
-        "reliability": { "$ref": "#/$defs/rating4" },
-        "owner": { "type": "string" },
-        "notes": { "type": "string" }
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "side": {
+          "enum": [
+            "prevent",
+            "recover"
+          ]
+        },
+        "threatId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "consequenceId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "text": {
+          "type": "string"
+        },
+        "function": {
+          "enum": [
+            "eliminate",
+            "prevent",
+            "reduce",
+            "mitigate",
+            null
+          ]
+        },
+        "type": {
+          "enum": [
+            "policy",
+            "equipment",
+            "warning",
+            "human",
+            "automated",
+            null
+          ]
+        },
+        "critical": {
+          "type": "boolean"
+        },
+        "adequacy": {
+          "$ref": "#/$defs/rating4"
+        },
+        "reliability": {
+          "$ref": "#/$defs/rating4"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "effective",
+            "degraded",
+            "failed",
+            "unknown",
+            null
+          ]
+        },
+        "degradedLogic": {
+          "enum": [
+            "blocks",
+            "fails",
+            null
+          ]
+        },
+        "assurance": {
+          "type": "object",
+          "properties": {
+            "performanceStandard": {
+              "type": "string"
+            },
+            "verification": {
+              "type": "string"
+            },
+            "lastVerified": {
+              "type": "string",
+              "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "nextReview": {
+              "type": "string",
+              "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          }
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "assumptionIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "escalation": {
       "type": "object",
-      "required": ["id", "controlId", "text"],
-      "properties": { "id": { "$ref": "#/$defs/id" }, "controlId": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "notes": { "type": "string" } }
+      "required": [
+        "id",
+        "controlId",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "controlId": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "escalationControl": {
       "type": "object",
-      "required": ["id", "escalationId", "text"],
-      "properties": { "id": { "$ref": "#/$defs/id" }, "escalationId": { "$ref": "#/$defs/id" }, "text": { "type": "string" }, "owner": { "type": "string" }, "notes": { "type": "string" } }
+      "required": [
+        "id",
+        "escalationId",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "escalationId": {
+          "$ref": "#/$defs/id"
+        },
+        "text": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "OBSERVED",
+            "ASSESSED",
+            "HYPOTHESISED"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "limitation": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            null
+          ]
+        }
+      }
+    },
+    "assumption": {
+      "type": "object",
+      "required": [
+        "id",
+        "statement"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statement": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "OBSERVED",
+            "ASSESSED",
+            "HYPOTHESISED"
+          ]
+        },
+        "owner": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "howToVerify": {
+          "type": "string"
+        },
+        "impactIfFalse": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            null
+          ]
+        }
+      }
+    },
+    "adrep": {
+      "type": "object",
+      "properties": {
+        "occurrenceCategoryIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "eventTypeIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
     }
   }
 }

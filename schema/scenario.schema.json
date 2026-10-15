@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/safetytool/scenario.schema.json",
+  "title": "Safetytool scenario (barrier-logic graph)",
+  "description": "safetytool.scenario/1. Cross-reference, cycle and series-rule checks are performed by js/scenario.js (`node cli/safetytool.js validate`).",
+  "type": "object",
+  "required": [
+    "schema",
+    "meta",
+    "nodes",
+    "edges",
+    "barriers",
+    "evidence",
+    "assumptions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "safetytool.scenario/1"
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "id",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domain": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "illustrative": {
+          "type": "boolean"
+        },
+        "baselineId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "adrep": {
+      "$ref": "#/$defs/adrep"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "hazard",
+              "threat",
+              "event",
+              "consequence"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assumptionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "from",
+          "to",
+          "barrierIds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "barrierIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "barriers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "effective",
+              "degraded",
+              "failed",
+              "unknown"
+            ]
+          },
+          "degradedLogic": {
+            "enum": [
+              "blocks",
+              "fails",
+              null
+            ]
+          },
+          "role": {
+            "enum": [
+              "preventive",
+              "recovery",
+              null
+            ]
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assumptionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/assumption"
+      }
+    },
+    "unknownPolicy": {
+      "enum": [
+        "inconclusive"
+      ]
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "OBSERVED",
+            "ASSESSED",
+            "HYPOTHESISED"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "limitation": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            null
+          ]
+        }
+      }
+    },
+    "assumption": {
+      "type": "object",
+      "required": [
+        "id",
+        "statement"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statement": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "OBSERVED",
+            "ASSESSED",
+            "HYPOTHESISED"
+          ]
+        },
+        "owner": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "howToVerify": {
+          "type": "string"
+        },
+        "impactIfFalse": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            null
+          ]
+        }
+      }
+    },
+    "adrep": {
+      "type": "object",
+      "properties": {
+        "occurrenceCategoryIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "eventTypeIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

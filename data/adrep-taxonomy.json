@@ -1,0 +1,5057 @@
+{
+ "schema": "safetytool.adrep-taxonomy/1",
+ "source": {
+  "publisher": "ICAO",
+  "title": "ADREP taxonomy — ECCAIRS Aviation Data Definition Standard 1.3.0.12 (Attribute Values)",
+  "url": "https://www.icao.int/safety/AIG/taxonomy",
+  "accessed": "2026-10-15",
+  "note": "Only numeric ids, CICTT codes and short names are extracted (identifiers, no definitions or usage notes). ICAO states the taxonomy is being updated. Verify against the ICAO PDFs before citing."
+ },
+ "occurrenceCategories": [
+  {
+   "id": 1,
+   "code": "AMAN",
+   "name": "Abrupt maneuvre"
+  },
+  {
+   "id": 2,
+   "code": "ARC",
+   "name": "Abnormal runway contact"
+  },
+  {
+   "id": 3,
+   "code": "CFIT",
+   "name": "Controlled flight into or toward terrain"
+  },
+  {
+   "id": 4,
+   "code": "EVAC",
+   "name": "Evacuation"
+  },
+  {
+   "id": 5,
+   "code": "F-NI",
+   "name": "Fire/smoke (non-impact)"
+  },
+  {
+   "id": 6,
+   "code": "F-POST",
+   "name": "Fire/smoke (post-impact)"
+  },
+  {
+   "id": 7,
+   "code": "FUEL",
+   "name": "Fuel related"
+  },
+  {
+   "id": 8,
+   "code": "RAMP",
+   "name": "Ground Handling"
+  },
+  {
+   "id": 9,
+   "code": "GCOL",
+   "name": "Ground Collision"
+  },
+  {
+   "id": 10,
+   "code": "ICE",
+   "name": "Icing"
+  },
+  {
+   "id": 11,
+   "code": "LALT",
+   "name": "Low altitude operations"
+  },
+  {
+   "id": 12,
+   "code": "LOC-G",
+   "name": "Loss of control - ground"
+  },
+  {
+   "id": 13,
+   "code": "LOC-I",
+   "name": "Loss of control - inflight"
+  },
+  {
+   "id": 14,
+   "code": "MAC",
+   "name": "Airprox/ ACAS alert/ loss of separation/ (near) midair collisions"
+  },
+  {
+   "id": 15,
+   "code": "RE",
+   "name": "Runway excursion"
+  },
+  {
+   "id": 16,
+   "code": "RI-O",
+   "name": "Runway incursion - other"
+  },
+  {
+   "id": 17,
+   "code": "RI-VA",
+   "name": "Rwy incursion-vehicle or a/c"
+  },
+  {
+   "id": 18,
+   "code": "SCF-NP",
+   "name": "System/component failure or malfunction [non-powerplant]"
+  },
+  {
+   "id": 19,
+   "code": "SCF-PP",
+   "name": "powerplant failure or malfunction"
+  },
+  {
+   "id": 20,
+   "code": "SEC",
+   "name": "Security related"
+  },
+  {
+   "id": 21,
+   "code": "TURB",
+   "name": "Turbulence encounter"
+  },
+  {
+   "id": 22,
+   "code": "USOS",
+   "name": "Undershoot/overshoot"
+  },
+  {
+   "id": 23,
+   "code": "WSTRW",
+   "name": "Windshear or thunderstorm"
+  },
+  {
+   "id": 24,
+   "code": "ADRM",
+   "name": "Aerodrome"
+  },
+  {
+   "id": 25,
+   "code": "ATM",
+   "name": "ATM/CNS"
+  },
+  {
+   "id": 26,
+   "code": "CABIN",
+   "name": "Cabin safety events"
+  },
+  {
+   "id": 27,
+   "code": "WILD",
+   "name": "Collision Wildlife"
+  },
+  {
+   "id": 28,
+   "code": "RI",
+   "name": "Runway incursion - vehicle, aircraft or person"
+  },
+  {
+   "id": 29,
+   "code": "BIRD",
+   "name": "Birdstrike"
+  },
+  {
+   "id": 98,
+   "code": "OTHR",
+   "name": "Other"
+  },
+  {
+   "id": 99,
+   "code": "UNK",
+   "name": "Unknown or undetermined"
+  },
+  {
+   "id": 100,
+   "code": "UIMC",
+   "name": "Unintended flight in IMC"
+  },
+  {
+   "id": 101,
+   "code": "EXTL",
+   "name": "External load related occurrences"
+  },
+  {
+   "id": 102,
+   "code": "CTOL",
+   "name": "Collision with obstacle(s) during take-off and landing"
+  },
+  {
+   "id": 103,
+   "code": "LOLI",
+   "name": "Loss of lifting conditions en-route"
+  },
+  {
+   "id": 104,
+   "code": "GTOW",
+   "name": "Glider towing related events"
+  }
+ ],
+ "occurrenceClasses": [
+  {
+   "id": 100,
+   "name": "Accident"
+  },
+  {
+   "id": 200,
+   "name": "Serious incident"
+  },
+  {
+   "id": 300,
+   "name": "Incident"
+  },
+  {
+   "id": 301,
+   "name": "Major incident"
+  },
+  {
+   "id": 302,
+   "name": "Significant incident"
+  },
+  {
+   "id": 400,
+   "name": "Occurrence without safety effect"
+  },
+  {
+   "id": 500,
+   "name": "Not determined"
+  }
+ ],
+ "eventTypes": [
+  {
+   "id": 1000000,
+   "name": "Aircraft/system/component",
+   "parent": null
+  },
+  {
+   "id": 1010000,
+   "name": "0100 Aircraft performance",
+   "parent": 1000000
+  },
+  {
+   "id": 1010100,
+   "name": "0101 Degraded performance",
+   "parent": 1010000
+  },
+  {
+   "id": 1090000,
+   "name": "0900 Towing & taxiing equipment related",
+   "parent": 1000000
+  },
+  {
+   "id": 1091000,
+   "name": "0910 Towing",
+   "parent": 1090000
+  },
+  {
+   "id": 1091001,
+   "name": "Tow bar/cable break",
+   "parent": 1091000
+  },
+  {
+   "id": 1100000,
+   "name": "1000 Parking & mooring",
+   "parent": 1000000
+  },
+  {
+   "id": 1110000,
+   "name": "1100 Placards and Markings",
+   "parent": 1100000
+  },
+  {
+   "id": 1120000,
+   "name": "1200 Servicing",
+   "parent": 1100000
+  },
+  {
+   "id": 1180000,
+   "name": "1800 Helicopter vibration / noise analysis",
+   "parent": 1100000
+  },
+  {
+   "id": 1180100,
+   "name": "1810 Helicopter vibration analysis",
+   "parent": 1180000
+  },
+  {
+   "id": 1182000,
+   "name": "1820 Helicopter noise analysis",
+   "parent": 1180000
+  },
+  {
+   "id": 1210000,
+   "name": "2100 Air conditioning & pressurization",
+   "parent": 1000000
+  },
+  {
+   "id": 1220000,
+   "name": "2200 Autoflight system",
+   "parent": 1000000
+  },
+  {
+   "id": 1230000,
+   "name": "2300 Communication system",
+   "parent": 1000000
+  },
+  {
+   "id": 1240000,
+   "name": "2400 Electrical power system",
+   "parent": 1000000
+  },
+  {
+   "id": 1250000,
+   "name": "2500 Aircraft equipment/furnishing",
+   "parent": 1000000
+  },
+  {
+   "id": 1251000,
+   "name": "2510 Flight compartment",
+   "parent": 1250000
+  },
+  {
+   "id": 1252000,
+   "name": "2520 Passenger compartment",
+   "parent": 1250000
+  },
+  {
+   "id": 1253000,
+   "name": "2530 Buffet/galleys",
+   "parent": 1250000
+  },
+  {
+   "id": 1254000,
+   "name": "2540 Lavatories",
+   "parent": 1250000
+  },
+  {
+   "id": 1255000,
+   "name": "5000 Cargo and accessory compartments",
+   "parent": 1250000
+  },
+  {
+   "id": 1255900,
+   "name": "5019 Cargo related",
+   "parent": 1255000
+  },
+  {
+   "id": 1255901,
+   "name": "Cargo leak",
+   "parent": 1255900
+  },
+  {
+   "id": 1255902,
+   "name": "Cargo shifted",
+   "parent": 1255900
+  },
+  {
+   "id": 1255903,
+   "name": "Cargo smoke/fumes/fire",
+   "parent": 1255900
+  },
+  {
+   "id": 1255904,
+   "name": "Cargo radiation leak",
+   "parent": 1255900
+  },
+  {
+   "id": 1255905,
+   "name": "Cargo/sling load dropped",
+   "parent": 1255900
+  },
+  {
+   "id": 1256500,
+   "name": "2565 Escape slide",
+   "parent": 1250000
+  },
+  {
+   "id": 1260000,
+   "name": "2600 Fire protection system",
+   "parent": 1000000
+  },
+  {
+   "id": 1270000,
+   "name": "2700 Aircraft flight control",
+   "parent": 1000000
+  },
+  {
+   "id": 1270100,
+   "name": "2750 Trailing edge flap control system",
+   "parent": 1270000
+  },
+  {
+   "id": 1270200,
+   "name": "2780 Leading Edge Slat Control System",
+   "parent": 1270000
+  },
+  {
+   "id": 1280000,
+   "name": "2800 Fuel system",
+   "parent": 1000000
+  },
+  {
+   "id": 1280100,
+   "name": "2801 Fuel leak",
+   "parent": 1280000
+  },
+  {
+   "id": 1290000,
+   "name": "2900 Hydraulic system",
+   "parent": 1000000
+  },
+  {
+   "id": 1300000,
+   "name": "3000 Ice/rain protection system",
+   "parent": 1000000
+  },
+  {
+   "id": 1310000,
+   "name": "3100 Indicating/recording systems",
+   "parent": 1300000
+  },
+  {
+   "id": 1313000,
+   "name": "3130 Data recording",
+   "parent": 1310000
+  },
+  {
+   "id": 1315000,
+   "name": "3150 Central warning",
+   "parent": 1310000
+  },
+  {
+   "id": 1320000,
+   "name": "3200 Landing gear",
+   "parent": 1300000
+  },
+  {
+   "id": 1321000,
+   "name": "3210 Main landing gear",
+   "parent": 1320000
+  },
+  {
+   "id": 1321001,
+   "name": "Main landing gear - partial collapse/retraction",
+   "parent": 1321000
+  },
+  {
+   "id": 1321002,
+   "name": "Main landing gear - collapse or retraction",
+   "parent": 1321000
+  },
+  {
+   "id": 1322000,
+   "name": "3220 Nose/tail landing gear",
+   "parent": 1320000
+  },
+  {
+   "id": 1322001,
+   "name": "Nose/tail landing gear - collapsed/retracted",
+   "parent": 1322000
+  },
+  {
+   "id": 1324000,
+   "name": "3240 Wheels & brakes",
+   "parent": 1320000
+  },
+  {
+   "id": 1324100,
+   "name": "3244 Tyres",
+   "parent": 1324000
+  },
+  {
+   "id": 1324200,
+   "name": "3242 Brakes",
+   "parent": 1324000
+  },
+  {
+   "id": 1324207,
+   "name": "Parking brake",
+   "parent": 1324200
+  },
+  {
+   "id": 1324214,
+   "name": "Emergency brake",
+   "parent": 1324200
+  },
+  {
+   "id": 1324400,
+   "name": "3241 Anti-skid system",
+   "parent": 1324000
+  },
+  {
+   "id": 1325000,
+   "name": "3250 Landing gear steering",
+   "parent": 1320000
+  },
+  {
+   "id": 1326000,
+   "name": "3260 Gear position & warning",
+   "parent": 1320000
+  },
+  {
+   "id": 1327000,
+   "name": "3270 Auxiliary landing gear",
+   "parent": 1320000
+  },
+  {
+   "id": 1327001,
+   "name": "Other gear collapse",
+   "parent": 1327000
+  },
+  {
+   "id": 1330000,
+   "name": "3300 Aircraft lighting",
+   "parent": 1300000
+  },
+  {
+   "id": 1340000,
+   "name": "3400 Navigation systems",
+   "parent": 1300000
+  },
+  {
+   "id": 1341400,
+   "name": "3414 Airspeed/Mach indicating system",
+   "parent": 1340000
+  },
+  {
+   "id": 1341600,
+   "name": "3416 Altitude system",
+   "parent": 1340000
+  },
+  {
+   "id": 1341800,
+   "name": "3460 Flight management system",
+   "parent": 1340000
+  },
+  {
+   "id": 1342000,
+   "name": "3420 Attitude and direction data system",
+   "parent": 1340000
+  },
+  {
+   "id": 1343000,
+   "name": "3430 Landing and taxi aids",
+   "parent": 1340000
+  },
+  {
+   "id": 1344000,
+   "name": "3440 Independent position system",
+   "parent": 1340000
+  },
+  {
+   "id": 1344400,
+   "name": "3444 Ground proximity warning",
+   "parent": 1344000
+  },
+  {
+   "id": 1344401,
+   "name": "GPWS nuisance alarm",
+   "parent": 1344400
+  },
+  {
+   "id": 1344402,
+   "name": "Other GPWS event",
+   "parent": 1344400
+  },
+  {
+   "id": 1344500,
+   "name": "3445 ACAS/TCAS",
+   "parent": 1344000
+  },
+  {
+   "id": 1344501,
+   "name": "TCAS nuisance alarm",
+   "parent": 1344500
+  },
+  {
+   "id": 1350000,
+   "name": "3500 Oxygen system",
+   "parent": 1300000
+  },
+  {
+   "id": 1360000,
+   "name": "3600 Pneumatic system",
+   "parent": 1300000
+  },
+  {
+   "id": 1370000,
+   "name": "3700 Vacuum system",
+   "parent": 1300000
+  },
+  {
+   "id": 1380000,
+   "name": "3800 Drinkable/waste water system",
+   "parent": 1300000
+  },
+  {
+   "id": 1490000,
+   "name": "4900 Auxiliary power unit",
+   "parent": 1000000
+  },
+  {
+   "id": 1510000,
+   "name": "5100 Standard practices and structures",
+   "parent": 1000000
+  },
+  {
+   "id": 1510100,
+   "name": "5101 Airframe structure - general",
+   "parent": 1510000
+  },
+  {
+   "id": 1520000,
+   "name": "5200 Aircraft's doors",
+   "parent": 1000000
+  },
+  {
+   "id": 1520100,
+   "name": "5201 Doors - general",
+   "parent": 1520000
+  },
+  {
+   "id": 1520101,
+   "name": "Door opening",
+   "parent": 1520100
+  },
+  {
+   "id": 1520102,
+   "name": "Door separation",
+   "parent": 1520100
+  },
+  {
+   "id": 1520170,
+   "name": "Door warning system",
+   "parent": 1520100
+  },
+  {
+   "id": 1530000,
+   "name": "5300 Aircraft's fuselage structure",
+   "parent": 1000000
+  },
+  {
+   "id": 1530100,
+   "name": "5301 Airframe failure - other",
+   "parent": 1530000
+  },
+  {
+   "id": 1530200,
+   "name": "5302 Airframe break-up",
+   "parent": 1530000
+  },
+  {
+   "id": 1540000,
+   "name": "5400 Aircraft engine nacelle/pylon structure",
+   "parent": 1000000
+  },
+  {
+   "id": 1550000,
+   "name": "5500 Aircraft empennage structure",
+   "parent": 1000000
+  },
+  {
+   "id": 1552000,
+   "name": "5520 Aircraft elevator",
+   "parent": 1550000
+  },
+  {
+   "id": 1554000,
+   "name": "5540 Aircraft rudder",
+   "parent": 1550000
+  },
+  {
+   "id": 1560000,
+   "name": "5600 Aircraft windows/windshields",
+   "parent": 1000000
+  },
+  {
+   "id": 1560100,
+   "name": "5601 Aircraft's windows in general",
+   "parent": 1560000
+  },
+  {
+   "id": 1560101,
+   "name": "Window separation in flight",
+   "parent": 1560100
+  },
+  {
+   "id": 1561000,
+   "name": "5610 Flight compartment window",
+   "parent": 1560000
+  },
+  {
+   "id": 1570000,
+   "name": "5700 Aircraft wing structure",
+   "parent": 1000000
+  },
+  {
+   "id": 1575000,
+   "name": "5750 Control surfaces",
+   "parent": 1570000
+  },
+  {
+   "id": 1610000,
+   "name": "6100 Propellers generally",
+   "parent": 1000000
+  },
+  {
+   "id": 1610100,
+   "name": "6101 Aircraft propellers - general",
+   "parent": 1610000
+  },
+  {
+   "id": 1610101,
+   "name": "Propeller over-speed",
+   "parent": 1610100
+  },
+  {
+   "id": 1610102,
+   "name": "Propeller separation",
+   "parent": 1610100
+  },
+  {
+   "id": 1610120,
+   "name": "Propeller control",
+   "parent": 1610100
+  },
+  {
+   "id": 1620000,
+   "name": "6200 Rotorcraft main rotor system",
+   "parent": 1000000
+  },
+  {
+   "id": 1620100,
+   "name": "6201 Main rotor - general",
+   "parent": 1620000
+  },
+  {
+   "id": 1620101,
+   "name": "Main rotor blade flapping",
+   "parent": 1620100
+  },
+  {
+   "id": 1630000,
+   "name": "6300 Main rotor drive system",
+   "parent": 1000000
+  },
+  {
+   "id": 1630100,
+   "name": "6301 Main rotor drive shaft",
+   "parent": 1630000
+  },
+  {
+   "id": 1632000,
+   "name": "6320 Main rotor transmission",
+   "parent": 1630000
+  },
+  {
+   "id": 1632001,
+   "name": "Gearbox chip warning",
+   "parent": 1632000
+  },
+  {
+   "id": 1640000,
+   "name": "6400 Rotorcraft tail rotor system",
+   "parent": 1000000
+  },
+  {
+   "id": 1650000,
+   "name": "6500 Tail rotor drive system",
+   "parent": 1000000
+  },
+  {
+   "id": 1651000,
+   "name": "6510 Tail rotor drive shaft",
+   "parent": 1650000
+  },
+  {
+   "id": 1652000,
+   "name": "Tail rotor gearbox (90 deg) related event (ATA Code:6520) (6520 Tail rotor gearbox (90 deg))",
+   "parent": 1650000
+  },
+  {
+   "id": 1653000,
+   "name": "Tail rotor gearbox (45 deg) related event (ATA Code:6530) (6530 Tail rotor gearbox (45 deg))",
+   "parent": 1650000
+  },
+  {
+   "id": 1670000,
+   "name": "6700 Rotorcraft flight control system",
+   "parent": 1000000
+  },
+  {
+   "id": 1710000,
+   "name": "7100 Powerplant package",
+   "parent": 1000000
+  },
+  {
+   "id": 1720000,
+   "name": "7200 Turbine engine",
+   "parent": 1000000
+  },
+  {
+   "id": 1720100,
+   "name": "7201 Turbine engine - generally",
+   "parent": 1720000
+  },
+  {
+   "id": 1720101,
+   "name": "Turbine engine - tearaway",
+   "parent": 1720100
+  },
+  {
+   "id": 1720102,
+   "name": "Turbine engine - uncontained failure",
+   "parent": 1720100
+  },
+  {
+   "id": 1720103,
+   "name": "Turbine engine - mechanical failure",
+   "parent": 1720100
+  },
+  {
+   "id": 1720104,
+   "name": "Turbine engine - non mechanical failure",
+   "parent": 1720100
+  },
+  {
+   "id": 1720105,
+   "name": "Turbine engine - simulated failure",
+   "parent": 1720100
+  },
+  {
+   "id": 1720106,
+   "name": "Turbine engine - fuel starvation",
+   "parent": 1720100
+  },
+  {
+   "id": 1720107,
+   "name": "Turbine engine - asymmetric thrust",
+   "parent": 1720100
+  },
+  {
+   "id": 1720108,
+   "name": "Turbine engine - multiple failures",
+   "parent": 1720100
+  },
+  {
+   "id": 1720109,
+   "name": "Turbine engine - vibration",
+   "parent": 1720100
+  },
+  {
+   "id": 1720110,
+   "name": "Turbine engine - engine gearbox",
+   "parent": 1720100
+  },
+  {
+   "id": 1720113,
+   "name": "Turbine engine - chip warning",
+   "parent": 1720110
+  },
+  {
+   "id": 1730000,
+   "name": "7300 Engine fuel and control system",
+   "parent": 1000000
+  },
+  {
+   "id": 1740000,
+   "name": "7400 Engine ignition system",
+   "parent": 1000000
+  },
+  {
+   "id": 1750000,
+   "name": "7500 Engine air system",
+   "parent": 1000000
+  },
+  {
+   "id": 1760000,
+   "name": "7600 Engine controls",
+   "parent": 1000000
+  },
+  {
+   "id": 1770000,
+   "name": "7700 Engine indicating system",
+   "parent": 1000000
+  },
+  {
+   "id": 1780000,
+   "name": "7800 Engine exhaust system",
+   "parent": 1000000
+  },
+  {
+   "id": 1783000,
+   "name": "7830 Thrust reverser system",
+   "parent": 1780000
+  },
+  {
+   "id": 1790000,
+   "name": "7900 Engine oil system",
+   "parent": 1000000
+  },
+  {
+   "id": 1800000,
+   "name": "8000 Engine starting system",
+   "parent": 1000000
+  },
+  {
+   "id": 1810000,
+   "name": "8100 Exhaust turbine system",
+   "parent": 1800000
+  },
+  {
+   "id": 1820000,
+   "name": "8200 Engine water injection system",
+   "parent": 1800000
+  },
+  {
+   "id": 1830000,
+   "name": "8300 Accessory gearbox",
+   "parent": 1800000
+  },
+  {
+   "id": 1850000,
+   "name": "8500 Reciprocating engine",
+   "parent": 1800000
+  },
+  {
+   "id": 1850100,
+   "name": "8501 Reciprocating engine general",
+   "parent": 1850000
+  },
+  {
+   "id": 1850101,
+   "name": "Reciprocating engine - tearaway",
+   "parent": 1850100
+  },
+  {
+   "id": 1850102,
+   "name": "Reciprocating engine - uncontained failure",
+   "parent": 1850100
+  },
+  {
+   "id": 1850103,
+   "name": "Reciprocating engine - mechanical failure",
+   "parent": 1850100
+  },
+  {
+   "id": 1850104,
+   "name": "Reciprocating engine - non-mechanical failure",
+   "parent": 1850100
+  },
+  {
+   "id": 1850105,
+   "name": "Reciprocating engine - simulated failure",
+   "parent": 1850100
+  },
+  {
+   "id": 1850106,
+   "name": "Reciprocating engine - fuel starvation",
+   "parent": 1850100
+  },
+  {
+   "id": 1850107,
+   "name": "Reciprocating engine - carburetor icing",
+   "parent": 1850100
+  },
+  {
+   "id": 1850108,
+   "name": "Reciprocating engine - multiple failures",
+   "parent": 1850100
+  },
+  {
+   "id": 1850109,
+   "name": "Reciprocating engine - gearbox failure",
+   "parent": 1850100
+  },
+  {
+   "id": 1850110,
+   "name": "Reciprocating engine - vibration",
+   "parent": 1850100
+  },
+  {
+   "id": 1990000,
+   "name": "Non-component specific events",
+   "parent": 1000000
+  },
+  {
+   "id": 1990100,
+   "name": "Explosions / fire/ fumes / smoke",
+   "parent": 1990000
+  },
+  {
+   "id": 1990101,
+   "name": "Explosion",
+   "parent": 1990100
+  },
+  {
+   "id": 1990102,
+   "name": "Explosion - Cockpit",
+   "parent": 1990100
+  },
+  {
+   "id": 1990103,
+   "name": "Explosion - Passenger cabin",
+   "parent": 1990100
+  },
+  {
+   "id": 1990104,
+   "name": "Explosion - Cargo hold / cargo pod",
+   "parent": 1990100
+  },
+  {
+   "id": 1990105,
+   "name": "Explosion - Galley",
+   "parent": 1990100
+  },
+  {
+   "id": 1990106,
+   "name": "Explosion - Lavatory",
+   "parent": 1990100
+  },
+  {
+   "id": 1990107,
+   "name": "Explosion - Avionics bay",
+   "parent": 1990100
+  },
+  {
+   "id": 1990108,
+   "name": "Explosion - Powerplant",
+   "parent": 1990100
+  },
+  {
+   "id": 1990109,
+   "name": "Explosion - APU",
+   "parent": 1990100
+  },
+  {
+   "id": 1990110,
+   "name": "Explosion - Other location",
+   "parent": 1990100
+  },
+  {
+   "id": 1990111,
+   "name": "Fire",
+   "parent": 1990110
+  },
+  {
+   "id": 1990112,
+   "name": "Fire - Cockpit",
+   "parent": 1990110
+  },
+  {
+   "id": 1990113,
+   "name": "Fire - Passenger cabin",
+   "parent": 1990110
+  },
+  {
+   "id": 1990114,
+   "name": "Fire - Cargo hold / pod",
+   "parent": 1990110
+  },
+  {
+   "id": 1990115,
+   "name": "Fire - Galley",
+   "parent": 1990110
+  },
+  {
+   "id": 1990116,
+   "name": "Fire - Lavatory",
+   "parent": 1990110
+  },
+  {
+   "id": 1990117,
+   "name": "Fire - Avionics bay",
+   "parent": 1990110
+  },
+  {
+   "id": 1990118,
+   "name": "Fire - Powerplant",
+   "parent": 1990110
+  },
+  {
+   "id": 1990119,
+   "name": "Fire - APU",
+   "parent": 1990110
+  },
+  {
+   "id": 1990120,
+   "name": "Fire - Other location",
+   "parent": 1990100
+  },
+  {
+   "id": 1990121,
+   "name": "Fumes",
+   "parent": 1990120
+  },
+  {
+   "id": 1990122,
+   "name": "Fumes - Cockpit",
+   "parent": 1990120
+  },
+  {
+   "id": 1990123,
+   "name": "Fumes - Passenger cabin",
+   "parent": 1990120
+  },
+  {
+   "id": 1990124,
+   "name": "Fumes - Cargo hold / pod",
+   "parent": 1990120
+  },
+  {
+   "id": 1990125,
+   "name": "Fumes - Galley",
+   "parent": 1990120
+  },
+  {
+   "id": 1990126,
+   "name": "Fumes - Lavatory",
+   "parent": 1990120
+  },
+  {
+   "id": 1990127,
+   "name": "Fumes - Avionics bay",
+   "parent": 1990120
+  },
+  {
+   "id": 1990128,
+   "name": "Fumes - Powerplant",
+   "parent": 1990120
+  },
+  {
+   "id": 1990129,
+   "name": "Fumes - APU",
+   "parent": 1990120
+  },
+  {
+   "id": 1990130,
+   "name": "Fumes - Other location",
+   "parent": 1990100
+  },
+  {
+   "id": 1990131,
+   "name": "Smoke",
+   "parent": 1990130
+  },
+  {
+   "id": 1990132,
+   "name": "Smoke - Cockpit",
+   "parent": 1990130
+  },
+  {
+   "id": 1990133,
+   "name": "Smoke - Passenger cabin",
+   "parent": 1990130
+  },
+  {
+   "id": 1990134,
+   "name": "Smoke - Cargo hold / pod",
+   "parent": 1990130
+  },
+  {
+   "id": 1990135,
+   "name": "Smoke - Galley",
+   "parent": 1990130
+  },
+  {
+   "id": 1990136,
+   "name": "Smoke - Lavatory",
+   "parent": 1990130
+  },
+  {
+   "id": 1990137,
+   "name": "Smoke - Avionics bay",
+   "parent": 1990130
+  },
+  {
+   "id": 1990138,
+   "name": "Smoke - Powerplant",
+   "parent": 1990130
+  },
+  {
+   "id": 1990139,
+   "name": "Smoke - APU",
+   "parent": 1990130
+  },
+  {
+   "id": 1990140,
+   "name": "Smoke - Other location",
+   "parent": 1990100
+  },
+  {
+   "id": 1990141,
+   "name": "Smell",
+   "parent": 1990140
+  },
+  {
+   "id": 1990142,
+   "name": "Smell - Cockpit",
+   "parent": 1990140
+  },
+  {
+   "id": 1990143,
+   "name": "Smell - Passenger cabin",
+   "parent": 1990140
+  },
+  {
+   "id": 1990144,
+   "name": "Smell - Cargo hold / pod",
+   "parent": 1990140
+  },
+  {
+   "id": 1990145,
+   "name": "Smell - Galley",
+   "parent": 1990140
+  },
+  {
+   "id": 1990146,
+   "name": "Smell - Lavatory",
+   "parent": 1990140
+  },
+  {
+   "id": 1990147,
+   "name": "Smell - Avionics bay",
+   "parent": 1990140
+  },
+  {
+   "id": 1990148,
+   "name": "Smell - Powerplant",
+   "parent": 1990140
+  },
+  {
+   "id": 1990149,
+   "name": "Smell - APU",
+   "parent": 1990140
+  },
+  {
+   "id": 1990150,
+   "name": "Smell - Other location",
+   "parent": 1990100
+  },
+  {
+   "id": 1990151,
+   "name": "Electrical smell",
+   "parent": 1990150
+  },
+  {
+   "id": 1990152,
+   "name": "Electrical smell - Cockpit",
+   "parent": 1990150
+  },
+  {
+   "id": 1990153,
+   "name": "Electrical smell - Passenger cabin",
+   "parent": 1990150
+  },
+  {
+   "id": 1990154,
+   "name": "Electrical smell - Cargo hold / pod",
+   "parent": 1990150
+  },
+  {
+   "id": 1990155,
+   "name": "Electrical smell - Galley",
+   "parent": 1990150
+  },
+  {
+   "id": 1990156,
+   "name": "Electrical smell - Lavatory",
+   "parent": 1990150
+  },
+  {
+   "id": 1990157,
+   "name": "Electrical smell - Avionics bay",
+   "parent": 1990150
+  },
+  {
+   "id": 1990158,
+   "name": "Electrical smell - Powerplant",
+   "parent": 1990150
+  },
+  {
+   "id": 1990159,
+   "name": "Electrical smell - APU",
+   "parent": 1990150
+  },
+  {
+   "id": 1990160,
+   "name": "Electrical smell - Other location",
+   "parent": 1990100
+  },
+  {
+   "id": 1990161,
+   "name": "Fire - Landing gear",
+   "parent": 1990160
+  },
+  {
+   "id": 1990162,
+   "name": "Smoke - Landing gear",
+   "parent": 1990160
+  },
+  {
+   "id": 1990200,
+   "name": "Vibration / rattle / noise",
+   "parent": 1990000
+  },
+  {
+   "id": 1990201,
+   "name": "Noise / rattle",
+   "parent": 1990200
+  },
+  {
+   "id": 1990202,
+   "name": "Vibration/buffet",
+   "parent": 1990200
+  },
+  {
+   "id": 1990203,
+   "name": "Loose object",
+   "parent": 1990200
+  },
+  {
+   "id": 2000000,
+   "name": "Aircraft operation general",
+   "parent": null
+  },
+  {
+   "id": 2010000,
+   "name": "Aircraft handling",
+   "parent": 2000000
+  },
+  {
+   "id": 2010100,
+   "name": "Altitude related",
+   "parent": 2010000
+  },
+  {
+   "id": 2010101,
+   "name": "Altitude bust",
+   "parent": 2010100
+  },
+  {
+   "id": 2010102,
+   "name": "Too close to ground",
+   "parent": 2010100
+  },
+  {
+   "id": 2010103,
+   "name": "Other altitude event",
+   "parent": 2010100
+  },
+  {
+   "id": 2010200,
+   "name": "Abrupt manoeuvre",
+   "parent": 2010000
+  },
+  {
+   "id": 2010201,
+   "name": "Environment-manoeuvre",
+   "parent": 2010200
+  },
+  {
+   "id": 2010202,
+   "name": "Crew-manoeuvre",
+   "parent": 2010200
+  },
+  {
+   "id": 2010203,
+   "name": "Other abrupt manoeuvre",
+   "parent": 2010200
+  },
+  {
+   "id": 2010300,
+   "name": "Dragged wing/pod/float",
+   "parent": 2010000
+  },
+  {
+   "id": 2010400,
+   "name": "Systems/crew mismatch",
+   "parent": 2010000
+  },
+  {
+   "id": 2010500,
+   "name": "Swerve-take-off/landing",
+   "parent": 2010000
+  },
+  {
+   "id": 2010501,
+   "name": "Intentional swerve",
+   "parent": 2010500
+  },
+  {
+   "id": 2010502,
+   "name": "Unintentional swerve",
+   "parent": 2010500
+  },
+  {
+   "id": 2010600,
+   "name": "Hard landing",
+   "parent": 2010000
+  },
+  {
+   "id": 2010700,
+   "name": "Beside landing surface",
+   "parent": 2010000
+  },
+  {
+   "id": 2010800,
+   "name": "Undershoot",
+   "parent": 2010000
+  },
+  {
+   "id": 2010900,
+   "name": "Over-rotation - tail scrape/strike",
+   "parent": 2010000
+  },
+  {
+   "id": 2011000,
+   "name": "Unstabilized approach",
+   "parent": 2010000
+  },
+  {
+   "id": 2011100,
+   "name": "Warning system triggered",
+   "parent": 2011000
+  },
+  {
+   "id": 2011101,
+   "name": "ACAS/TCAS triggered",
+   "parent": 2011100
+  },
+  {
+   "id": 2011102,
+   "name": "Configuration warning",
+   "parent": 2011100
+  },
+  {
+   "id": 2011103,
+   "name": "Ground proximity warning",
+   "parent": 2011100
+  },
+  {
+   "id": 2011104,
+   "name": "Other warning system triggered",
+   "parent": 2011100
+  },
+  {
+   "id": 2011105,
+   "name": "Health monitoring system warning",
+   "parent": 2011100
+  },
+  {
+   "id": 2011106,
+   "name": "Stall warning triggered",
+   "parent": 2011100
+  },
+  {
+   "id": 2011200,
+   "name": "Wheels-up landings",
+   "parent": 2011000
+  },
+  {
+   "id": 2011201,
+   "name": "Wheels-up landing - intentional",
+   "parent": 2011200
+  },
+  {
+   "id": 2011202,
+   "name": "Wheels-up unintentional",
+   "parent": 2011200
+  },
+  {
+   "id": 2011203,
+   "name": "Wheels-up landing -cause unknown",
+   "parent": 2011200
+  },
+  {
+   "id": 2011300,
+   "name": "Wheels down landing on water",
+   "parent": 2011000
+  },
+  {
+   "id": 2011400,
+   "name": "Aircraft landed long",
+   "parent": 2011000
+  },
+  {
+   "id": 2011500,
+   "name": "Aircraft landed fast",
+   "parent": 2011000
+  },
+  {
+   "id": 2011600,
+   "name": "Unsafe descent",
+   "parent": 2011000
+  },
+  {
+   "id": 2020000,
+   "name": "Flight crew/ANS",
+   "parent": 2000000
+  },
+  {
+   "id": 2020100,
+   "name": "Traffic conflict",
+   "parent": 2020000
+  },
+  {
+   "id": 2020200,
+   "name": "ANS-clearance",
+   "parent": 2020000
+  },
+  {
+   "id": 2020201,
+   "name": "Erroneous clearance",
+   "parent": 2020200
+  },
+  {
+   "id": 2020202,
+   "name": "Clearance-wrong altitude",
+   "parent": 2020200
+  },
+  {
+   "id": 2020300,
+   "name": "Communications flight crew with ANS",
+   "parent": 2020000
+  },
+  {
+   "id": 2020400,
+   "name": "Airspace infringement",
+   "parent": 2020000
+  },
+  {
+   "id": 2020500,
+   "name": "Deviation/ATC clearance",
+   "parent": 2020000
+  },
+  {
+   "id": 2020501,
+   "name": "Deviation-start-up",
+   "parent": 2020500
+  },
+  {
+   "id": 2020502,
+   "name": "Deviation-push-back",
+   "parent": 2020500
+  },
+  {
+   "id": 2020503,
+   "name": "Deviation-taxi",
+   "parent": 2020500
+  },
+  {
+   "id": 2020504,
+   "name": "Deviation-line-up",
+   "parent": 2020500
+  },
+  {
+   "id": 2020505,
+   "name": "Deviation-take-off",
+   "parent": 2020500
+  },
+  {
+   "id": 2020506,
+   "name": "Deviation-en-route",
+   "parent": 2020500
+  },
+  {
+   "id": 2020507,
+   "name": "Deviation-oceanic",
+   "parent": 2020500
+  },
+  {
+   "id": 2020508,
+   "name": "Deviation-approach",
+   "parent": 2020500
+  },
+  {
+   "id": 2020509,
+   "name": "Deviation-holding",
+   "parent": 2020500
+  },
+  {
+   "id": 2020510,
+   "name": "Deviation-landing",
+   "parent": 2020500
+  },
+  {
+   "id": 2020511,
+   "name": "Deviation-runway crossing",
+   "parent": 2020510
+  },
+  {
+   "id": 2020512,
+   "name": "Deviation-clearance limit",
+   "parent": 2020510
+  },
+  {
+   "id": 2020513,
+   "name": "Deviation-special procedure",
+   "parent": 2020510
+  },
+  {
+   "id": 2020514,
+   "name": "Deviation-missed approach",
+   "parent": 2020510
+  },
+  {
+   "id": 2020515,
+   "name": "Deviation-low approach",
+   "parent": 2020510
+  },
+  {
+   "id": 2020516,
+   "name": "Deviation-touch and go",
+   "parent": 2020510
+  },
+  {
+   "id": 2020517,
+   "name": "Deviation-flight level/altitude",
+   "parent": 2020510
+  },
+  {
+   "id": 2020518,
+   "name": "Deviation-assigned details",
+   "parent": 2020510
+  },
+  {
+   "id": 2020519,
+   "name": "Deviation-specified speed",
+   "parent": 2020510
+  },
+  {
+   "id": 2020520,
+   "name": "Deviation-time restriction",
+   "parent": 2020500
+  },
+  {
+   "id": 2020521,
+   "name": "Deviation-climb/descent",
+   "parent": 2020520
+  },
+  {
+   "id": 2020522,
+   "name": "Deviation-climb/descent- conditional clearance",
+   "parent": 2020520
+  },
+  {
+   "id": 2020523,
+   "name": "Deviation-hold short",
+   "parent": 2020520
+  },
+  {
+   "id": 2020524,
+   "name": "Deviation-noise abatement procedure",
+   "parent": 2020520
+  },
+  {
+   "id": 2020600,
+   "name": "ANS provision-information",
+   "parent": 2020000
+  },
+  {
+   "id": 2020601,
+   "name": "ANS flight information",
+   "parent": 2020600
+  },
+  {
+   "id": 2020602,
+   "name": "ANS geographical info",
+   "parent": 2020600
+  },
+  {
+   "id": 2020603,
+   "name": "ANS weather information",
+   "parent": 2020600
+  },
+  {
+   "id": 2020604,
+   "name": "ANS traffic information",
+   "parent": 2020600
+  },
+  {
+   "id": 2020700,
+   "name": "Deviation-ATM Regulation",
+   "parent": 2020000
+  },
+  {
+   "id": 2020701,
+   "name": "Airspace entry",
+   "parent": 2020700
+  },
+  {
+   "id": 2020702,
+   "name": "Deviations/ATM equipment",
+   "parent": 2020700
+  },
+  {
+   "id": 2020703,
+   "name": "Other deviation ATM",
+   "parent": 2020700
+  },
+  {
+   "id": 2020800,
+   "name": "Flight crew deviation",
+   "parent": 2020000
+  },
+  {
+   "id": 2020801,
+   "name": "En-route MSA",
+   "parent": 2020800
+  },
+  {
+   "id": 2020802,
+   "name": "ATM landing minima",
+   "parent": 2020800
+  },
+  {
+   "id": 2020803,
+   "name": "ATM SID",
+   "parent": 2020800
+  },
+  {
+   "id": 2020804,
+   "name": "ATM STAR",
+   "parent": 2020800
+  },
+  {
+   "id": 2020805,
+   "name": "ATM approach procedure",
+   "parent": 2020800
+  },
+  {
+   "id": 2020806,
+   "name": "ATM speed restriction",
+   "parent": 2020800
+  },
+  {
+   "id": 2020900,
+   "name": "Other ATM procedure",
+   "parent": 2020000
+  },
+  {
+   "id": 2030000,
+   "name": "Cabin safety",
+   "parent": 2000000
+  },
+  {
+   "id": 2030100,
+   "name": "Blocked cabin exit",
+   "parent": 2030000
+  },
+  {
+   "id": 2030200,
+   "name": "Unserviceable seatbelt",
+   "parent": 2030000
+  },
+  {
+   "id": 2030300,
+   "name": "Slide failure or not armed",
+   "parent": 2030000
+  },
+  {
+   "id": 2030400,
+   "name": "Cabin crew - medical",
+   "parent": 2030000
+  },
+  {
+   "id": 2030500,
+   "name": "Cabin crew - injury sustained",
+   "parent": 2030000
+  },
+  {
+   "id": 2030600,
+   "name": "Cabin crew - other",
+   "parent": 2030000
+  },
+  {
+   "id": 2030700,
+   "name": "Cabin-cockpit communications",
+   "parent": 2030000
+  },
+  {
+   "id": 2030800,
+   "name": "Medical emergency - passenger",
+   "parent": 2030000
+  },
+  {
+   "id": 2030900,
+   "name": "Passenger carry-on baggage",
+   "parent": 2030000
+  },
+  {
+   "id": 2031000,
+   "name": "Animals in the cabin",
+   "parent": 2030000
+  },
+  {
+   "id": 2031100,
+   "name": "Door opening/door interference - passengers",
+   "parent": 2031000
+  },
+  {
+   "id": 2039800,
+   "name": "Other non-crew cabin safety related event",
+   "parent": 2030000
+  },
+  {
+   "id": 2040000,
+   "name": "Flight crew",
+   "parent": 2000000
+  },
+  {
+   "id": 2040100,
+   "name": "Flight crew incapacitation/illness/medical issue",
+   "parent": 2040000
+  },
+  {
+   "id": 2050000,
+   "name": "Aircraft - collisions with obstacle/terrain/aircraft",
+   "parent": 2000000
+  },
+  {
+   "id": 2050100,
+   "name": "Aircraft collision - moving aircraft",
+   "parent": 2050000
+  },
+  {
+   "id": 2050101,
+   "name": "Aircraft collision - both aircraft aloft",
+   "parent": 2050100
+  },
+  {
+   "id": 2050102,
+   "name": "Aircraft collision - one aircraft aloft",
+   "parent": 2050100
+  },
+  {
+   "id": 2050103,
+   "name": "Aircraft collision - both aircraft on ground",
+   "parent": 2050100
+  },
+  {
+   "id": 2050104,
+   "name": "Aircraft collision - balloon",
+   "parent": 2050100
+  },
+  {
+   "id": 2050105,
+   "name": "Aircraft collision - microlight",
+   "parent": 2050100
+  },
+  {
+   "id": 2050106,
+   "name": "Aircraft collision - dirigible",
+   "parent": 2050100
+  },
+  {
+   "id": 2050200,
+   "name": "Collision aircraft - terrain",
+   "parent": 2050000
+  },
+  {
+   "id": 2050201,
+   "name": "Aircraft collision - level terrain",
+   "parent": 2050200
+  },
+  {
+   "id": 2050202,
+   "name": "Aircraft collision - high terrain",
+   "parent": 2050200
+  },
+  {
+   "id": 2050300,
+   "name": "Aircraft collision - object aloft",
+   "parent": 2050000
+  },
+  {
+   "id": 2050301,
+   "name": "Aircraft bird strike",
+   "parent": 2050300
+  },
+  {
+   "id": 2050302,
+   "name": "Aircraft collision - model aircraft",
+   "parent": 2050300
+  },
+  {
+   "id": 2050303,
+   "name": "Aircraft collision - other object",
+   "parent": 2050300
+  },
+  {
+   "id": 2050304,
+   "name": "Aircraft collision - parachutist",
+   "parent": 2050300
+  },
+  {
+   "id": 2050400,
+   "name": "Collision aircraft - object ground",
+   "parent": 2050000
+  },
+  {
+   "id": 2050401,
+   "name": "Collision aircraft-structure",
+   "parent": 2050400
+  },
+  {
+   "id": 2050402,
+   "name": "Collision aircraft-animal",
+   "parent": 2050400
+  },
+  {
+   "id": 2050403,
+   "name": "Collision aircraft-lights",
+   "parent": 2050400
+  },
+  {
+   "id": 2050404,
+   "name": "Collision aircraft-building",
+   "parent": 2050400
+  },
+  {
+   "id": 2050405,
+   "name": "Collision aircraft-submerged log",
+   "parent": 2050400
+  },
+  {
+   "id": 2050406,
+   "name": "Collision aircraft-the shore",
+   "parent": 2050400
+  },
+  {
+   "id": 2050407,
+   "name": "Collision aircraft-other object",
+   "parent": 2050400
+  },
+  {
+   "id": 2050408,
+   "name": "Collision aircraft-parked aircraft",
+   "parent": 2050400
+  },
+  {
+   "id": 2050410,
+   "name": "Collision aircraft-person",
+   "parent": 2050400
+  },
+  {
+   "id": 2050411,
+   "name": "Collision aircraft- cable/wire/power line",
+   "parent": 2050410
+  },
+  {
+   "id": 2050412,
+   "name": "Collision aircraft-snow bank",
+   "parent": 2050410
+  },
+  {
+   "id": 2050413,
+   "name": "Collision aircraft-tall structure",
+   "parent": 2050410
+  },
+  {
+   "id": 2050414,
+   "name": "Collision aircraft-tree / tall vegetation",
+   "parent": 2050410
+  },
+  {
+   "id": 2050415,
+   "name": "Collision aircraft-vehicle",
+   "parent": 2050410
+  },
+  {
+   "id": 2050416,
+   "name": "Collision aircraft-wave",
+   "parent": 2050410
+  },
+  {
+   "id": 2060000,
+   "name": "Damage to aircraft",
+   "parent": 2000000
+  },
+  {
+   "id": 2060100,
+   "name": "Explosive decompression",
+   "parent": 2060000
+  },
+  {
+   "id": 2060200,
+   "name": "Foreign object damage",
+   "parent": 2060000
+  },
+  {
+   "id": 2060300,
+   "name": "Ground resonance damage",
+   "parent": 2060000
+  },
+  {
+   "id": 2060400,
+   "name": "Lightning strike damage",
+   "parent": 2060000
+  },
+  {
+   "id": 2060500,
+   "name": "Aircraft over-stress damage",
+   "parent": 2060000
+  },
+  {
+   "id": 2060600,
+   "name": "Propeller/rotor/jet blast",
+   "parent": 2060000
+  },
+  {
+   "id": 2060700,
+   "name": "Sank through surface",
+   "parent": 2060000
+  },
+  {
+   "id": 2060800,
+   "name": "Damaged by object",
+   "parent": 2060000
+  },
+  {
+   "id": 2060900,
+   "name": "Struck/damaged by equipment on ground",
+   "parent": 2060000
+  },
+  {
+   "id": 2061000,
+   "name": "Turbulence damage",
+   "parent": 2060000
+  },
+  {
+   "id": 2061100,
+   "name": "Unlawful act damage",
+   "parent": 2061000
+  },
+  {
+   "id": 2061200,
+   "name": "Wind damage",
+   "parent": 2061000
+  },
+  {
+   "id": 2061300,
+   "name": "Aircraft sank",
+   "parent": 2061000
+  },
+  {
+   "id": 2061400,
+   "name": "Hail damage",
+   "parent": 2061000
+  },
+  {
+   "id": 2061500,
+   "name": "Main rotor strike",
+   "parent": 2061000
+  },
+  {
+   "id": 2070000,
+   "name": "Aircraft off movement area",
+   "parent": 2000000
+  },
+  {
+   "id": 2070100,
+   "name": "Runway side excursion",
+   "parent": 2070000
+  },
+  {
+   "id": 2070200,
+   "name": "Taxiway excursion",
+   "parent": 2070000
+  },
+  {
+   "id": 2070300,
+   "name": "Apron excursion",
+   "parent": 2070000
+  },
+  {
+   "id": 2070400,
+   "name": "Aircraft overrun",
+   "parent": 2070000
+  },
+  {
+   "id": 2080000,
+   "name": "Aeroplane flight path deviation",
+   "parent": 2000000
+  },
+  {
+   "id": 2080100,
+   "name": "Aeroplane - deviation from altitude",
+   "parent": 2080000
+  },
+  {
+   "id": 2080200,
+   "name": "Aeroplane - deviation from heading",
+   "parent": 2080000
+  },
+  {
+   "id": 2080300,
+   "name": "Aeroplane - mush/stall",
+   "parent": 2080000
+  },
+  {
+   "id": 2080400,
+   "name": "Aeroplane - spin",
+   "parent": 2080000
+  },
+  {
+   "id": 2080500,
+   "name": "Aeroplane - spiral dive",
+   "parent": 2080000
+  },
+  {
+   "id": 2080600,
+   "name": "Aeroplane - deviation from pitch attitude",
+   "parent": 2080000
+  },
+  {
+   "id": 2080700,
+   "name": "Aeroplane - deviation from roll attitude",
+   "parent": 2080000
+  },
+  {
+   "id": 2080800,
+   "name": "Aeroplane - porpoising",
+   "parent": 2080000
+  },
+  {
+   "id": 2080900,
+   "name": "Aeroplane - other deviation from flight path",
+   "parent": 2080000
+  },
+  {
+   "id": 2090000,
+   "name": "Helicopter flight path deviation",
+   "parent": 2000000
+  },
+  {
+   "id": 2090100,
+   "name": "Helicopter - deviation from altitude",
+   "parent": 2090000
+  },
+  {
+   "id": 2090200,
+   "name": "Helicopter - deviation from heading",
+   "parent": 2090000
+  },
+  {
+   "id": 2090300,
+   "name": "Helicopter - deviation from pitch attitude",
+   "parent": 2090000
+  },
+  {
+   "id": 2090400,
+   "name": "Helicopter - deviation from roll attitude",
+   "parent": 2090000
+  },
+  {
+   "id": 2090500,
+   "name": "Helicopter - dynamic roll-over",
+   "parent": 2090000
+  },
+  {
+   "id": 2090600,
+   "name": "Helicopter - inadequate rotor rpm",
+   "parent": 2090000
+  },
+  {
+   "id": 2090700,
+   "name": "Helicopter - settling with power",
+   "parent": 2090000
+  },
+  {
+   "id": 2090800,
+   "name": "Helicopter - uncontrolled yaw",
+   "parent": 2090000
+  },
+  {
+   "id": 2090900,
+   "name": "Helicopter - other deviation from flight path",
+   "parent": 2090000
+  },
+  {
+   "id": 2100000,
+   "name": "Aircraft diversion",
+   "parent": 2000000
+  },
+  {
+   "id": 2100100,
+   "name": "Weather conditions",
+   "parent": 2100000
+  },
+  {
+   "id": 2100200,
+   "name": "Operational decision",
+   "parent": 2100000
+  },
+  {
+   "id": 2100300,
+   "name": "Technical reasons",
+   "parent": 2100000
+  },
+  {
+   "id": 2100400,
+   "name": "Other reasons",
+   "parent": 2100000
+  },
+  {
+   "id": 2110000,
+   "name": "Aircraft fire/explosion",
+   "parent": 2100000
+  },
+  {
+   "id": 2110100,
+   "name": "Aircraft fire",
+   "parent": 2110000
+  },
+  {
+   "id": 2110200,
+   "name": "Explosion in the aircraft",
+   "parent": 2110000
+  },
+  {
+   "id": 2110300,
+   "name": "Smoke or fumes in aircraft",
+   "parent": 2110000
+  },
+  {
+   "id": 2120000,
+   "name": "Flight preparation",
+   "parent": 2100000
+  },
+  {
+   "id": 2120100,
+   "name": "Incorrect loading",
+   "parent": 2120000
+  },
+  {
+   "id": 2120200,
+   "name": "Incorrect fuel balance",
+   "parent": 2120000
+  },
+  {
+   "id": 2120300,
+   "name": "Minimum equipment violation",
+   "parent": 2120000
+  },
+  {
+   "id": 2120400,
+   "name": "Take-off overweight/ incorrect center of gravity (Take-off overweight/incorrect centre of gravity (COG))",
+   "parent": 2120000
+  },
+  {
+   "id": 2120500,
+   "name": "Take-off-previous damage",
+   "parent": 2120000
+  },
+  {
+   "id": 2130000,
+   "name": "Ground handling",
+   "parent": 2100000
+  },
+  {
+   "id": 2140000,
+   "name": "Object ingestion by engine",
+   "parent": 2100000
+  },
+  {
+   "id": 2140100,
+   "name": "Turbine - bird",
+   "parent": 2140000
+  },
+  {
+   "id": 2140200,
+   "name": "Water",
+   "parent": 2140000
+  },
+  {
+   "id": 2140300,
+   "name": "Ice",
+   "parent": 2140000
+  },
+  {
+   "id": 2140400,
+   "name": "Other items",
+   "parent": 2140000
+  },
+  {
+   "id": 2150000,
+   "name": "Injuries to persons",
+   "parent": 2100000
+  },
+  {
+   "id": 2150100,
+   "name": "Injuries from turbulence",
+   "parent": 2150000
+  },
+  {
+   "id": 2150200,
+   "name": "Injuries-abrupt manoeuvre",
+   "parent": 2150000
+  },
+  {
+   "id": 2150300,
+   "name": "Injuries-propeller/jet blast",
+   "parent": 2150000
+  },
+  {
+   "id": 2150400,
+   "name": "Injuries-aircraft component",
+   "parent": 2150000
+  },
+  {
+   "id": 2150500,
+   "name": "Injuries from other sources",
+   "parent": 2150000
+  },
+  {
+   "id": 2160000,
+   "name": "Material off aircraft",
+   "parent": 2100000
+  },
+  {
+   "id": 2160100,
+   "name": "Ice",
+   "parent": 2160000
+  },
+  {
+   "id": 2160101,
+   "name": "Ice - weather",
+   "parent": 2160100
+  },
+  {
+   "id": 2160102,
+   "name": "Ice - galley drains",
+   "parent": 2160100
+  },
+  {
+   "id": 2160103,
+   "name": "Ice - toilet water",
+   "parent": 2160100
+  },
+  {
+   "id": 2160104,
+   "name": "Ice - potable water",
+   "parent": 2160100
+  },
+  {
+   "id": 2160105,
+   "name": "Ice - undetermined",
+   "parent": 2160100
+  },
+  {
+   "id": 2160200,
+   "name": "Objects [not ice]",
+   "parent": 2160000
+  },
+  {
+   "id": 2160201,
+   "name": "Panels",
+   "parent": 2160200
+  },
+  {
+   "id": 2160202,
+   "name": "Identified component",
+   "parent": 2160200
+  },
+  {
+   "id": 2160203,
+   "name": "Unidentified component",
+   "parent": 2160200
+  },
+  {
+   "id": 2160300,
+   "name": "Sighting-object from aircraft",
+   "parent": 2160000
+  },
+  {
+   "id": 2170000,
+   "name": "Aircraft navigation",
+   "parent": 2100000
+  },
+  {
+   "id": 2170100,
+   "name": "Wrong aerodrome selected",
+   "parent": 2170000
+  },
+  {
+   "id": 2170200,
+   "name": "Wrong runway selected",
+   "parent": 2170000
+  },
+  {
+   "id": 2170300,
+   "name": "Wrong taxiway selected",
+   "parent": 2170000
+  },
+  {
+   "id": 2170400,
+   "name": "Navigation track error",
+   "parent": 2170000
+  },
+  {
+   "id": 2170500,
+   "name": "Navigation error - other",
+   "parent": 2170000
+  },
+  {
+   "id": 2180000,
+   "name": "Aircraft - near collisions/loss of separation",
+   "parent": 2100000
+  },
+  {
+   "id": 2180100,
+   "name": "Loss of separation between aircraft",
+   "parent": 2180000
+  },
+  {
+   "id": 2180101,
+   "name": "Loss of separation - aircraft both airborne",
+   "parent": 2180100
+  },
+  {
+   "id": 2180102,
+   "name": "Loss of separation - one aircraft airborne",
+   "parent": 2180100
+  },
+  {
+   "id": 2180103,
+   "name": "Loss of separation - aircraft both on ground",
+   "parent": 2180100
+  },
+  {
+   "id": 2180104,
+   "name": "Loss of separation: potential collision",
+   "parent": 2180100
+  },
+  {
+   "id": 2180105,
+   "name": "Loss of separation: no risk of collision",
+   "parent": 2180100
+  },
+  {
+   "id": 2180106,
+   "name": "Loss of separation: risk undetermined",
+   "parent": 2180100
+  },
+  {
+   "id": 2180107,
+   "name": "Separation minima infringement",
+   "parent": 2180100
+  },
+  {
+   "id": 2180200,
+   "name": "Near collision with terrain",
+   "parent": 2180000
+  },
+  {
+   "id": 2180201,
+   "name": "Near collision with level terrain",
+   "parent": 2180200
+  },
+  {
+   "id": 2180202,
+   "name": "Near collision with high terrain/mountain",
+   "parent": 2180200
+  },
+  {
+   "id": 2180300,
+   "name": "Near collision with airborne object",
+   "parent": 2180000
+  },
+  {
+   "id": 2180301,
+   "name": "Near collision with bird",
+   "parent": 2180300
+  },
+  {
+   "id": 2180302,
+   "name": "Near collision with other airborne object",
+   "parent": 2180300
+  },
+  {
+   "id": 2180303,
+   "name": "Near collision with unknown airborne object",
+   "parent": 2180300
+  },
+  {
+   "id": 2180304,
+   "name": "Near collision with parachutist",
+   "parent": 2180300
+  },
+  {
+   "id": 2180400,
+   "name": "Near collision with object on ground",
+   "parent": 2180000
+  },
+  {
+   "id": 2180401,
+   "name": "Near collision with parked aircraft",
+   "parent": 2180400
+  },
+  {
+   "id": 2180402,
+   "name": "Near collision with tall object",
+   "parent": 2180400
+  },
+  {
+   "id": 2180403,
+   "name": "Near collision with person",
+   "parent": 2180400
+  },
+  {
+   "id": 2180404,
+   "name": "Near collision - parachutist",
+   "parent": 2180400
+  },
+  {
+   "id": 2180405,
+   "name": "Near collision with vehicle",
+   "parent": 2180400
+  },
+  {
+   "id": 2180406,
+   "name": "Near collision with other ground object",
+   "parent": 2180400
+  },
+  {
+   "id": 2190000,
+   "name": "Nosed down/overturned",
+   "parent": 2100000
+  },
+  {
+   "id": 2200000,
+   "name": "Incursions generally",
+   "parent": 2000000
+  },
+  {
+   "id": 2200100,
+   "name": "Runway incursions",
+   "parent": 2200000
+  },
+  {
+   "id": 2200101,
+   "name": "By an aircraft",
+   "parent": 2200100
+  },
+  {
+   "id": 2200102,
+   "name": "By a vehicle/equipment",
+   "parent": 2200100
+  },
+  {
+   "id": 2200103,
+   "name": "By a person",
+   "parent": 2200100
+  },
+  {
+   "id": 2200104,
+   "name": "By an animal",
+   "parent": 2200100
+  },
+  {
+   "id": 2200200,
+   "name": "Taxiway incursion",
+   "parent": 2200000
+  },
+  {
+   "id": 2200201,
+   "name": "By an aircraft",
+   "parent": 2200200
+  },
+  {
+   "id": 2200202,
+   "name": "By a vehicle/equipment",
+   "parent": 2200200
+  },
+  {
+   "id": 2200203,
+   "name": "By a person",
+   "parent": 2200200
+  },
+  {
+   "id": 2200204,
+   "name": "By an animal",
+   "parent": 2200200
+  },
+  {
+   "id": 2200300,
+   "name": "Apron/ramp incursion",
+   "parent": 2200000
+  },
+  {
+   "id": 2200301,
+   "name": "By an aircraft",
+   "parent": 2200300
+  },
+  {
+   "id": 2200302,
+   "name": "By a vehicle/equipment",
+   "parent": 2200300
+  },
+  {
+   "id": 2200303,
+   "name": "By a person",
+   "parent": 2200300
+  },
+  {
+   "id": 2200304,
+   "name": "By an animal",
+   "parent": 2200300
+  },
+  {
+   "id": 2210000,
+   "name": "Person (not flight crew) (Person (not flight crew))",
+   "parent": 2200000
+  },
+  {
+   "id": 2210100,
+   "name": "Difficult Passenger",
+   "parent": 2210000
+  },
+  {
+   "id": 2210200,
+   "name": "Medical emergency (not cabin crew) (Medical emergency (Passenger))",
+   "parent": 2210000
+  },
+  {
+   "id": 2210300,
+   "name": "Other non-flight crew person",
+   "parent": 2210000
+  },
+  {
+   "id": 2220000,
+   "name": "Weather encounters",
+   "parent": 2200000
+  },
+  {
+   "id": 2220100,
+   "name": "Icing conditions",
+   "parent": 2220000
+  },
+  {
+   "id": 2220200,
+   "name": "Windshear",
+   "parent": 2220000
+  },
+  {
+   "id": 2220300,
+   "name": "Volcanic ash",
+   "parent": 2220000
+  },
+  {
+   "id": 2220400,
+   "name": "Wake turbulence",
+   "parent": 2220000
+  },
+  {
+   "id": 2220500,
+   "name": "IMC",
+   "parent": 2220000
+  },
+  {
+   "id": 2220600,
+   "name": "Turbulence",
+   "parent": 2220000
+  },
+  {
+   "id": 2220700,
+   "name": "Unexpected weather",
+   "parent": 2220000
+  },
+  {
+   "id": 2220800,
+   "name": "Crosswind",
+   "parent": 2220000
+  },
+  {
+   "id": 2220900,
+   "name": "Tailwind",
+   "parent": 2220000
+  },
+  {
+   "id": 2221000,
+   "name": "Loss of visual reference",
+   "parent": 2220000
+  },
+  {
+   "id": 2221100,
+   "name": "Headwind encounter",
+   "parent": 2221000
+  },
+  {
+   "id": 2221200,
+   "name": "High wind",
+   "parent": 2221000
+  },
+  {
+   "id": 2221300,
+   "name": "Hail encounter",
+   "parent": 2221000
+  },
+  {
+   "id": 2221400,
+   "name": "Adverse cloud condition",
+   "parent": 2221000
+  },
+  {
+   "id": 2222000,
+   "name": "Lightning strike",
+   "parent": 2220000
+  },
+  {
+   "id": 2230000,
+   "name": "Security generally",
+   "parent": 2200000
+  },
+  {
+   "id": 2230100,
+   "name": "Bomb warning/scare",
+   "parent": 2230000
+  },
+  {
+   "id": 2230200,
+   "name": "Hijacking",
+   "parent": 2230000
+  },
+  {
+   "id": 2230300,
+   "name": "Sabotage",
+   "parent": 2230000
+  },
+  {
+   "id": 2230400,
+   "name": "Military intervention",
+   "parent": 2230000
+  },
+  {
+   "id": 2230500,
+   "name": "Difficult / unruly passenger",
+   "parent": 2230000
+  },
+  {
+   "id": 2230600,
+   "name": "Stowaway",
+   "parent": 2230000
+  },
+  {
+   "id": 2230700,
+   "name": "Threats",
+   "parent": 2230000
+  },
+  {
+   "id": 2230800,
+   "name": "Aircraft damaged by unlawful act",
+   "parent": 2230000
+  },
+  {
+   "id": 2240000,
+   "name": "Sailplane/glider specific events",
+   "parent": 2200000
+  },
+  {
+   "id": 2240100,
+   "name": "Winch launching related event",
+   "parent": 2240000
+  },
+  {
+   "id": 2240101,
+   "name": "Take-off interrupted",
+   "parent": 2240100
+  },
+  {
+   "id": 2240104,
+   "name": "Rope disconnect",
+   "parent": 2240100
+  },
+  {
+   "id": 2240198,
+   "name": "Other",
+   "parent": 2240100
+  },
+  {
+   "id": 2240200,
+   "name": "Aircraft towing",
+   "parent": 2240000
+  },
+  {
+   "id": 2240201,
+   "name": "Towing aircraft failure",
+   "parent": 2240200
+  },
+  {
+   "id": 2240202,
+   "name": "Climb above the towing aircraft",
+   "parent": 2240200
+  },
+  {
+   "id": 2240203,
+   "name": "Rope failure",
+   "parent": 2240200
+  },
+  {
+   "id": 2240204,
+   "name": "Rope disconnect",
+   "parent": 2240200
+  },
+  {
+   "id": 2240205,
+   "name": "Aero tow - other",
+   "parent": 2240200
+  },
+  {
+   "id": 2240300,
+   "name": "Missing lift",
+   "parent": 2240000
+  },
+  {
+   "id": 2240301,
+   "name": "Missing lift - thermal",
+   "parent": 2240300
+  },
+  {
+   "id": 2240302,
+   "name": "Missing lift - wave",
+   "parent": 2240300
+  },
+  {
+   "id": 2240303,
+   "name": "Missing lift - slope",
+   "parent": 2240300
+  },
+  {
+   "id": 2250000,
+   "name": "Balloon specific events",
+   "parent": 2200000
+  },
+  {
+   "id": 2250100,
+   "name": "Envelope burned",
+   "parent": 2250000
+  },
+  {
+   "id": 2250101,
+   "name": "Skirt burned",
+   "parent": 2250100
+  },
+  {
+   "id": 2250102,
+   "name": "Panels burned",
+   "parent": 2250100
+  },
+  {
+   "id": 2250200,
+   "name": "Envelope ripped",
+   "parent": 2250000
+  },
+  {
+   "id": 2250300,
+   "name": "Basket tipped over",
+   "parent": 2250000
+  },
+  {
+   "id": 2250400,
+   "name": "Basket caught in obstacles",
+   "parent": 2250000
+  },
+  {
+   "id": 2250500,
+   "name": "Basket sliding",
+   "parent": 2250000
+  },
+  {
+   "id": 2260000,
+   "name": "Warning system triggered",
+   "parent": 2200000
+  },
+  {
+   "id": 2260100,
+   "name": "ACAS/TCAS warning triggered",
+   "parent": 2260000
+  },
+  {
+   "id": 2260200,
+   "name": "Configuration warning triggered",
+   "parent": 2260000
+  },
+  {
+   "id": 2260300,
+   "name": "Ground proximity warning triggered",
+   "parent": 2260000
+  },
+  {
+   "id": 2260400,
+   "name": "Health monitoring system warning triggered",
+   "parent": 2260000
+  },
+  {
+   "id": 2260500,
+   "name": "Stall warning triggered",
+   "parent": 2260000
+  },
+  {
+   "id": 2260600,
+   "name": "Other warning system triggered",
+   "parent": 2260000
+  },
+  {
+   "id": 2270000,
+   "name": "Interference with aircraft from the ground",
+   "parent": 2200000
+  },
+  {
+   "id": 2270100,
+   "name": "Interference by LASER/Beamer",
+   "parent": 2270000
+  },
+  {
+   "id": 2270200,
+   "name": "Interference by fire works",
+   "parent": 2270000
+  },
+  {
+   "id": 2270300,
+   "name": "Interference by search lights",
+   "parent": 2270000
+  },
+  {
+   "id": 2270400,
+   "name": "Interference by flying kites",
+   "parent": 2270000
+  },
+  {
+   "id": 2270500,
+   "name": "Interference by model aircraft activity",
+   "parent": 2270000
+  },
+  {
+   "id": 2270600,
+   "name": "Interference by balloons",
+   "parent": 2270000
+  },
+  {
+   "id": 2270700,
+   "name": "Interference by other ground based activity",
+   "parent": 2270000
+  },
+  {
+   "id": 3000000,
+   "name": "Consequential events",
+   "parent": null
+  },
+  {
+   "id": 3010000,
+   "name": "Precautionary landing",
+   "parent": 3000000
+  },
+  {
+   "id": 3020000,
+   "name": "Declared emergency",
+   "parent": 3000000
+  },
+  {
+   "id": 3020100,
+   "name": "Declared emergency - Distress",
+   "parent": 3020000
+  },
+  {
+   "id": 3020200,
+   "name": "Declared emergency - Urgency",
+   "parent": 3020000
+  },
+  {
+   "id": 3030000,
+   "name": "Rejected take-off",
+   "parent": 3000000
+  },
+  {
+   "id": 3030100,
+   "name": "High speed rejected take-off",
+   "parent": 3030000
+  },
+  {
+   "id": 3030200,
+   "name": "Low speed rejected take-off",
+   "parent": 3030000
+  },
+  {
+   "id": 3040000,
+   "name": "Rejected landing",
+   "parent": 3000000
+  },
+  {
+   "id": 3050000,
+   "name": "Missed approach",
+   "parent": 3000000
+  },
+  {
+   "id": 3060000,
+   "name": "Emergency descent",
+   "parent": 3000000
+  },
+  {
+   "id": 3070000,
+   "name": "Ditching",
+   "parent": 3000000
+  },
+  {
+   "id": 3080000,
+   "name": "Forced landing",
+   "parent": 3000000
+  },
+  {
+   "id": 3090000,
+   "name": "Approach below minima",
+   "parent": 3000000
+  },
+  {
+   "id": 3100000,
+   "name": "Fuel dumping",
+   "parent": 3000000
+  },
+  {
+   "id": 3110000,
+   "name": "Evacuation",
+   "parent": 3100000
+  },
+  {
+   "id": 3120000,
+   "name": "Flapless landing",
+   "parent": 3100000
+  },
+  {
+   "id": 3130000,
+   "name": "Fuel burn off",
+   "parent": 3100000
+  },
+  {
+   "id": 3140000,
+   "name": "Aircraft return",
+   "parent": 3100000
+  },
+  {
+   "id": 3150000,
+   "name": "Overweight landing",
+   "parent": 3100000
+  },
+  {
+   "id": 3160000,
+   "name": "Aircraft abandoned / crew ejected",
+   "parent": 3100000
+  },
+  {
+   "id": 3170000,
+   "name": "Cargo dumped",
+   "parent": 3100000
+  },
+  {
+   "id": 3180000,
+   "name": "Emergency cancelled",
+   "parent": 3100000
+  },
+  {
+   "id": 3190000,
+   "name": "Flight cancellation",
+   "parent": 3100000
+  },
+  {
+   "id": 3200000,
+   "name": "Flight delay",
+   "parent": 3000000
+  },
+  {
+   "id": 3210000,
+   "name": "Fly-past inspection",
+   "parent": 3200000
+  },
+  {
+   "id": 3220000,
+   "name": "Handling check",
+   "parent": 3200000
+  },
+  {
+   "id": 3230000,
+   "name": "Precautionary descent",
+   "parent": 3200000
+  },
+  {
+   "id": 3240000,
+   "name": "External load dropped/jettisoned",
+   "parent": 3200000
+  },
+  {
+   "id": 3250000,
+   "name": "Diversion",
+   "parent": 3200000
+  },
+  {
+   "id": 3250100,
+   "name": "Diversion - weather",
+   "parent": 3250000
+  },
+  {
+   "id": 3250200,
+   "name": "Diversion - technical reasons",
+   "parent": 3250000
+  },
+  {
+   "id": 3250300,
+   "name": "Diversion - operational decision",
+   "parent": 3250000
+  },
+  {
+   "id": 3250400,
+   "name": "Diversion - other",
+   "parent": 3250000
+  },
+  {
+   "id": 3260000,
+   "name": "Change aircraft",
+   "parent": 3200000
+  },
+  {
+   "id": 3270000,
+   "name": "Emergency autorotation (helicopter) (Emergency autorotation (helicopter))",
+   "parent": 3200000
+  },
+  {
+   "id": 3280000,
+   "name": "Engine shutdown/flameout",
+   "parent": 3200000
+  },
+  {
+   "id": 3280100,
+   "name": "Engine shutdown - precautionary (soft) (Engine shutdown - precautionary (soft))",
+   "parent": 3280000
+  },
+  {
+   "id": 3280200,
+   "name": "Engine shutdown (hard) (Engine shutdown (hard))",
+   "parent": 3280000
+  },
+  {
+   "id": 3290000,
+   "name": "Nosed down/overturned",
+   "parent": 3200000
+  },
+  {
+   "id": 3300000,
+   "name": "Uncommanded movement of the aircraft",
+   "parent": 3000000
+  },
+  {
+   "id": 4000000,
+   "name": "Air Navigation Services",
+   "parent": null
+  },
+  {
+   "id": 4010000,
+   "name": "Operational issues",
+   "parent": 4000000
+  },
+  {
+   "id": 4010100,
+   "name": "Communications",
+   "parent": 4010000
+  },
+  {
+   "id": 4010200,
+   "name": "Information provision",
+   "parent": 4010000
+  },
+  {
+   "id": 4010201,
+   "name": "Provision of ANS flight information",
+   "parent": 4010200
+  },
+  {
+   "id": 4010202,
+   "name": "Provision of ANS geographical information",
+   "parent": 4010200
+  },
+  {
+   "id": 4010203,
+   "name": "Provision of ANS weather information",
+   "parent": 4010200
+  },
+  {
+   "id": 4010204,
+   "name": "Provision of ANS traffic information",
+   "parent": 4010200
+  },
+  {
+   "id": 4010300,
+   "name": "Separation provision",
+   "parent": 4010000
+  },
+  {
+   "id": 4010400,
+   "name": "Conflict detection/resolution",
+   "parent": 4010000
+  },
+  {
+   "id": 4010500,
+   "name": "Handling- occurrences",
+   "parent": 4010000
+  },
+  {
+   "id": 4010600,
+   "name": "Handing over procedure",
+   "parent": 4010000
+  },
+  {
+   "id": 4010700,
+   "name": "Clearance related",
+   "parent": 4010000
+  },
+  {
+   "id": 4010701,
+   "name": "Clearance - wrong altitude",
+   "parent": 4010700
+  },
+  {
+   "id": 4010702,
+   "name": "Clearance - wrong heading",
+   "parent": 4010700
+  },
+  {
+   "id": 4010703,
+   "name": "Clearance - wrong speed",
+   "parent": 4010700
+  },
+  {
+   "id": 4010704,
+   "name": "Clearance - wrong aircraft",
+   "parent": 4010700
+  },
+  {
+   "id": 4020000,
+   "name": "Aeronautical Info Service",
+   "parent": 4000000
+  },
+  {
+   "id": 4020100,
+   "name": "Out of date information",
+   "parent": 4020000
+  },
+  {
+   "id": 4020200,
+   "name": "Data difference",
+   "parent": 4020000
+  },
+  {
+   "id": 4020300,
+   "name": "Erroneous data",
+   "parent": 4020000
+  },
+  {
+   "id": 4020400,
+   "name": "Flight crew & ATM data",
+   "parent": 4020000
+  },
+  {
+   "id": 4030000,
+   "name": "ATFM",
+   "parent": 4000000
+  },
+  {
+   "id": 4040000,
+   "name": "Airspace management",
+   "parent": 4000000
+  },
+  {
+   "id": 4050000,
+   "name": "ATM/CNS serviceability",
+   "parent": 4000000
+  },
+  {
+   "id": 4050100,
+   "name": "Failure of ATM",
+   "parent": 4050000
+  },
+  {
+   "id": 4050101,
+   "name": "Failure Air Traffic Services",
+   "parent": 4050100
+  },
+  {
+   "id": 4050102,
+   "name": "Failure ASM",
+   "parent": 4050100
+  },
+  {
+   "id": 4050103,
+   "name": "Failure ATFM",
+   "parent": 4050100
+  },
+  {
+   "id": 4050200,
+   "name": "Failure of communication",
+   "parent": 4050000
+  },
+  {
+   "id": 4050300,
+   "name": "Failure of surveillance",
+   "parent": 4050000
+  },
+  {
+   "id": 4050400,
+   "name": "Failure of data processing",
+   "parent": 4050000
+  },
+  {
+   "id": 4050500,
+   "name": "Failure of support information",
+   "parent": 4050000
+  },
+  {
+   "id": 4050600,
+   "name": "Failure to provide navigation",
+   "parent": 4050000
+  },
+  {
+   "id": 4050700,
+   "name": "Failure of the power supply",
+   "parent": 4050000
+  },
+  {
+   "id": 4060000,
+   "name": "ATM emergency/security situation",
+   "parent": 4000000
+  },
+  {
+   "id": 4060100,
+   "name": "Fire-ATM facility",
+   "parent": 4060000
+  },
+  {
+   "id": 4060200,
+   "name": "Unlawful interference",
+   "parent": 4060000
+  },
+  {
+   "id": 4060300,
+   "name": "Bomb threat",
+   "parent": 4060000
+  },
+  {
+   "id": 4060400,
+   "name": "Smoke-ATM facility",
+   "parent": 4060000
+  },
+  {
+   "id": 4060500,
+   "name": "Sabotage-ATM facility",
+   "parent": 4060000
+  },
+  {
+   "id": 4060600,
+   "name": "Other event",
+   "parent": 4060000
+  },
+  {
+   "id": 4070000,
+   "name": "Events affecting ATM",
+   "parent": 4000000
+  },
+  {
+   "id": 4070100,
+   "name": "Closure of FIR",
+   "parent": 4070000
+  },
+  {
+   "id": 4070200,
+   "name": "Closure of aerodrome",
+   "parent": 4070000
+  },
+  {
+   "id": 4070300,
+   "name": "Closure of runway",
+   "parent": 4070000
+  },
+  {
+   "id": 4070400,
+   "name": "Reduced capacity",
+   "parent": 4070000
+  },
+  {
+   "id": 5000000,
+   "name": "Aerodrome & ground aids",
+   "parent": null
+  },
+  {
+   "id": 5010000,
+   "name": "Ground aids generally",
+   "parent": 5000000
+  },
+  {
+   "id": 5010100,
+   "name": "Aerodrome approach systems",
+   "parent": 5010000
+  },
+  {
+   "id": 5010101,
+   "name": "Instrument landing system related event (Instrument landing system (ILS))",
+   "parent": 5010100
+  },
+  {
+   "id": 5010102,
+   "name": "Global positioning system related event (Global positioning system (GPS))",
+   "parent": 5010100
+  },
+  {
+   "id": 5010103,
+   "name": "Marker beacon",
+   "parent": 5010100
+  },
+  {
+   "id": 5010104,
+   "name": "Non-directional beacon related event (Non-directional beacon (NDB))",
+   "parent": 5010100
+  },
+  {
+   "id": 5010105,
+   "name": "Distance measuring equipment related event (Distance measuring equipment (DME))",
+   "parent": 5010100
+  },
+  {
+   "id": 5010106,
+   "name": "VHF Omni-directional radio Range related event (VHF Omni-directional radio Range (VOR))",
+   "parent": 5010100
+  },
+  {
+   "id": 5010107,
+   "name": "Precision approach path indicator related event (Precision approach path indicator (PAPI))",
+   "parent": 5010100
+  },
+  {
+   "id": 5010108,
+   "name": "Microwave landing systems related event (Microwave landing systems (MLS))",
+   "parent": 5010100
+  },
+  {
+   "id": 5010109,
+   "name": "Precision approach radar related event (Precision approach radar (PAR))",
+   "parent": 5010100
+  },
+  {
+   "id": 5010110,
+   "name": "Visual approach slope indicator related event (Visual approach slope indicator (VASI))",
+   "parent": 5010100
+  },
+  {
+   "id": 5020000,
+   "name": "Aerodrome systems",
+   "parent": 5000000
+  },
+  {
+   "id": 5020100,
+   "name": "Lighting",
+   "parent": 5020000
+  },
+  {
+   "id": 5020101,
+   "name": "Aerodrome approach lighting",
+   "parent": 5020100
+  },
+  {
+   "id": 5020102,
+   "name": "Runway lighting",
+   "parent": 5020100
+  },
+  {
+   "id": 5020103,
+   "name": "Taxiway lighting",
+   "parent": 5020100
+  },
+  {
+   "id": 5020104,
+   "name": "Apron lighting",
+   "parent": 5020100
+  },
+  {
+   "id": 5020200,
+   "name": "Back-up power",
+   "parent": 5020000
+  },
+  {
+   "id": 5020300,
+   "name": "Signs",
+   "parent": 5020000
+  },
+  {
+   "id": 5020400,
+   "name": "Markings",
+   "parent": 5020000
+  },
+  {
+   "id": 5020401,
+   "name": "Runway marking",
+   "parent": 5020400
+  },
+  {
+   "id": 5020402,
+   "name": "Taxiway marking",
+   "parent": 5020400
+  },
+  {
+   "id": 5020403,
+   "name": "Apron marking",
+   "parent": 5020400
+  },
+  {
+   "id": 5020404,
+   "name": "Obstacle marking",
+   "parent": 5020400
+  },
+  {
+   "id": 5020500,
+   "name": "Overrun catch equipment",
+   "parent": 5020000
+  },
+  {
+   "id": 5020600,
+   "name": "Other equipment",
+   "parent": 5020000
+  },
+  {
+   "id": 5020700,
+   "name": "Winch-launch equipment",
+   "parent": 5020000
+  },
+  {
+   "id": 5020701,
+   "name": "Winch failed",
+   "parent": 5020700
+  },
+  {
+   "id": 5020702,
+   "name": "Winch-launch cable broke",
+   "parent": 5020700
+  },
+  {
+   "id": 5020798,
+   "name": "Other winch-launch equipment related event",
+   "parent": 5020700
+  },
+  {
+   "id": 5020800,
+   "name": "Main power",
+   "parent": 5020000
+  },
+  {
+   "id": 5030000,
+   "name": "Aerodrome services / operations",
+   "parent": 5000000
+  },
+  {
+   "id": 5030100,
+   "name": "Apron management",
+   "parent": 5030000
+  },
+  {
+   "id": 5030200,
+   "name": "Snow/ice removal",
+   "parent": 5030000
+  },
+  {
+   "id": 5030300,
+   "name": "Maintenance",
+   "parent": 5030000
+  },
+  {
+   "id": 5030400,
+   "name": "Foreign object control",
+   "parent": 5030000
+  },
+  {
+   "id": 5030500,
+   "name": "Bird control",
+   "parent": 5030000
+  },
+  {
+   "id": 5030600,
+   "name": "Wildlife control",
+   "parent": 5030000
+  },
+  {
+   "id": 5030700,
+   "name": "Vehicle/equipment operations",
+   "parent": 5030000
+  },
+  {
+   "id": 5030701,
+   "name": "Vehicle - vehicle collision",
+   "parent": 5030700
+  },
+  {
+   "id": 5030702,
+   "name": "Vehicle - person collision",
+   "parent": 5030700
+  },
+  {
+   "id": 5030703,
+   "name": "Vehicle - object collision",
+   "parent": 5030700
+  },
+  {
+   "id": 5030704,
+   "name": "Aircraft struck/damaged by vehicle",
+   "parent": 5030700
+  },
+  {
+   "id": 5040000,
+   "name": "Functioning/layout generally",
+   "parent": 5000000
+  },
+  {
+   "id": 5040100,
+   "name": "Aerodrome layout",
+   "parent": 5040000
+  },
+  {
+   "id": 5040200,
+   "name": "Aerodrome functioning",
+   "parent": 5040000
+  },
+  {
+   "id": 5050000,
+   "name": "Ground handling services",
+   "parent": 5000000
+  },
+  {
+   "id": 5050100,
+   "name": "Line maintenance",
+   "parent": 5050000
+  },
+  {
+   "id": 5050200,
+   "name": "De-icing",
+   "parent": 5050000
+  },
+  {
+   "id": 5050300,
+   "name": "Loading",
+   "parent": 5050000
+  },
+  {
+   "id": 5050301,
+   "name": "Loading of baggage",
+   "parent": 5050300
+  },
+  {
+   "id": 5050302,
+   "name": "Loading of cargo",
+   "parent": 5050300
+  },
+  {
+   "id": 5050303,
+   "name": "Loading - other",
+   "parent": 5050300
+  },
+  {
+   "id": 5050400,
+   "name": "Servicing",
+   "parent": 5050000
+  },
+  {
+   "id": 5050401,
+   "name": "Fuelling",
+   "parent": 5050400
+  },
+  {
+   "id": 5050402,
+   "name": "Catering",
+   "parent": 5050400
+  },
+  {
+   "id": 5050403,
+   "name": "Fluid servicing",
+   "parent": 5050400
+  },
+  {
+   "id": 5050404,
+   "name": "Servicing - other",
+   "parent": 5050400
+  },
+  {
+   "id": 5060000,
+   "name": "Cargo related",
+   "parent": 5000000
+  },
+  {
+   "id": 5060100,
+   "name": "Cargo handling",
+   "parent": 5060000
+  },
+  {
+   "id": 5060200,
+   "name": "Cargo acceptance",
+   "parent": 5060000
+  },
+  {
+   "id": 5060300,
+   "name": "Cargo weighting",
+   "parent": 5060000
+  },
+  {
+   "id": 5060400,
+   "name": "Cargo labelling",
+   "parent": 5060000
+  },
+  {
+   "id": 5060500,
+   "name": "Cargo packaging",
+   "parent": 5060000
+  },
+  {
+   "id": 5060600,
+   "name": "Cargo moving",
+   "parent": 5060000
+  },
+  {
+   "id": 5060700,
+   "name": "Cargo loading/unloading",
+   "parent": 5060000
+  },
+  {
+   "id": 5060800,
+   "name": "Cargo security check",
+   "parent": 5060000
+  },
+  {
+   "id": 5060900,
+   "name": "Cargo stowage",
+   "parent": 5060000
+  },
+  {
+   "id": 5070000,
+   "name": "Aerodrome security",
+   "parent": 5000000
+  },
+  {
+   "id": 5070100,
+   "name": "Unlawful entry",
+   "parent": 5070000
+  },
+  {
+   "id": 5070200,
+   "name": "Sabotage",
+   "parent": 5070000
+  },
+  {
+   "id": 5079800,
+   "name": "Other aerodrome security related event",
+   "parent": 5070000
+  },
+  {
+   "id": 6000000,
+   "name": "Civil Aviation Authority related event",
+   "parent": null
+  },
+  {
+   "id": 7000000,
+   "name": "Regulatory issues / events",
+   "parent": null
+  },
+  {
+   "id": 7010000,
+   "name": "Duty time related",
+   "parent": 7000000
+  },
+  {
+   "id": 7010100,
+   "name": "Duty time exceeded",
+   "parent": 7010000
+  },
+  {
+   "id": 7020000,
+   "name": "Rest time related",
+   "parent": 7000000
+  },
+  {
+   "id": 7020100,
+   "name": "Rest time less than required",
+   "parent": 7020000
+  },
+  {
+   "id": 7030000,
+   "name": "Staffing related event",
+   "parent": 7000000
+  },
+  {
+   "id": 7030100,
+   "name": "Staffing/crewing less than required",
+   "parent": 7030000
+  },
+  {
+   "id": 7030200,
+   "name": "Crew/staff not licensed for activity",
+   "parent": 7030000
+  },
+  {
+   "id": 7040000,
+   "name": "Operation in violation of license",
+   "parent": 7000000
+  },
+  {
+   "id": 7040100,
+   "name": "Air operator certificate (AOC) invalid (Air operator certificate (AOC) invalid)",
+   "parent": 7040000
+  },
+  {
+   "id": 7040200,
+   "name": "ATS license invalid",
+   "parent": 7040000
+  },
+  {
+   "id": 7050000,
+   "name": "Aircraft related regulatory event/issue",
+   "parent": 7000000
+  },
+  {
+   "id": 7050100,
+   "name": "Operation in violation of the MEL",
+   "parent": 7050000
+  },
+  {
+   "id": 7050200,
+   "name": "Aircraft not equipped for operation",
+   "parent": 7050000
+  },
+  {
+   "id": 7050300,
+   "name": "Aircraft not RVSM equipped",
+   "parent": 7050000
+  },
+  {
+   "id": 7050400,
+   "name": "Aircraft not equipped / certified for approach",
+   "parent": 7050000
+  },
+  {
+   "id": 7050500,
+   "name": "Aircraft operating time / maintenance interval exceeded",
+   "parent": 7050000
+  },
+  {
+   "id": 7050600,
+   "name": "Aircraft not airworthy",
+   "parent": 7050000
+  },
+  {
+   "id": 7050601,
+   "name": "Aircraft not airworthy - airworthiness directive not implemented (Airworthiness directive (AD) not implemented)",
+   "parent": 7050600
+  },
+  {
+   "id": 7050700,
+   "name": "Invalid / no permit to fly",
+   "parent": 7050000
+  },
+  {
+   "id": 7060000,
+   "name": "Operation in violation of aerodrome curfew",
+   "parent": 7000000
+  }
+ ],
+ "eventPhases": [
+  {
+   "id": 10000,
+   "name": "Powered Fixed-wing aircraft"
+  },
+  {
+   "id": 10100,
+   "name": "Standing"
+  },
+  {
+   "id": 10101,
+   "name": "Standing : Engine(s) Not Operating"
+  },
+  {
+   "id": 10102,
+   "name": "Standing : Engine(s) Start-up"
+  },
+  {
+   "id": 990899,
+   "name": "Standing : Engine(s) Run-up"
+  },
+  {
+   "id": 10103,
+   "name": "Standing : Engine(s) Operating"
+  },
+  {
+   "id": 10104,
+   "name": "Standing : Engine(s) Shut Down"
+  },
+  {
+   "id": 10198,
+   "name": "Standing : Other"
+  },
+  {
+   "id": 10200,
+   "name": "Taxi"
+  },
+  {
+   "id": 10201,
+   "name": "Push-back/tow"
+  },
+  {
+   "id": 990825,
+   "name": "Assisted, Engine(s) Not Operating"
+  },
+  {
+   "id": 990826,
+   "name": "Assisted, Engine(s) Start-up"
+  },
+  {
+   "id": 990827,
+   "name": "Assisted, Engine(s) Operating"
+  },
+  {
+   "id": 990828,
+   "name": "Assisted, Engine(s) Shutting Down"
+  },
+  {
+   "id": 990914,
+   "name": "Power back"
+  },
+  {
+   "id": 10202,
+   "name": "Taxiing to/from runway"
+  },
+  {
+   "id": 990829,
+   "name": "Taxi to runway"
+  },
+  {
+   "id": 990830,
+   "name": "Taxi to take-off position"
+  },
+  {
+   "id": 990831,
+   "name": "Taxi from runway"
+  },
+  {
+   "id": 990832,
+   "name": "Maintaining position"
+  },
+  {
+   "id": 990833,
+   "name": "High speed taxi trial"
+  },
+  {
+   "id": 10298,
+   "name": "Taxiing: Other"
+  },
+  {
+   "id": 10300,
+   "name": "Take-off"
+  },
+  {
+   "id": 10301,
+   "name": "Take-off run"
+  },
+  {
+   "id": 10303,
+   "name": "Rejected take-off"
+  },
+  {
+   "id": 10302,
+   "name": "Initial climb"
+  },
+  {
+   "id": 10304,
+   "name": "Climb into traffic pattern"
+  },
+  {
+   "id": 10305,
+   "name": "Emergency descent during take-off"
+  },
+  {
+   "id": 10306,
+   "name": "Uncontrolled descent during take-off"
+  },
+  {
+   "id": 10398,
+   "name": "Take-off: Other"
+  },
+  {
+   "id": 10400,
+   "name": "En-route"
+  },
+  {
+   "id": 10401,
+   "name": "Climb to cruising level or altitude"
+  },
+  {
+   "id": 10402,
+   "name": "Cruise"
+  },
+  {
+   "id": 10403,
+   "name": "Change of cruise level"
+  },
+  {
+   "id": 10404,
+   "name": "Normal descent"
+  },
+  {
+   "id": 10405,
+   "name": "Emergency descent en-route"
+  },
+  {
+   "id": 10406,
+   "name": "Uncontrolled descent en-route"
+  },
+  {
+   "id": 10407,
+   "name": "En-route - holding"
+  },
+  {
+   "id": 10498,
+   "name": "En-route: Other"
+  },
+  {
+   "id": 10500,
+   "name": "Manoeuvring"
+  },
+  {
+   "id": 10501,
+   "name": "Aerobatics"
+  },
+  {
+   "id": 10502,
+   "name": "Low flying"
+  },
+  {
+   "id": 10503,
+   "name": "Emergency descent"
+  },
+  {
+   "id": 10504,
+   "name": "Uncontrolled descent"
+  },
+  {
+   "id": 10598,
+   "name": "Manoeuvring: Other"
+  },
+  {
+   "id": 10600,
+   "name": "Approach"
+  },
+  {
+   "id": 10611,
+   "name": "Initial Approach"
+  },
+  {
+   "id": 10601,
+   "name": "Intermediate approach"
+  },
+  {
+   "id": 10602,
+   "name": "Final approach"
+  },
+  {
+   "id": 10603,
+   "name": "Circuit pattern - downwind"
+  },
+  {
+   "id": 10604,
+   "name": "Circuit pattern - base leg"
+  },
+  {
+   "id": 10605,
+   "name": "Circuit pattern - final approach"
+  },
+  {
+   "id": 990898,
+   "name": "Circuit pattern - crosswind"
+  },
+  {
+   "id": 10606,
+   "name": "Aborted - interrupted approach (before reaching decision height)"
+  },
+  {
+   "id": 10607,
+   "name": "Missed approach or go-around"
+  },
+  {
+   "id": 10608,
+   "name": "Emergency descent during approach"
+  },
+  {
+   "id": 10609,
+   "name": "Uncontrolled descent during an approach"
+  },
+  {
+   "id": 10610,
+   "name": "Approach - holding"
+  },
+  {
+   "id": 10698,
+   "name": "Approach : Other"
+  },
+  {
+   "id": 10700,
+   "name": "Landing"
+  },
+  {
+   "id": 10701,
+   "name": "Level off-touchdown"
+  },
+  {
+   "id": 10702,
+   "name": "Landing roll"
+  },
+  {
+   "id": 990918,
+   "name": "Landing roll - on runway"
+  },
+  {
+   "id": 10708,
+   "name": "Landing roll - off runway"
+  },
+  {
+   "id": 990920,
+   "name": "Landing aborted before touch-down"
+  },
+  {
+   "id": 10703,
+   "name": "Landing aborted after touch-down"
+  },
+  {
+   "id": 10706,
+   "name": "Emergency landing or off-runway landing"
+  },
+  {
+   "id": 10798,
+   "name": "Landing: Other"
+  },
+  {
+   "id": 10800,
+   "name": "Post-impact"
+  },
+  {
+   "id": 19900,
+   "name": "Unknown"
+  },
+  {
+   "id": 990824,
+   "name": "Helicopter"
+  },
+  {
+   "id": 990835,
+   "name": "Standing"
+  },
+  {
+   "id": 990844,
+   "name": "Standing : Engine(s) Not Operating"
+  },
+  {
+   "id": 990845,
+   "name": "Standing : Engine(s) Start-up"
+  },
+  {
+   "id": 990847,
+   "name": "Standing : Engine(s) Run-up"
+  },
+  {
+   "id": 990846,
+   "name": "Standing : Engines operating"
+  },
+  {
+   "id": 10105,
+   "name": "Standing : Rotors turning"
+  },
+  {
+   "id": 990848,
+   "name": "Standing : Other"
+  },
+  {
+   "id": 990836,
+   "name": "Taxi"
+  },
+  {
+   "id": 990849,
+   "name": "Taxi to runway"
+  },
+  {
+   "id": 990850,
+   "name": "Taxi to take-off position"
+  },
+  {
+   "id": 990851,
+   "name": "Taxi from runway"
+  },
+  {
+   "id": 990852,
+   "name": "Maintaining position"
+  },
+  {
+   "id": 10203,
+   "name": "Air taxi/hover taxi"
+  },
+  {
+   "id": 990853,
+   "name": "Taxi : Other"
+  },
+  {
+   "id": 990837,
+   "name": "Take-off"
+  },
+  {
+   "id": 990854,
+   "name": "Running take-off"
+  },
+  {
+   "id": 10307,
+   "name": "Vertical take-off"
+  },
+  {
+   "id": 990860,
+   "name": "Vertical take-off with external load attached"
+  },
+  {
+   "id": 990856,
+   "name": "Rejected take-off"
+  },
+  {
+   "id": 990855,
+   "name": "Initial climb"
+  },
+  {
+   "id": 990857,
+   "name": "Climb into traffic pattern"
+  },
+  {
+   "id": 990858,
+   "name": "Emergency descent during take-off"
+  },
+  {
+   "id": 990859,
+   "name": "Uncontrolled descent during take-off"
+  },
+  {
+   "id": 990861,
+   "name": "Hovering/transition from hover to forward flight"
+  },
+  {
+   "id": 990862,
+   "name": "Take-off : Other"
+  },
+  {
+   "id": 990838,
+   "name": "En-route"
+  },
+  {
+   "id": 990863,
+   "name": "Climb to cruising level or altitude"
+  },
+  {
+   "id": 990864,
+   "name": "Cruise"
+  },
+  {
+   "id": 990865,
+   "name": "Change of cruise level"
+  },
+  {
+   "id": 990866,
+   "name": "Normal descent"
+  },
+  {
+   "id": 990867,
+   "name": "Emergency descent en-route"
+  },
+  {
+   "id": 990868,
+   "name": "Emergency autorotation en-route"
+  },
+  {
+   "id": 990869,
+   "name": "Uncontrolled descent en-route"
+  },
+  {
+   "id": 990870,
+   "name": "En-route - holding"
+  },
+  {
+   "id": 990871,
+   "name": "En-route : Other"
+  },
+  {
+   "id": 990839,
+   "name": "Manoeuvring"
+  },
+  {
+   "id": 990872,
+   "name": "Aerobatics"
+  },
+  {
+   "id": 990873,
+   "name": "Low flying"
+  },
+  {
+   "id": 990874,
+   "name": "Pick-up/positioning of external load"
+  },
+  {
+   "id": 990875,
+   "name": "Emergency descent"
+  },
+  {
+   "id": 990877,
+   "name": "Uncontrolled descent"
+  },
+  {
+   "id": 10507,
+   "name": "Autorotative descent"
+  },
+  {
+   "id": 990876,
+   "name": "Emergency autorotation during manoeuvring"
+  },
+  {
+   "id": 990878,
+   "name": "Autorotation – practice"
+  },
+  {
+   "id": 990879,
+   "name": "Hovering"
+  },
+  {
+   "id": 10509,
+   "name": "Hovering out of ground effect"
+  },
+  {
+   "id": 10508,
+   "name": "Hovering in ground effect"
+  },
+  {
+   "id": 990880,
+   "name": "Manoeuvring : Other"
+  },
+  {
+   "id": 990840,
+   "name": "Approach"
+  },
+  {
+   "id": 990881,
+   "name": "Transition forward flight to hover"
+  },
+  {
+   "id": 990882,
+   "name": "Initial Approach"
+  },
+  {
+   "id": 990883,
+   "name": "Intermediate approach"
+  },
+  {
+   "id": 990884,
+   "name": "Final approach"
+  },
+  {
+   "id": 990885,
+   "name": "Circuit pattern - downwind"
+  },
+  {
+   "id": 990886,
+   "name": "Circuit pattern - base leg"
+  },
+  {
+   "id": 990887,
+   "name": "Circuit pattern - final approach"
+  },
+  {
+   "id": 990915,
+   "name": "Circuit pattern - crosswind"
+  },
+  {
+   "id": 990888,
+   "name": "Aborted approach before decision height"
+  },
+  {
+   "id": 990889,
+   "name": "Missed approach or go-around"
+  },
+  {
+   "id": 990890,
+   "name": "Emergency descent during approach"
+  },
+  {
+   "id": 990891,
+   "name": "Emergency autorotation during approach"
+  },
+  {
+   "id": 990892,
+   "name": "Uncontrolled descent during an approach"
+  },
+  {
+   "id": 990893,
+   "name": "Approach - holding"
+  },
+  {
+   "id": 990894,
+   "name": "Approach : Other"
+  },
+  {
+   "id": 990841,
+   "name": "Landing"
+  },
+  {
+   "id": 10709,
+   "name": "Transition from forward flight to hovering / hovering on landing"
+  },
+  {
+   "id": 990895,
+   "name": "Flare"
+  },
+  {
+   "id": 10707,
+   "name": "Vertical landing"
+  },
+  {
+   "id": 10704,
+   "name": "Run-on landing"
+  },
+  {
+   "id": 10705,
+   "name": "Autorotative landing"
+  },
+  {
+   "id": 990896,
+   "name": "Landing aborted after touch-down"
+  },
+  {
+   "id": 990897,
+   "name": "Emergency landing or off-runway landing"
+  },
+  {
+   "id": 990901,
+   "name": "A phase of flight while landing other than one of the landing phases above"
+  },
+  {
+   "id": 990842,
+   "name": "Post-impact"
+  },
+  {
+   "id": 990843,
+   "name": "Unknown"
+  },
+  {
+   "id": 30000,
+   "name": "Sailplane/Glider"
+  },
+  {
+   "id": 30100,
+   "name": "Standing"
+  },
+  {
+   "id": 30101,
+   "name": "Standing - tow/winch wire attached"
+  },
+  {
+   "id": 30102,
+   "name": "Standing - after landing"
+  },
+  {
+   "id": 30109,
+   "name": "Standing - Other"
+  },
+  {
+   "id": 30300,
+   "name": "Take-off"
+  },
+  {
+   "id": 30301,
+   "name": "Take-off run"
+  },
+  {
+   "id": 30302,
+   "name": "Take-off - initial climb"
+  },
+  {
+   "id": 30303,
+   "name": "Rejected take-off"
+  },
+  {
+   "id": 30304,
+   "name": "Emergency descent during take-off"
+  },
+  {
+   "id": 30305,
+   "name": "Uncontrolled descent during take-off"
+  },
+  {
+   "id": 30398,
+   "name": "Take-off: Other"
+  },
+  {
+   "id": 990801,
+   "name": "Take-off - Winch launch"
+  },
+  {
+   "id": 990803,
+   "name": "Winch-launch - Take-off run"
+  },
+  {
+   "id": 990804,
+   "name": "Winch-launch - Initital climb"
+  },
+  {
+   "id": 990805,
+   "name": "Winch-launch - Rope release"
+  },
+  {
+   "id": 990806,
+   "name": "Winch-launch - rejected take-off"
+  },
+  {
+   "id": 990807,
+   "name": "Winch launch - Uncontrolled descent during take-off"
+  },
+  {
+   "id": 990902,
+   "name": "Take-off - winch-launch: Other"
+  },
+  {
+   "id": 990802,
+   "name": "Take-off - Aircraft tow"
+  },
+  {
+   "id": 990808,
+   "name": "Aircraft tow - Take-off run"
+  },
+  {
+   "id": 990809,
+   "name": "Aircraft tow - Initital climb"
+  },
+  {
+   "id": 990810,
+   "name": "Aircraft tow - Rope release"
+  },
+  {
+   "id": 990811,
+   "name": "Aircraft tow - rejected take-off"
+  },
+  {
+   "id": 990812,
+   "name": "Aircraft tow - Uncontrolled descent"
+  },
+  {
+   "id": 990919,
+   "name": "Take-off - aircraft tow: Other"
+  },
+  {
+   "id": 30400,
+   "name": "En-route"
+  },
+  {
+   "id": 30401,
+   "name": "Slope lift"
+  },
+  {
+   "id": 30402,
+   "name": "Thermal lift"
+  },
+  {
+   "id": 30403,
+   "name": "Wave lift"
+  },
+  {
+   "id": 30404,
+   "name": "Cloud flying"
+  },
+  {
+   "id": 30505,
+   "name": "In search of lift"
+  },
+  {
+   "id": 30506,
+   "name": "Normal descent"
+  },
+  {
+   "id": 30405,
+   "name": "Ferry towing"
+  },
+  {
+   "id": 30407,
+   "name": "Emergency descent en route"
+  },
+  {
+   "id": 30408,
+   "name": "Uncontrolled descent en route"
+  },
+  {
+   "id": 30498,
+   "name": "En-route - Other"
+  },
+  {
+   "id": 30600,
+   "name": "Approach"
+  },
+  {
+   "id": 30406,
+   "name": "Final glide - goal run"
+  },
+  {
+   "id": 30601,
+   "name": "Circuit pattern - downwind"
+  },
+  {
+   "id": 30602,
+   "name": "Circuit pattern - base leg"
+  },
+  {
+   "id": 30603,
+   "name": "Circuit pattern - final approach"
+  },
+  {
+   "id": 990916,
+   "name": "Circuit pattern - crosswind"
+  },
+  {
+   "id": 30604,
+   "name": "Emergency descent"
+  },
+  {
+   "id": 30605,
+   "name": "Uncontrolled descent"
+  },
+  {
+   "id": 30698,
+   "name": "Approach: Other"
+  },
+  {
+   "id": 30700,
+   "name": "Landing"
+  },
+  {
+   "id": 30701,
+   "name": "Level-off/touchdown"
+  },
+  {
+   "id": 30702,
+   "name": "Landing roll"
+  },
+  {
+   "id": 30703,
+   "name": "Landing after failed launch"
+  },
+  {
+   "id": 990813,
+   "name": "Off-field landing"
+  },
+  {
+   "id": 30704,
+   "name": "Emergency landing"
+  },
+  {
+   "id": 30798,
+   "name": "Landing: Other"
+  },
+  {
+   "id": 30800,
+   "name": "Post-impact"
+  },
+  {
+   "id": 39900,
+   "name": "Unknown"
+  },
+  {
+   "id": 40000,
+   "name": "Hang/Para-glider"
+  },
+  {
+   "id": 40100,
+   "name": "Standing"
+  },
+  {
+   "id": 40101,
+   "name": "Ground check"
+  },
+  {
+   "id": 40198,
+   "name": "Other"
+  },
+  {
+   "id": 40300,
+   "name": "Take-off"
+  },
+  {
+   "id": 40301,
+   "name": "Foot launch"
+  },
+  {
+   "id": 40302,
+   "name": "Winch launch"
+  },
+  {
+   "id": 40303,
+   "name": "Aerotow launch"
+  },
+  {
+   "id": 40304,
+   "name": "Aborted launch"
+  },
+  {
+   "id": 40305,
+   "name": "Initial climb"
+  },
+  {
+   "id": 40306,
+   "name": "Uncontrolled descent in the take-off phase"
+  },
+  {
+   "id": 40398,
+   "name": "Take-off: Other"
+  },
+  {
+   "id": 40500,
+   "name": "En-route"
+  },
+  {
+   "id": 40501,
+   "name": "Slope lift"
+  },
+  {
+   "id": 40502,
+   "name": "Thermal lift"
+  },
+  {
+   "id": 990814,
+   "name": "Normal descent"
+  },
+  {
+   "id": 40503,
+   "name": "Emergency descent en route"
+  },
+  {
+   "id": 40504,
+   "name": "Uncontrolled descent en route"
+  },
+  {
+   "id": 40598,
+   "name": "En-route: Other"
+  },
+  {
+   "id": 40600,
+   "name": "Approach"
+  },
+  {
+   "id": 40601,
+   "name": "Circuit pattern - downwind"
+  },
+  {
+   "id": 40602,
+   "name": "Circuit pattern - base leg"
+  },
+  {
+   "id": 40604,
+   "name": "Circuit pattern - final approach"
+  },
+  {
+   "id": 990917,
+   "name": "Circuit pattern - crosswind"
+  },
+  {
+   "id": 990815,
+   "name": "Straight in"
+  },
+  {
+   "id": 40605,
+   "name": "Emergency descent"
+  },
+  {
+   "id": 40606,
+   "name": "Uncontrolled descent"
+  },
+  {
+   "id": 40698,
+   "name": "Approach: Other"
+  },
+  {
+   "id": 40700,
+   "name": "Landing"
+  },
+  {
+   "id": 40701,
+   "name": "Level-off-touchdown"
+  },
+  {
+   "id": 40798,
+   "name": "Landing: Other"
+  },
+  {
+   "id": 990900,
+   "name": "Off-field landing"
+  },
+  {
+   "id": 40800,
+   "name": "Post-impact"
+  },
+  {
+   "id": 49900,
+   "name": "Unknown"
+  },
+  {
+   "id": 50000,
+   "name": "Balloon"
+  },
+  {
+   "id": 50100,
+   "name": "Standing"
+  },
+  {
+   "id": 50101,
+   "name": "Assembly and checking (ground check)"
+  },
+  {
+   "id": 50102,
+   "name": "Cold air ventilation"
+  },
+  {
+   "id": 50103,
+   "name": "Hot air inflating"
+  },
+  {
+   "id": 50104,
+   "name": "Valve control test (\"parachute test\")"
+  },
+  {
+   "id": 50198,
+   "name": "Any other phase of flight before take-off"
+  },
+  {
+   "id": 50300,
+   "name": "Take-off"
+  },
+  {
+   "id": 50301,
+   "name": "Weighting"
+  },
+  {
+   "id": 50302,
+   "name": "Let-go"
+  },
+  {
+   "id": 50303,
+   "name": "Initial climb"
+  },
+  {
+   "id": 50398,
+   "name": "Take-off: Other"
+  },
+  {
+   "id": 50400,
+   "name": "En-route"
+  },
+  {
+   "id": 50401,
+   "name": "Stabilized climb"
+  },
+  {
+   "id": 50402,
+   "name": "Level flight"
+  },
+  {
+   "id": 50403,
+   "name": "Stabilized descent"
+  },
+  {
+   "id": 50404,
+   "name": "En-route: Emergency descent"
+  },
+  {
+   "id": 50405,
+   "name": "En-route: Uncontrolled descent"
+  },
+  {
+   "id": 50498,
+   "name": "En-route: Other"
+  },
+  {
+   "id": 50600,
+   "name": "Approach"
+  },
+  {
+   "id": 50601,
+   "name": "Final approach - normal (using planned glide slope)"
+  },
+  {
+   "id": 50602,
+   "name": "Approach: Emergency descent"
+  },
+  {
+   "id": 50603,
+   "name": "Approach: Uncontrolled descent"
+  },
+  {
+   "id": 50708,
+   "name": "Go-around"
+  },
+  {
+   "id": 50698,
+   "name": "Approach: Other"
+  },
+  {
+   "id": 50700,
+   "name": "Landing"
+  },
+  {
+   "id": 50701,
+   "name": "Flare"
+  },
+  {
+   "id": 50702,
+   "name": "Touch-down"
+  },
+  {
+   "id": 50703,
+   "name": "Tumbling"
+  },
+  {
+   "id": 50704,
+   "name": "Dragging"
+  },
+  {
+   "id": 50705,
+   "name": "Tear-away panels or valve opening"
+  },
+  {
+   "id": 50706,
+   "name": "Pilot light extinction"
+  },
+  {
+   "id": 50707,
+   "name": "Deflating"
+  },
+  {
+   "id": 50798,
+   "name": "Landing: Other"
+  },
+  {
+   "id": 50800,
+   "name": "Post-impact"
+  },
+  {
+   "id": 59900,
+   "name": "Unknown"
+  },
+  {
+   "id": 990903,
+   "name": "Parachuting"
+  },
+  {
+   "id": 990904,
+   "name": "Pre-flight preparation"
+  },
+  {
+   "id": 990905,
+   "name": "Leaving the aircraft"
+  },
+  {
+   "id": 990906,
+   "name": "Free falling"
+  },
+  {
+   "id": 990907,
+   "name": "Parachute opening"
+  },
+  {
+   "id": 990908,
+   "name": "Descend with parachute open"
+  },
+  {
+   "id": 990913,
+   "name": "Uncontrolled descent"
+  },
+  {
+   "id": 990909,
+   "name": "Approach/landing preparation"
+  },
+  {
+   "id": 990910,
+   "name": "Landing"
+  },
+  {
+   "id": 990911,
+   "name": "Post landing"
+  },
+  {
+   "id": 990912,
+   "name": "Other"
+  },
+  {
+   "id": 990816,
+   "name": "Maintenance phases"
+  },
+  {
+   "id": 990817,
+   "name": "Aircraft repair"
+  },
+  {
+   "id": 990818,
+   "name": "Aircraft modification"
+  },
+  {
+   "id": 990819,
+   "name": "Scheduled maintenance"
+  },
+  {
+   "id": 990820,
+   "name": "Non-scheduled maintenance"
+  },
+  {
+   "id": 990821,
+   "name": "Air worthiness directive"
+  },
+  {
+   "id": 990822,
+   "name": "Service bulletin"
+  },
+  {
+   "id": 990823,
+   "name": "Other"
+  },
+  {
+   "id": 990000,
+   "name": "Unknown aircraft category"
+  },
+  {
+   "id": 990100,
+   "name": "Standing"
+  },
+  {
+   "id": 990200,
+   "name": "Taxi"
+  },
+  {
+   "id": 990300,
+   "name": "Take-off"
+  },
+  {
+   "id": 990400,
+   "name": "En-route"
+  },
+  {
+   "id": 990500,
+   "name": "Manoeuvring"
+  },
+  {
+   "id": 990600,
+   "name": "Approach"
+  },
+  {
+   "id": 990700,
+   "name": "Landing"
+  },
+  {
+   "id": 990800,
+   "name": "Post-impact"
+  }
+ ]
+}

@@ -66,3 +66,12 @@ Swiss cheese writing rules: layers are defences between hazard and loss; a hole 
 ## When unsure
 
 Ask the user. Especially for: scope definitions, which regulator/ICAO document applies, whether a statement needs a citation, licence choices, and anything that would be published.
+
+## Analysis layer (added 2026-10-15)
+
+- `safetytool.scenario/1` (`schema/scenario.schema.json`, `js/scenario.js`): hazard/threat/event/consequence nodes, edges carrying barriers, deterministic series rule → each path is `cut` / `open` / `inconclusive`. Unknown or degraded-without-logic is **never** treated as cut or failed.
+- Bowtie optional fields (`js/bowtie-analysis.js`): control `status` (effective/degraded/failed/unknown; missing = unknown), `degradedLogic`, `assurance{performanceStandard,verification,lastVerified,nextReview}`, `evidenceIds`, plus model-level `evidence[]`, `assumptions[]`, `adrep`.
+- Swiss optional fields: layer `controlId`; hole `hfacsLevel`, `commonCauseId`, `escalationId`. `swissFromBowtie` builds the deep-dive view (holes = escalation factors) and leaves the trajectory empty on purpose.
+- New CLI: `simulate [--set id=status[:blocks|fails]]`, `impact`, `register [--as-of]`, `diff`, `swiss-from-bowtie`. Report these outputs, not memory.
+- Wording rule: a changed path count is a **Path Count Difference**, never "risk reduction"; "reachable" means "not shown to be cut", never "will occur".
+- `data/adrep-taxonomy.json`: ICAO ADREP ids/codes/names only (see docs/SOURCES.md); source PDFs stay outside the repo.

@@ -1,0 +1,30 @@
+{
+  "schema": "safetytool.scenario/1",
+  "meta": { "id": "SCN-0001", "title": "Runway incursion (illustrative template)", "domain": "Aerodrome", "author": "", "illustrative": true, "createdAt": "2026-10-15T00:00:00.000Z", "updatedAt": "2026-10-15T00:00:00.000Z" },
+  "adrep": { "occurrenceCategoryIds": [28], "eventTypeIds": [] },
+  "nodes": [
+    { "id": "HZ-01", "kind": "hazard", "text": "Conflicting runway occupancy" },
+    { "id": "TH-01", "kind": "threat", "text": "Vehicle enters the runway without clearance" },
+    { "id": "TH-02", "kind": "threat", "text": "Aircraft crosses a holding position without clearance" },
+    { "id": "EV-01", "kind": "event", "text": "Runway occupied while another aircraft is landing or taking off" },
+    { "id": "CS-01", "kind": "consequence", "text": "Collision on the runway" }
+  ],
+  "edges": [
+    { "id": "E-01", "from": "HZ-01", "to": "TH-01", "barrierIds": [] },
+    { "id": "E-02", "from": "HZ-01", "to": "TH-02", "barrierIds": [] },
+    { "id": "E-03", "from": "TH-01", "to": "EV-01", "barrierIds": ["BR-01", "BR-02"] },
+    { "id": "E-04", "from": "TH-02", "to": "EV-01", "barrierIds": ["BR-02", "BR-03"] },
+    { "id": "E-05", "from": "EV-01", "to": "CS-01", "barrierIds": ["BR-04"] }
+  ],
+  "barriers": [
+    { "id": "BR-01", "name": "Clearance and communication", "status": "effective", "role": "preventive", "degradedLogic": null, "evidenceIds": [], "assumptionIds": [] },
+    { "id": "BR-02", "name": "Entry procedure", "status": "unknown", "role": "preventive", "degradedLogic": null, "evidenceIds": [], "assumptionIds": [] },
+    { "id": "BR-03", "name": "Surveillance and alerting", "status": "degraded", "role": "preventive", "degradedLogic": null, "evidenceIds": [], "assumptionIds": ["AS-01"] },
+    { "id": "BR-04", "name": "Response by crew and controller", "status": "effective", "role": "recovery", "degradedLogic": null, "evidenceIds": [], "assumptionIds": [] }
+  ],
+  "evidence": [],
+  "assumptions": [
+    { "id": "AS-01", "statement": "Alerting is assumed to be unreliable in poor visibility (to be verified).", "kind": "HYPOTHESISED", "confidence": null, "owner": "" }
+  ],
+  "unknownPolicy": "inconclusive"
+}
