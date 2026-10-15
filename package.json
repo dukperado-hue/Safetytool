@@ -1,11 +1,11 @@
-﻿{
+{
   "name": "safetytool",
   "version": "0.1.0",
   "description": "Free, browser-based safety-model workbench (bowtie first) for aviation safety",
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node --test test/model.test.js test/models.test.js test/scenario.test.js test/analysis.test.js",
+    "test": "node --test test/model.test.js test/models.test.js test/scenario.test.js test/analysis.test.js test/gallery.test.js",
     "lint:model": "node cli/safetytool.js lint",
     "serve": "node cli/serve.js"
   },

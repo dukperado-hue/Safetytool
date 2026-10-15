@@ -1,0 +1,38 @@
+{
+  "schema": "safetytool.erc-matrix/1",
+  "name": "ATSB 2013 presentation matrix (reference preset)",
+  "status": "REFERENCE ONLY. Transcribed by hand from slides 10-12 and 22 of the source below. Not the matrix of any specific organisation: an operator or regulator may use a 4x4 version whose top-right cell is 2,500. Confirm against your organisation's own matrix before using any score for decisions.",
+  "source": {
+    "title": "Event Risk Classification (ERC) — Finding out where the problems really lie",
+    "author": "Russell Taylor, Australian Transport Safety Bureau (ATSB)",
+    "year": 2013,
+    "url": "https://asasi.org/wp-content/uploads/2021/05/Event-Risk-Classification-by-Russell-Taylor-2013.pdf",
+    "accessed": "2026-10-15",
+    "method": "ERC is from the ARMS (Aviation Risk Management Solutions) working group. Step 1 = most credible accident outcome; Step 2 = effectiveness of remaining barriers; Step 3 = score from the matrix. It is an analyst judgement, not a computed value."
+  },
+  "columns": [
+    { "id": "effective", "definition": "Several good barriers remaining" },
+    { "id": "limited", "definition": "An abnormal situation, more demanding to manage, but still a considerable safety margin" },
+    { "id": "minimal", "definition": "Some barrier(s) still in place" },
+    { "id": "notEffective", "definition": "An accident was not avoided, or was avoided by luck" }
+  ],
+  "rows": [
+    { "id": "highCapacityCatastrophic", "outcome": "More than 38 fatalities", "cells": [
+      { "score": 250, "band": "medium" }, { "score": 503, "band": "high" }, { "score": 2503, "band": "veryHigh" }, { "score": 12500, "band": "veryHigh" } ] },
+    { "id": "catastrophic", "outcome": "Multiple fatalities (7 to 38)", "cells": [
+      { "score": 50, "band": "medium" }, { "score": 102, "band": "medium" }, { "score": 502, "band": "high" }, { "score": 2500, "band": "veryHigh" } ] },
+    { "id": "major", "outcome": "1 to 6 fatalities", "cells": [
+      { "score": 10, "band": "low" }, { "score": 21, "band": "medium" }, { "score": 101, "band": "medium" }, { "score": 500, "band": "high" } ] },
+    { "id": "injury", "outcome": "1 or more injuries (no fatalities), minor damage to aircraft", "cells": [
+      { "score": 2, "band": "low" }, { "score": 4, "band": "low" }, { "score": 20, "band": "medium" }, { "score": 100, "band": "medium" } ] },
+    { "id": "noAccident", "outcome": "No potential for aircraft damage or injuries", "cells": [
+      { "score": 1, "band": "noAccidentOutcome" }, { "score": 1, "band": "noAccidentOutcome" }, { "score": 1, "band": "noAccidentOutcome" }, { "score": 1, "band": "noAccidentOutcome" } ] }
+  ],
+  "bands": {
+    "veryHigh": "Investigate and take action immediately",
+    "high": "Investigate",
+    "medium": "Possibly investigate or inform research",
+    "low": "Database entry",
+    "noAccidentOutcome": "Database entry"
+  }
+}

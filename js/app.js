@@ -7,6 +7,8 @@ import { renderModel, exportSvgString, exportPngBlob, installCanvasMeasurer } fr
 import { buildSwissForm, buildShellForm } from './forms.js';
 import { STR } from './i18n.js';
 import { drawSimulate } from './simtab.js';
+import { drawGuide, GUIDE_STRINGS } from './guide.js';
+import { drawGallery, readWorks, writeWorks, upsertWork, newId } from './gallery.js';
 import { HELP, GLOSSARY_ORDER, MODEL_INTRO, helpFor, explainShort } from './help.js';
 
 const $ = (s) => document.querySelector(s);
@@ -35,6 +37,8 @@ const state = {
   rtab: 'inspector',
   view: { x: 0, y: 0, k: 1 },
   last: null,
+  guide: { on: false, step: 0 },
+  galleryId: null,
 };
 
 const t = (k) => k.split('.').reduce((o, p) => (o ? o[p] : undefined), STR[state.lang]) ?? k;
@@ -87,6 +91,7 @@ function loadModel(m, { fit = true } = {}) {
   state.undo[type] = [];
   state.redo[type] = [];
   state.models[type] = TYPES[type].normalize(m);
+  state.galleryId = null;
   state.selectedId = null;
   state.selectedKind = null;
   save();
@@ -368,10 +373,28 @@ function drawInspector() {
 }
 
 // ---------- help tab ----------
+function guideCtx() {
+  return {
+    type: state.type, model: cur(), lang: state.lang, step: state.guide.step,
+    setStep: (n) => { state.guide.step = n; drawHelp(); },
+    close: () => { state.guide.on = false; drawHelp(); },
+    refreshGuide: () => drawHelp(),
+    mutate,
+    openSimulate: () => setTab('simulate'),
+    saveGallery: () => !!saveToGallery(false),
+  };
+}
+function startGuide() { state.guide = { on: true, step: 0 }; setRightTab('help'); }
+
 function drawHelp() {
   const host = $('#help');
   host.textContent = '';
   const mk = (tag, txt, cls) => { const e = document.createElement(tag); if (txt != null) e.textContent = txt; if (cls) e.className = cls; return e; };
+  if (state.guide.on) { drawGuide(host, guideCtx()); return; }
+  const gs = mk('button', GUIDE_STRINGS[state.lang].start, 'primary');
+  gs.type = 'button';
+  gs.addEventListener('click', startGuide);
+  host.appendChild(gs);
 
   const sw = mk('label', null, 'fld chk helpswitch');
   const cb = mk('input');
@@ -420,13 +443,14 @@ function syncHelpButton() { $('#b-help').setAttribute('aria-pressed', String(sta
 
 function setRightTab(name) {
   state.rtab = name;
-  ['inspector', 'quality', 'help'].forEach((n) => {
+  ['inspector', 'quality', 'help', 'gallery'].forEach((n) => {
     $('#rp-' + n).hidden = n !== name;
     const b = $('#r-' + n);
     b.setAttribute('aria-selected', String(n === name));
     b.tabIndex = n === name ? 0 : -1;
   });
   if (name === 'help') drawHelp();
+  if (name === 'gallery') drawGalleryPane();
 }
 
 // ---------- meta tab ----------
@@ -453,6 +477,48 @@ function drawForm() {
   host.scrollTop = top;
 }
 
+// ---------- online / offline ----------
+function netStatus() {
+  const f = $('#footer');
+  if (!f) return;
+  let s = f.querySelector('#net');
+  if (!s) { s = document.createElement('span'); s.id = 'net'; f.appendChild(s); }
+  const on = navigator.onLine !== false;
+  const lbl = state.lang === 'th' ? (on ? 'ออนไลน์' : 'ออฟไลน์ — ใช้งานต่อได้ งานเก็บในเบราว์เซอร์') : (on ? 'online' : 'offline — still works; work is kept in this browser');
+  s.textContent = '';
+  const dot = document.createElement('span');
+  dot.className = 'net-dot' + (on ? '' : ' off');
+  dot.setAttribute('aria-hidden', 'true');
+  s.append(dot, lbl);
+}
+function registerOffline() {
+  if (!('serviceWorker' in navigator)) return;
+  const dev = ['localhost', '127.0.0.1'].includes(location.hostname) && !/[?&]sw=1/.test(location.search);
+  if (dev) return; // keep local development uncached; add ?sw=1 to test offline mode locally
+  navigator.serviceWorker.register('sw.js').catch(() => { /* offline mode is optional */ });
+}
+
+// ---------- gallery ----------
+function thumbSvg(type, model) {
+  const m = TYPES[type].normalize(JSON.parse(JSON.stringify(model)));
+  return exportSvgString(type, m, { showEsc: false, kindTags: false });
+}
+function saveToGallery(asNew) {
+  const id = !asNew && state.galleryId ? state.galleryId : newId();
+  const works = upsertWork(readWorks(), { id, type: state.type, model: cur() });
+  if (!writeWorks(works)) return null;
+  state.galleryId = id;
+  return id;
+}
+function drawGalleryPane() {
+  drawGallery($('#gallery'), {
+    lang: state.lang, currentType: state.type, currentId: state.galleryId, thumbSvg,
+    openModel: (m, workId) => { if (loadModel(m)) { state.galleryId = workId; drawGalleryPane(); } },
+    saveCurrent: saveToGallery,
+    onChange: drawGalleryPane,
+  });
+}
+
 // ---------- labels / layout ----------
 function labels() {
   document.documentElement.lang = state.lang;
@@ -462,12 +528,13 @@ function labels() {
     '#b-example': 'example', '#b-new': 'new', '#b-open': 'open', '#b-save': 'save', '#b-svg': 'svg', '#b-png': 'png', '#b-csv': 'csv', '#b-print': 'print',
     '#b-undo': 'undo', '#b-redo': 'redo', '#b-fit': 'fit', '#b-lang': 'lang', '#b-theme': 'theme', '#b-help': 'help',
     '#tab-diagram': 'tabDiagram', '#tab-simulate': 'tabSimulate', '#tab-table': 'tabTable', '#tab-meta': 'tabMeta', '#tab-form': 'tabForm',
-    '#r-inspector': 'rInspector', '#r-help': 'rHelp',
+    '#r-inspector': 'rInspector', '#r-help': 'rHelp', '#r-gallery': 'rGallery',
     '#m-bowtie': 'mBowtie', '#m-swiss': 'mSwiss', '#m-shell': 'mShell',
   };
   Object.entries(map).forEach(([sel, key]) => { $(sel).textContent = t(key); });
   $('#lbl-esc').textContent = t('esc');
   $('#footer').textContent = t('disclaimer');
+  netStatus();
   $('#models-label').textContent = t('models');
   $('#b-addthreat').textContent = t('addThreat');
   $('#b-addcons').textContent = t('addConsequence');
@@ -629,8 +696,10 @@ function bind() {
     snapshot();
     state.models[state.type] = spec().empty();
     state.selectedId = null; state.selectedKind = null;
+    state.galleryId = null;
     save();
     applyType();
+    startGuide();
   });
   $('#b-open').addEventListener('click', () => $('#file').click());
   $('#file').addEventListener('change', async (ev) => {
@@ -654,7 +723,7 @@ function bind() {
   $('#b-addthreat').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addThreat(m).id; }); state.selectedId = id; state.selectedKind = 'threat'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
   $('#b-addcons').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addConsequence(m).id; }); state.selectedId = id; state.selectedKind = 'consequence'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
   ['form', 'diagram', 'simulate', 'table', 'meta'].forEach((n) => $('#tab-' + n).addEventListener('click', () => setTab(n)));
-  ['inspector', 'quality', 'help'].forEach((n) => $('#r-' + n).addEventListener('click', () => setRightTab(n)));
+  ['inspector', 'quality', 'help', 'gallery'].forEach((n) => $('#r-' + n).addEventListener('click', () => setRightTab(n)));
   TYPE_IDS.forEach((id) => $('#m-' + id).addEventListener('click', () => { switchType(id); }));
 
   const stage = $('#stage');
@@ -694,6 +763,9 @@ function bind() {
 
 async function init() {
   installCanvasMeasurer();
+  registerOffline();
+  window.addEventListener('online', netStatus);
+  window.addEventListener('offline', netStatus);
   try {
     const p = JSON.parse(lsGet(PREF) || '{}');
     if (p.lang) state.lang = p.lang;

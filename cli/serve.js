@@ -8,7 +8,7 @@ const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const port = Number(process.argv[2]) || 8765;
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml' };
 // Only these top-level locations are served (never docs/reference material).
-const allowed = ['index.html', 'js', 'css', 'data'];
+const allowed = ['index.html', 'sw.js', 'js', 'css', 'data'];
 
 createServer(async (req, res) => {
   try {
