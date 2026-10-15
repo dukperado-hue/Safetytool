@@ -5,9 +5,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "node --test test/model.test.js test/models.test.js test/scenario.test.js test/analysis.test.js test/gallery.test.js test/erc.test.js",
+    "test": "node --test test/model.test.js test/models.test.js test/scenario.test.js test/analysis.test.js test/gallery.test.js test/erc.test.js test/report.test.js",
     "lint:model": "node cli/safetytool.js lint",
     "serve": "node cli/serve.js"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

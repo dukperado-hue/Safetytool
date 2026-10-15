@@ -173,3 +173,7 @@ td.erc-red::before{content:"\25B2 "}td.erc-yellow::before{content:"\25C6 "}td.er
 .sim-cut-text::marker{color:var(--strong);content:"\25A0  "}.sim-open-text::marker{color:var(--poor);content:"\25B2  "}
 @media (max-width:700px){.cmp-heads,.cmp-cards{grid-template-columns:1fr}}
 .rtabs button{white-space:nowrap;font-size:13px;padding:9px 2px}
+
+/* Report tab */
+.rpt-sections{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 12px;margin:8px 0}
+.rpt-preview{border:1px solid var(--line);background:#f5f4f1;margin-top:10px;overflow:auto;max-height:70vh}

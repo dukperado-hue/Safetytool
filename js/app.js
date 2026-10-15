@@ -6,6 +6,7 @@ import { lint as lintBowtie, summarize } from './lint.js';
 import { renderModel, exportSvgString, exportPngBlob, installCanvasMeasurer } from './render.js';
 import { buildSwissForm, buildShellForm } from './forms.js';
 import { STR } from './i18n.js';
+import { drawReport } from './reporttab.js';
 import { drawCompare } from './comparetab.js';
 import { drawSimulate } from './simtab.js';
 import { drawGuide, GUIDE_STRINGS } from './guide.js';
@@ -17,7 +18,7 @@ const PREF = 'safetytool.prefs';
 
 // ---------- model-type registry ----------
 const TYPES = {
-  bowtie: { schema: M.SCHEMA, empty: M.emptyModel, validate: M.validateShape, normalize: M.normalize, lint: lintBowtie, find: M.findNode, example: 'data/example-wildlife.json', tabs: ['diagram', 'simulate', 'compare', 'table', 'meta'] },
+  bowtie: { schema: M.SCHEMA, empty: M.emptyModel, validate: M.validateShape, normalize: M.normalize, lint: lintBowtie, find: M.findNode, example: 'data/example-wildlife.json', tabs: ['diagram', 'simulate', 'compare', 'report', 'table', 'meta'] },
   swiss: { schema: SW.SCHEMA, empty: SW.emptySwiss, validate: SW.validateSwiss, normalize: SW.normalizeSwiss, lint: SW.lintSwiss, find: SW.findSwiss, example: 'data/example-swiss.json', tabs: ['form', 'diagram', 'table', 'meta'] },
   shell: { schema: SH.SCHEMA, empty: SH.emptyShell, validate: SH.validateShell, normalize: SH.normalizeShell, lint: SH.lintShell, find: SH.findShell, example: 'data/example-shell.json', tabs: ['form', 'diagram', 'table', 'meta'] },
 };
@@ -529,7 +530,7 @@ function labels() {
   const map = {
     '#b-example': 'example', '#b-new': 'new', '#b-open': 'open', '#b-save': 'save', '#b-svg': 'svg', '#b-png': 'png', '#b-csv': 'csv', '#b-print': 'print',
     '#b-undo': 'undo', '#b-redo': 'redo', '#b-fit': 'fit', '#b-lang': 'lang', '#b-theme': 'theme', '#b-help': 'help',
-    '#tab-diagram': 'tabDiagram', '#tab-simulate': 'tabSimulate', '#tab-compare': 'tabCompare', '#tab-table': 'tabTable', '#tab-meta': 'tabMeta', '#tab-form': 'tabForm',
+    '#tab-diagram': 'tabDiagram', '#tab-simulate': 'tabSimulate', '#tab-compare': 'tabCompare', '#tab-report': 'tabReport', '#tab-table': 'tabTable', '#tab-meta': 'tabMeta', '#tab-form': 'tabForm',
     '#r-inspector': 'rInspector', '#r-help': 'rHelp', '#r-gallery': 'rGallery',
     '#m-bowtie': 'mBowtie', '#m-swiss': 'mSwiss', '#m-shell': 'mShell',
   };
@@ -555,6 +556,7 @@ function labels() {
   }
 }
 
+function reportSvg() { return exportSvgString('bowtie', cur(), { showEsc: state.showEsc, kindTags: false }); }
 function setBaseline(b) { state.baseline = b; refresh(); }
 
 function applyTheme() { document.documentElement.dataset.theme = state.dark ? 'dark' : 'light'; }
@@ -563,6 +565,7 @@ function refresh({ inspector = false, fit = false, form = false } = {}) {
   drawLint();
   if (state.tab === 'diagram') drawDiagram({ fit });
   if (state.tab === 'simulate') drawSimulate($('#simulate'), cur(), { lang: state.lang, mutate });
+  if (state.tab === 'report') drawReport($('#report'), cur(), { lang: state.lang, baseline: state.baseline, svg: reportSvg, download, fileBase });
   if (state.tab === 'compare') drawCompare($('#compare'), cur(), { lang: state.lang, baseline: state.baseline, setBaseline });
   if (state.tab === 'table') drawTable();
   if (state.tab === 'meta') drawMeta();
@@ -577,7 +580,7 @@ function setTab(name) {
   const allowed = spec().tabs;
   if (!allowed.includes(name)) name = allowed[0];
   state.tab = name;
-  ['form', 'diagram', 'simulate', 'compare', 'table', 'meta'].forEach((n) => {
+  ['form', 'diagram', 'simulate', 'compare', 'report', 'table', 'meta'].forEach((n) => {
     const show = allowed.includes(n);
     $('#tab-' + n).hidden = !show;
     $('#pane-' + n).hidden = n !== name;
@@ -727,7 +730,7 @@ function bind() {
   $('#chk-esc').addEventListener('change', (ev) => { state.showEsc = ev.target.checked; savePrefs(); drawDiagram({ fit: true }); });
   $('#b-addthreat').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addThreat(m).id; }); state.selectedId = id; state.selectedKind = 'threat'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
   $('#b-addcons').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addConsequence(m).id; }); state.selectedId = id; state.selectedKind = 'consequence'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
-  ['form', 'diagram', 'simulate', 'compare', 'table', 'meta'].forEach((n) => $('#tab-' + n).addEventListener('click', () => setTab(n)));
+  ['form', 'diagram', 'simulate', 'compare', 'report', 'table', 'meta'].forEach((n) => $('#tab-' + n).addEventListener('click', () => setTab(n)));
   ['inspector', 'quality', 'help', 'gallery'].forEach((n) => $('#r-' + n).addEventListener('click', () => setRightTab(n)));
   TYPE_IDS.forEach((id) => $('#m-' + id).addEventListener('click', () => { switchType(id); }));
 
