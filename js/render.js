@@ -11,14 +11,14 @@ const NS = 'http://www.w3.org/2000/svg';
 const FONT = 'system-ui,-apple-system,"Segoe UI","Noto Sans Thai","Leelawadee UI",sans-serif';
 
 export const SVG_CSS = `
-.st-root{--bg:#ffffff;--ink:#1b2430;--muted:#5b6675;--line:#7a8594;
- --haz:#fff1c2;--haz-b:#c58a00;--top:#ffe0d2;--top-b:#c4411c;
- --thr:#e3eefc;--thr-b:#2b6cb0;--con:#fde4ea;--con-b:#b83254;
- --ctl:#ffffff;--ctl-b:#56616f;--esc:#efe7fb;--esc-b:#7a55b8;--ecl:#f6f1fd;
- --poor:#d64545;--weak:#e8883a;--fair:#e6c230;--strong:#3a9d5d;--none:#b9c0c9;--sel:#0b57d0;
+.st-root{--bg:#ffffff;--ink:#14202e;--muted:#5b6675;--line:#7a8594;
+ --haz:#fff6d6;--haz-b:#b8860b;--top:#fde7dc;--top-b:#c0501f;
+ --thr:#e6eef8;--thr-b:#3b6ea8;--con:#f6e6f0;--con-b:#8a3b6e;
+ --ctl:#ffffff;--ctl-b:#475569;--esc:#efe7fb;--esc-b:#7a55b8;--ecl:#f6f1fd;
+ --poor:#c62828;--weak:#b26a00;--fair:#c9a227;--strong:#1e7b45;--none:#6b7785;--sel:#1f5fbf;
  --cheese:#fff3bf;--cheese-b:#c9a227;--act:#fde0e0;--act-b:#c0392b;--lat:#e3e8ff;--lat-b:#4c5fd5;--wall:#6b7480;--traj:#d64545;
  --cS:#e8f3ff;--cH:#e6f6ec;--cE:#fff0dc;--cL:#f1e8fb;--cX:#eef0f3;
- --ok:#3a9d5d;--bad:#d64545;--unk:#8b95a3}
+ --ok:#1e7b45;--bad:#c62828;--unk:#6b7785}
 .st-root.dark{--bg:#10151c;--ink:#e6ebf2;--muted:#9aa6b5;--line:#7d8898;
  --haz:#3d3210;--haz-b:#d9a31a;--top:#4a2417;--top-b:#e0673f;
  --thr:#14304f;--thr-b:#5b9be0;--con:#4a1a2a;--con-b:#e0708f;
