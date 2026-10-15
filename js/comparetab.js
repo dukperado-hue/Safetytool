@@ -3,6 +3,7 @@
 
 import { compareBowties } from './bowtie-analysis.js';
 import { readWorks } from './gallery.js';
+import { localizeMsg } from './msgs.js';
 
 const S = {
   th: {
@@ -116,7 +117,7 @@ export function drawCompare(host, m, ctx) {
     const w = el('div', 'callout cmp-warn');
     w.appendChild(el('strong', null, '▲ ' + L.warn));
     const ul = el('ul', 'sim-list');
-    d.notes.forEach((n) => ul.appendChild(el('li', null, n)));
+    d.notes.forEach((n) => ul.appendChild(el('li', null, localizeMsg(n, ctx.lang))));
     w.appendChild(ul);
     host.appendChild(w);
   }

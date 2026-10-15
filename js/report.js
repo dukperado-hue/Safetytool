@@ -4,6 +4,7 @@
 
 import { simulateBowtie, assuranceRegister, compareBowties } from './bowtie-analysis.js';
 import { ercLookup, pickMatrix } from './erc.js';
+import { localizeMsg } from './msgs.js';
 
 export const SECTIONS = ['summary', 'diagram', 'paths', 'barriers', 'erc', 'evidence', 'compare', 'limits'];
 
@@ -83,7 +84,7 @@ export function buildReport(m, opts = {}) {
   if (want.has('paths')) {
     if (!sim.ok) out.push(`<section>${h('paths')}<p>${esc((sim.errors || []).slice(0, 3).join('; '))}</p></section>`);
     else {
-      const rows = sim.run.paths.map((p) => [esc(nm(m, p.threatId)), esc(nm(m, p.consequenceId)), badge(L, p.result) + (p.fragileCut ? ' *' : ''), esc(p.reason || '')]);
+      const rows = sim.run.paths.map((p) => [esc(nm(m, p.threatId)), esc(nm(m, p.consequenceId)), badge(L, p.result) + (p.fragileCut ? ' *' : ''), esc(localizeMsg(p.reason || '', opts.lang))]);
       let html = `<section>${h('paths')}${table([L.threat, L.cons, L.res, L.why], rows)}`;
       if (sim.run.uncontrolledEscalations.length) html += `<h3>${esc(L.unctl)}</h3><ul>${sim.run.uncontrolledEscalations.map((u) => `<li>${esc(u.text)}</li>`).join('')}</ul>`;
       out.push(html + '</section>');
@@ -122,11 +123,11 @@ export function buildReport(m, opts = {}) {
     if (r.ok) {
       const d = r.diff;
       const rows = [[esc(L.cmpBase), d.pathCount.baseline.cut, d.pathCount.baseline.open, d.pathCount.baseline.inconclusive], ['', d.pathCount.alternative.cut, d.pathCount.alternative.open, d.pathCount.alternative.inconclusive]];
-      out.push(`<section>${h('compare')}<p>${esc(L.cmpNote)}</p>${table(['', L.result.cut, L.result.open, L.result.inconclusive], rows)}<p>${esc(L.newlyCut)}: ${d.newlyCut.length} · ${esc(L.newlyOpen)}: ${d.newlyOpen.length}</p>${d.notes.length ? `<ul>${d.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}</section>`);
+      out.push(`<section>${h('compare')}<p>${esc(L.cmpNote)}</p>${table(['', L.result.cut, L.result.open, L.result.inconclusive], rows)}<p>${esc(L.newlyCut)}: ${d.newlyCut.length} · ${esc(L.newlyOpen)}: ${d.newlyOpen.length}</p>${d.notes.length ? `<ul>${d.notes.map((n) => `<li>${esc(localizeMsg(n, opts.lang))}</li>`).join('')}</ul>` : ''}</section>`);
     }
   }
 
-  if (want.has('limits') && sim.ok) out.push(`<section>${h('limits')}<ul>${sim.run.limitations.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></section>`);
+  if (want.has('limits') && sim.ok) out.push(`<section>${h('limits')}<ul>${sim.run.limitations.map((x) => `<li>${esc(localizeMsg(x, opts.lang))}</li>`).join('')}</ul></section>`);
   out.push(`<footer class="rf">${esc(L.disclaimer)}</footer>`);
   return `<article class="rpt">${out.join('\n')}</article>`;
 }

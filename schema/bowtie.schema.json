@@ -244,6 +244,14 @@
           "type": "integer",
           "minimum": 0
         },
+        "sharedWith": {
+          "description": "Optional. Extra lanes this ONE control also stands on: other threat ids (side prevent) or consequence ids (side recover). Not the control's own lane.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
         "text": {
           "type": "string"
         },

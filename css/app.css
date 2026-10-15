@@ -182,3 +182,30 @@ td.erc-red::before{content:"\25B2 "}td.erc-yellow::before{content:"\25C6 "}td.er
 .assure{border-top:1px solid var(--line);margin-top:10px;padding-top:4px}
 .assure input[aria-invalid=true]{border-color:var(--danger)}
 .assure .fcard{background:var(--bg)}
+
+/* Narrow screens (phones, small tablets): the page scrolls as a whole, toolbars and tabs scroll sideways */
+@media (max-width:900px){
+  html,body{height:auto;min-height:100%}
+  body{display:block}
+  header{gap:6px 10px;padding:8px 10px}
+  .brand span{display:none}
+  .models{flex-wrap:wrap}
+  .tools{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .tools>*{flex:0 0 auto}
+  main{display:block}
+  .work{min-height:0}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;padding:0 8px;-webkit-overflow-scrolling:touch}
+  .tabs>*{flex:0 0 auto;white-space:nowrap}
+  .tabs .grow{display:none}
+  #stage{height:58vh;min-height:300px;flex:none}
+  [role=tabpanel]{min-height:0}
+  .scroll{max-height:none;overflow:visible}
+  .side{max-height:none;overflow:visible;border-top:1px solid var(--line)}
+  .rpanel{overflow:visible}
+  .rtabs{overflow-x:auto}
+  button,select{min-height:36px}
+  .sim-table,.erc-table{display:block;overflow-x:auto}
+  .rpt-preview{max-height:60vh}
+}
+
+:root{color-scheme:light}:root[data-theme="dark"]{color-scheme:dark}

@@ -3,6 +3,7 @@
 // so they are saved, undoable and exported with the file.
 
 import { controlsOf } from './model.js';
+import { localizeMsg } from './msgs.js';
 import { simulateBowtie, assuranceRegister } from './bowtie-analysis.js';
 import { pickMatrix, ercLookup, barrierContext, BARRIER_LEVELS } from './erc.js';
 
@@ -210,6 +211,7 @@ function drawErc(host, m, L, api) {
 
 export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
   const L = S[lang] || S.th;
+  const msg = (s) => localizeMsg(s, lang);
   const api = { mutate };
   const top = host.scrollTop;
   host.textContent = '';
@@ -242,7 +244,7 @@ export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
   const run = r.run;
 
   host.appendChild(el('h3', null, L.threats));
-  run.threats.forEach((t) => host.appendChild(group(L, t.text, t.result, t.reason, controlsOf(m, 'prevent', t.id), api)));
+  run.threats.forEach((t) => host.appendChild(group(L, t.text, t.result, msg(t.reason), controlsOf(m, 'prevent', t.id), api)));
 
   const te = el('div', 'sim-te');
   te.appendChild(el('strong', null, `${L.topEvent}: ${short(run.topEvent.text, 100)}`));
@@ -250,7 +252,7 @@ export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
   host.appendChild(te);
 
   host.appendChild(el('h3', null, L.consequences));
-  run.consequences.forEach((c) => host.appendChild(group(L, c.text, c.result, c.reason, controlsOf(m, 'recover', c.id), api)));
+  run.consequences.forEach((c) => host.appendChild(group(L, c.text, c.result, msg(c.reason), controlsOf(m, 'recover', c.id), api)));
 
   host.appendChild(el('h3', null, `${L.paths} — ${L.summary(run.summary)}`));
   const table = el('table', 'sim-table');
@@ -264,14 +266,14 @@ export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
     tr.insertCell().textContent = short(text(run.consequences, p.consequenceId), 50);
     tr.insertCell().appendChild(badge(L, p.result));
     const why = tr.insertCell();
-    why.textContent = p.reason + (p.fragileCut ? ' ⚠ ' + L.fragile : '');
+    why.textContent = msg(p.reason) + (p.fragileCut ? ' ⚠ ' + L.fragile : '');
   });
   host.appendChild(table);
 
   if (run.warnings.length) {
     host.appendChild(el('h3', null, L.warnings));
     const ul = el('ul', 'sim-list');
-    run.warnings.forEach((w) => ul.appendChild(el('li', null, w)));
+    run.warnings.forEach((w) => ul.appendChild(el('li', null, msg(w))));
     host.appendChild(ul);
   }
   if (run.uncontrolledEscalations.length) {
@@ -292,7 +294,7 @@ export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
   drawErc(host, m, L, api);
   host.appendChild(el('h3', null, L.limits));
   const ul = el('ul', 'sim-list muted');
-  run.limitations.forEach((x) => ul.appendChild(el('li', null, x)));
+  run.limitations.forEach((x) => ul.appendChild(el('li', null, msg(x))));
   host.appendChild(ul);
   host.appendChild(el('p', 'muted', run.id));
 

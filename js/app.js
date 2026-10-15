@@ -51,6 +51,8 @@ const t = (k) => k.split('.').reduce((o, p) => (o ? o[p] : undefined), STR[state
 const cur = () => state.models[state.type];
 const spec = () => TYPES[state.type];
 const keyOf = (type) => 'safetytool.' + type + '.current';
+const BASE_KEY = 'safetytool.baseline';
+const SRC_KEY = 'safetytool.swissSource';
 
 // ---------- persistence (storage can be unavailable) ----------
 function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -98,7 +100,7 @@ function loadModel(m, { fit = true } = {}) {
   state.redo[type] = [];
   state.models[type] = TYPES[type].normalize(m);
   state.galleryId = null;
-  state.swissSource = null;
+  setSwissSource(null);
   state.selectedId = null;
   state.selectedKind = null;
   save();
@@ -147,7 +149,7 @@ function drawDiagram({ fit = false } = {}) {
   const svg = $('#svg');
   const { w, h } = stageSize();
   state.last = renderModel(svg, state.type, cur(), {
-    showEsc: state.showEsc, selectedId: state.selectedId, dark: state.dark, kindTags: state.help, explain, onSelect,
+    showEsc: state.showEsc, selectedId: state.selectedId, dark: state.dark, kindTags: state.help, explain, onSelect, lang: state.lang,
   });
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
   svg.setAttribute('width', w);
@@ -221,6 +223,7 @@ function tableRows() {
       if (c.function) bits.push(t('fn.' + c.function));
       if (c.type) bits.push(t('ty.' + c.type));
       if (c.critical) bits.push('★ critical');
+      if (Array.isArray(c.sharedWith) && c.sharedWith.length) bits.push('⇄ ×' + (c.sharedWith.length + 1));
       const e = M.effectiveness(c);
       if (e != null) bits.push(`A${c.adequacy}×R${c.reliability}=${e}`);
       if (c.owner) bits.push(c.owner);
@@ -344,6 +347,45 @@ function callout(kind) {
   return d;
 }
 
+/** A control can stand on several threats' (or consequences') lanes: still ONE object, one state, one set of evidence. */
+function drawSharing(host, m, c) {
+  const rec = c.side === 'recover';
+  const lanes = rec ? m.consequences : m.threats;
+  const own = rec ? c.consequenceId : c.threatId;
+  const box = document.createElement('section');
+  box.className = 'assure';
+  const h = document.createElement('h3');
+  h.textContent = t(rec ? 'sharedHeadRec' : 'sharedHead');
+  box.appendChild(h);
+  const note = document.createElement('p');
+  note.className = 'muted';
+  note.textContent = t('sharedNote');
+  box.appendChild(note);
+  const home = lanes.find((x) => x.id === own);
+  const hp = document.createElement('p');
+  hp.textContent = t('sharedHome') + ': ' + ((home && home.text) || own);
+  box.appendChild(hp);
+  const others = lanes.filter((x) => x.id !== own);
+  if (!others.length) { const p = document.createElement('p'); p.className = 'muted'; p.textContent = t('sharedOnly'); box.appendChild(p); }
+  others.forEach((x) => {
+    const lab = document.createElement('label');
+    lab.className = 'fld chk';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = Array.isArray(c.sharedWith) && c.sharedWith.includes(x.id);
+    cb.addEventListener('change', () => mutate((model) => {
+      const cur2 = new Set((model.controls.find((k) => k.id === c.id).sharedWith) || []);
+      if (cb.checked) cur2.add(x.id); else cur2.delete(x.id);
+      M.setShared(model, c.id, [...cur2]);
+    }, { rebuild: true }));
+    const sp = document.createElement('span');
+    sp.textContent = x.text || x.id;
+    lab.append(cb, sp);
+    box.appendChild(lab);
+  });
+  host.appendChild(box);
+}
+
 function drawInspector() {
   const host = $('#inspector');
   host.textContent = '';
@@ -357,7 +399,7 @@ function drawInspector() {
   host.appendChild(h);
   if (state.help) { const c = callout(kind); if (c) host.appendChild(c); }
   SPECS[kind].forEach(([k, ty]) => host.appendChild(fieldEl(ref, k, ty)));
-  if (kind === 'control') drawAssurance(host, cur(), ref, { lang: state.lang, mutate });
+  if (kind === 'control') { drawSharing(host, cur(), ref); drawAssurance(host, cur(), ref, { lang: state.lang, mutate }); }
   const row = document.createElement('div');
   row.className = 'btnrow';
   const pick = (id, kd) => { state.selectedId = id; state.selectedKind = kd; refresh({ inspector: true }); };
@@ -569,10 +611,30 @@ function openSwissFromBowtie(threatId, consequenceId) {
   const src = JSON.parse(JSON.stringify(cur()));
   const made = SW.swissFromBowtie(src, { threatId, consequenceId: consequenceId || null });
   state.type = 'bowtie';
-  if (loadModel(made)) { state.swissSource = src; setTab('analysis'); }
+  if (loadModel(made)) { setSwissSource(src); setTab('analysis'); }
 }
 const openSwiss = openSwissFromBowtie;
-function setBaseline(b) { state.baseline = b; refresh(); }
+/** The pinned baseline survives a reload (browser-local, like the autosave). Stored as { title, model }. */
+function setBaseline(b) {
+  state.baseline = b;
+  try { if (b) localStorage.setItem(BASE_KEY, JSON.stringify(b)); else localStorage.removeItem(BASE_KEY); } catch { /* storage unavailable: baseline lasts for this session only */ }
+  refresh();
+}
+/** The bowtie a Swiss view was built from (for the uncontrolled-hole list). Browser-local, cleared whenever another file is loaded. */
+function setSwissSource(src) {
+  state.swissSource = src;
+  try { if (src) localStorage.setItem(SRC_KEY, JSON.stringify(src)); else localStorage.removeItem(SRC_KEY); } catch { /* session only */ }
+}
+function loadBaseline() {
+  try {
+    const s = JSON.parse(lsGet(SRC_KEY) || 'null');
+    if (s && !M.validateShape(s).length) state.swissSource = M.normalize(s);
+  } catch { /* ignore */ }
+  try {
+    const b = JSON.parse(lsGet(BASE_KEY) || 'null');
+    if (b && b.model && !M.validateShape(b.model).length) state.baseline = { title: String(b.title || ''), model: M.normalize(b.model) };
+  } catch { /* ignore a damaged value */ }
+}
 
 function applyTheme() { document.documentElement.dataset.theme = state.dark ? 'dark' : 'light'; }
 
@@ -697,7 +759,7 @@ function printDiagram() {
   const root = $('#print-root');
   root.textContent = '';
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  const out = renderModel(svg, state.type, cur(), { showEsc: state.showEsc, forExport: true, dark: false, kindTags: state.help });
+  const out = renderModel(svg, state.type, cur(), { showEsc: state.showEsc, forExport: true, dark: false, kindTags: state.help, lang: state.lang });
   svg.setAttribute('viewBox', `0 0 ${Math.ceil(out.width)} ${Math.ceil(out.height)}`);
   svg.removeAttribute('width');
   svg.removeAttribute('height');
@@ -733,8 +795,8 @@ function bind() {
     try { loadModel(JSON.parse(await f.text())); } catch (e) { alert(t('badFile') + e.message); }
   });
   $('#b-save').addEventListener('click', () => download(fileBase() + '.' + state.type + '.json', new Blob([JSON.stringify(cur(), null, 2)], { type: 'application/json' })));
-  $('#b-svg').addEventListener('click', () => download(fileBase() + '.svg', new Blob([exportSvgString(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help })], { type: 'image/svg+xml' })));
-  $('#b-png').addEventListener('click', async () => download(fileBase() + '.png', await exportPngBlob(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help }, 3)));
+  $('#b-svg').addEventListener('click', () => download(fileBase() + '.svg', new Blob([exportSvgString(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help, lang: state.lang })], { type: 'image/svg+xml' })));
+  $('#b-png').addEventListener('click', async () => download(fileBase() + '.png', await exportPngBlob(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help, lang: state.lang }, 3)));
   $('#b-csv').addEventListener('click', () => download(fileBase() + '.csv', new Blob([toCsv()], { type: 'text/csv;charset=utf-8' })));
   $('#b-print').addEventListener('click', printDiagram);
   $('#b-undo').addEventListener('click', doUndo);
@@ -753,18 +815,38 @@ function bind() {
   const stage = $('#stage');
   stage.addEventListener('click', () => { if (state.selectedId) { state.selectedId = null; state.selectedKind = null; refresh({ inspector: true }); } });
   let drag = null;
+  // touch: two fingers pinch-zoom around their midpoint (one finger pans, as with the mouse)
+  const pts = new Map();
+  let pinch = null;
+  const pinchGeom = () => { const [a, b] = [...pts.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 }; };
   stage.addEventListener('pointerdown', (ev) => {
+    pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pts.size === 2) { pinch = Object.assign(pinchGeom(), { k: state.view.k, vx: state.view.x, vy: state.view.y }); drag = null; stage.setPointerCapture(ev.pointerId); return; }
     if (ev.target.closest('.st-node')) return;
     drag = { x: ev.clientX, y: ev.clientY, vx: state.view.x, vy: state.view.y, moved: false };
     stage.setPointerCapture(ev.pointerId);
   });
+  const endPointer = (ev) => { pts.delete(ev.pointerId); if (pts.size < 2) pinch = null; };
+  stage.addEventListener('pointercancel', endPointer);
   stage.addEventListener('pointermove', (ev) => {
+    if (pts.has(ev.pointerId)) pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (pinch && pts.size === 2) {
+      const g = pinchGeom();
+      const r = stage.getBoundingClientRect();
+      const k1 = Math.min(3, Math.max(0.1, pinch.k * (g.d / pinch.d)));
+      const px = pinch.cx - r.left; const py = pinch.cy - r.top;
+      state.view.k = k1;
+      state.view.x = px - (px - pinch.vx) * (k1 / pinch.k) + (g.cx - pinch.cx);
+      state.view.y = py - (py - pinch.vy) * (k1 / pinch.k) + (g.cy - pinch.cy);
+      applyView();
+      return;
+    }
     if (!drag) return;
     const dx = ev.clientX - drag.x; const dy = ev.clientY - drag.y;
     if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
     state.view.x = drag.vx + dx; state.view.y = drag.vy + dy; applyView();
   });
-  stage.addEventListener('pointerup', (ev) => { if (drag && drag.moved) ev.stopPropagation(); drag = null; });
+  stage.addEventListener('pointerup', (ev) => { endPointer(ev); if (drag && drag.moved) ev.stopPropagation(); drag = null; });
   stage.addEventListener('wheel', (ev) => {
     ev.preventDefault();
     const r = stage.getBoundingClientRect();
@@ -799,6 +881,7 @@ async function init() {
     if (TYPE_IDS.includes(p.type)) state.type = p.type;
   } catch { /* ignore */ }
   $('#chk-esc').checked = state.showEsc;
+  loadBaseline();
   applyTheme();
   syncHelpButton();
   bind();

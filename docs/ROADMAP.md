@@ -7,7 +7,7 @@ Editor · auto layout · table view · 17 quality rules · JSON/SVG/PNG/CSV · C
 - Per-element **source/evidence** field (citation, URL, date) with a lint rule for unsourced factual claims
 - Model **version history** (named snapshots) and a "report" export: Markdown/DOCX-ready outline, control register (CSV), lint appendix
 - `CITATION.cff` + Zenodo DOI recipe; stable model hash in exports
-- Shared controls across threats; multiple linked bowties (one hazard, several top events)
+- ~~Shared controls across threats~~ (done: `sharedWith`); multiple linked bowties (one hazard, several top events)
 - Printable A-size export with legend
 - Keyboard shortcuts and a full screen-reader pass with a blind user
 
@@ -26,6 +26,6 @@ Editor · auto layout · table view · 17 quality rules · JSON/SVG/PNG/CSV · C
 
 ## Open questions for the owner
 1. "Airborne object" — UAS/drones, balloons, unidentified objects, or all of them?
-2. Licence for code and content (proposal: MIT/Apache-2.0 + CC BY 4.0).
-3. Public host: this repo's GitHub Pages, or under the existing site?
+2. Licence for code and content — **working default chosen 2026-10-15: MIT (code) + CC BY 4.0 (own content)**; owner may still change it. See `LICENSE`, `LICENSE-CONTENT.md`.
+3. Public host — **working default: this repo's GitHub Pages** (already live); moving under the existing site is still open.
 4. Will a regulator or committee need offline use (single-file build)?

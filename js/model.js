@@ -46,7 +46,7 @@ export function addConsequence(m, text = '') {
 
 /** side 'prevent' attaches to a threat; side 'recover' attaches to a consequence. */
 export function addControl(m, side, parentId, text = '') {
-  const siblings = controlsOf(m, side, parentId);
+  const siblings = primaryControlsOf(m, side, parentId);
   const c = {
     id: uid('ct'),
     side,
@@ -78,21 +78,56 @@ export function addEscalationControl(m, escalationId, text = '') {
   return x;
 }
 
-export function controlsOf(m, side, parentId) {
+/** Controls whose own lane this is (the control lives here; `order` is its position). */
+export function primaryControlsOf(m, side, parentId) {
   return m.controls
     .filter((c) => c.side === side && (side === 'prevent' ? c.threatId : c.consequenceId) === parentId)
     .sort((a, b) => a.order - b.order);
 }
 
+/**
+ * Every control shown on a lane: the ones that live there plus controls shared into it via `sharedWith`.
+ * A shared control is ONE object (one state, one set of evidence) that stands on several threat/consequence lanes.
+ * Shared controls come after the lane's own controls, in the order of their primary lane.
+ */
+export function controlsOf(m, side, parentId) {
+  const own = primaryControlsOf(m, side, parentId);
+  const shared = m.controls
+    .filter((c) => c.side === side && Array.isArray(c.sharedWith) && c.sharedWith.includes(parentId))
+    .sort((a, b) => a.order - b.order);
+  return own.concat(shared);
+}
+
+/** True when control `c` is drawn on lane `parentId` only because it is shared into it. */
+export function isSharedIn(c, parentId) {
+  return (c.side === 'prevent' ? c.threatId : c.consequenceId) !== parentId;
+}
+
+/** Lane ids a control stands on: its own plus the shared ones. */
+export function lanesOf(c) {
+  return [c.side === 'prevent' ? c.threatId : c.consequenceId].concat(Array.isArray(c.sharedWith) ? c.sharedWith : []);
+}
+
+/** Replace the set of extra lanes a control is shared into. Ids that are not valid lanes of the right kind are ignored. */
+export function setShared(m, controlId, laneIds) {
+  const c = m.controls.find((x) => x.id === controlId);
+  if (!c) return false;
+  const valid = new Set((c.side === 'prevent' ? m.threats : m.consequences).map((x) => x.id));
+  const own = c.side === 'prevent' ? c.threatId : c.consequenceId;
+  const next = [...new Set(laneIds)].filter((id) => valid.has(id) && id !== own);
+  if (next.length) c.sharedWith = next; else delete c.sharedWith;
+  return true;
+}
+
 function renumber(m, side, parentId) {
-  controlsOf(m, side, parentId).forEach((c, i) => { c.order = i; });
+  primaryControlsOf(m, side, parentId).forEach((c, i) => { c.order = i; });
 }
 
 export function moveControl(m, controlId, delta) {
   const c = m.controls.find((x) => x.id === controlId);
   if (!c) return false;
   const parent = c.side === 'prevent' ? c.threatId : c.consequenceId;
-  const list = controlsOf(m, c.side, parent);
+  const list = primaryControlsOf(m, c.side, parent);
   const i = list.findIndex((x) => x.id === controlId);
   const j = i + delta;
   if (j < 0 || j >= list.length) return false;
@@ -110,14 +145,25 @@ export function removeNode(m, id) {
     controlIds.add(cid);
     m.escalations.filter((e) => e.controlId === cid).forEach((e) => escIds.add(e.id));
   };
-  m.threats.filter((t) => t.id === id).forEach((t) => {
-    m.controls.filter((c) => c.threatId === t.id).forEach((c) => markControl(c.id));
-    gone.add(t.id);
-  });
-  m.consequences.filter((t) => t.id === id).forEach((t) => {
-    m.controls.filter((c) => c.consequenceId === t.id).forEach((c) => markControl(c.id));
-    gone.add(t.id);
-  });
+  // A shared control outlives the lane it was born in: it moves to its next lane instead of being deleted.
+  const releaseLane = (laneId, side) => {
+    m.controls.filter((c) => c.side === side).forEach((c) => {
+      if (Array.isArray(c.sharedWith) && c.sharedWith.includes(laneId)) {
+        c.sharedWith = c.sharedWith.filter((x) => x !== laneId);
+        if (!c.sharedWith.length) delete c.sharedWith;
+      }
+    });
+    m.controls.filter((c) => c.side === side && (side === 'prevent' ? c.threatId : c.consequenceId) === laneId).forEach((c) => {
+      if (Array.isArray(c.sharedWith) && c.sharedWith.length) {
+        const [next, ...rest] = c.sharedWith;
+        if (side === 'prevent') c.threatId = next; else c.consequenceId = next;
+        if (rest.length) c.sharedWith = rest; else delete c.sharedWith;
+        c.order = primaryControlsOf(m, side, next).filter((x) => x.id !== c.id).length;
+      } else markControl(c.id);
+    });
+  };
+  m.threats.filter((t) => t.id === id).forEach((t) => { releaseLane(t.id, 'prevent'); gone.add(t.id); });
+  m.consequences.filter((t) => t.id === id).forEach((t) => { releaseLane(t.id, 'recover'); gone.add(t.id); });
   if (m.controls.some((c) => c.id === id)) markControl(id);
   if (m.escalations.some((e) => e.id === id)) escIds.add(id);
 
@@ -198,6 +244,19 @@ export function validateShape(m) {
     if (!SIDES.includes(c.side)) errs.push('control ' + c.id + ': bad side');
     else if (c.side === 'prevent' && !th.has(c.threatId)) errs.push('control ' + c.id + ': unknown threat');
     else if (c.side === 'recover' && !co.has(c.consequenceId)) errs.push('control ' + c.id + ': unknown consequence');
+  }
+  for (const c of m.controls) {
+    if (c.sharedWith == null) continue;
+    if (!arr(c.sharedWith)) { errs.push('control ' + c.id + ': sharedWith must be an array'); continue; }
+    const lanes = c.side === 'prevent' ? th : co;
+    const own = c.side === 'prevent' ? c.threatId : c.consequenceId;
+    const seen = new Set();
+    for (const id of c.sharedWith) {
+      if (!lanes.has(id)) errs.push('control ' + c.id + ': sharedWith has unknown ' + (c.side === 'prevent' ? 'threat ' : 'consequence ') + String(id));
+      else if (id === own) errs.push('control ' + c.id + ': sharedWith repeats its own lane');
+      else if (seen.has(id)) errs.push('control ' + c.id + ': sharedWith has duplicate ' + id);
+      seen.add(id);
+    }
   }
   for (const e of m.escalations) if (!ct.has(e.controlId)) errs.push('escalation ' + e.id + ': unknown control');
   for (const x of m.escalationControls) if (!ef.has(x.escalationId)) errs.push('escalation control ' + x.id + ': unknown escalation');

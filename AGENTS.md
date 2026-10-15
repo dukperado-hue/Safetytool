@@ -81,5 +81,10 @@ Ask the user. Especially for: scope definitions, which regulator/ICAO document a
 - Swiss tabs: form, diagram, Analysis (common cause, HFACS counts, trajectory, uncontrolled holes), table, info.
 - Inspector for a control: state, assurance, evidence, assumptions (js/assurancepanel.js).
 - js/report.js is pure (HTML string, escapes all text); js/reporttab.js does print/download. Reports never print signatures, approvals or compliance claims.
-- Not done: shared controls across threats (needs a schema change), SHELL/Swiss renderer re-layout from the Stitch designs, persistent baselines.
-- Service worker cache name must be bumped when the shell file list changes (currently safetytool-v6).
+- Shared controls: a control may carry `sharedWith: [threatId|consequenceId, ...]` — ONE object (one state, one evidence set) standing on several lanes. `controlsOf()` returns own controls then shared ones, so simulate/lint/layout/report all follow; `primaryControlsOf()` is for ordering. Escalation factors are drawn only under the control's home lane. Deleting a control's home lane hands it to its next lane (never deletes it). Edit it in the inspector ("Shared with other threats").
+- Swiss and SHELL pictures are built from positioned primitives (`prims`: text/rect/line/chip) attached to layout items; `render.js` only draws them. Swiss: banner (trajectory state), layer chips HELD/PENETRATED (only when the analyst chose a trajectory), legend. SHELL: component cards with item rows, interface cards with ■ ▲ ? status chips, summary strip. Items with `inert` are not clickable.
+- Engine messages stay English in the engine/CLI; `js/msgs.js` (`localizeMsg`) gives the Thai text in the UI and report. Add a rule there whenever the engine gets a new message (a test fails if a bowtie message has no Thai rule).
+- Persistence (browser-local): pinned baseline `safetytool.baseline`, Swiss source bowtie `safetytool.swissSource` (cleared when another file is loaded).
+- Narrow screens (<=900px): the page scrolls as a whole; toolbar/tabs scroll sideways; the stage is 58vh; two-finger pinch zooms the diagram.
+- Licence (working default, owner may change): MIT for code, CC BY 4.0 for own content; ADREP taxonomy and the ERC matrix are excluded (`LICENSE-CONTENT.md`).
+- Service worker cache name must be bumped when the shell file list changes (currently safetytool-v7).

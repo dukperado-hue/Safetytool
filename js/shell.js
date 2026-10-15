@@ -7,7 +7,7 @@
 // human-factors SHELL model. Confirm this is the model you want.
 
 import { uid } from './model.js';
-import { wrapText } from './textmetrics.js';
+import { wrapText, textWidth } from './textmetrics.js';
 import { normalizeGeom } from './swiss.js';
 
 export const SCHEMA = 'safetytool.shell/1';
@@ -148,39 +148,97 @@ export function lintShell(m) {
 }
 
 // ---------------- layout ----------------
-export const SH = { fs: 12, lh: 15, padX: 10, padY: 9, wComp: 230, wCentre: 230, wIface: 250, gap: 34, minH: 50 };
+export const SH = { fs: 12, lh: 15, padX: 12, padY: 10, wComp: 250, wCentre: 250, wIface: 270, gap: 34, minH: 56, headH: 38, subPad: 7, subGap: 6, sumH: 36 };
+
+const STATUS_CHIP = { match: '■ MATCH', mismatch: '▲ MISMATCH', unknown: '? UNKNOWN' };
+const SEV = (n) => '●'.repeat(Math.max(0, Math.min(5, n))) + '○'.repeat(5 - Math.max(0, Math.min(5, n)));
 
 /**
  * Cross layout: other Liveware (left) – LL card – CENTRE – LH card – Hardware (right),
- * Software above (LS card between), Environment below (LE card between).
+ * Software above (LS card between), Environment below (LE card between), a summary strip underneath.
+ * Cards carry `prims` (text / rect / chip primitives relative to the card); the renderer only draws them.
  */
 export function layoutShell(m) {
   const D = SH;
-  const lines = (s, w) => wrapText(s || '—', w - 2 * D.padX, D.fs);
-  const compBox = (c, label) => {
-    const rows = m.components[c].length ? m.components[c].map((x) => '• ' + x.text) : ['—'];
-    const ls = rows.flatMap((r) => lines(r, D.wComp));
-    return { lines: ls, title: label, h: Math.max(D.minH, (ls.length + 1) * D.lh + 2 * D.padY) };
+  const wrap = (s, w) => wrapText(s || '—', w, D.fs);
+
+  const header = (letter, title, right, w) => {
+    const p = [
+      { t: 'rect', x: D.padX, y: 8, w: 22, h: 22, cls: 'bd bd-' + letter, rx: 5 },
+      { t: 'text', x: D.padX + 11, y: 24, s: letter, cls: 'bdt', anchor: 'middle' },
+      { t: 'text', x: D.padX + 32, y: 24, s: title, cls: 'nm' },
+    ];
+    if (right) p.push(right);
+    void w;
+    return p;
   };
+
+  const compCard = (c, label) => {
+    const inner = D.wComp - 2 * D.padX;
+    const rows = m.components[c].map((x) => ({ lines: wrap(x.text, inner - 2 * D.subPad) }));
+    const prims = header(c, label, { t: 'text', x: D.wComp - D.padX, y: 24, s: rows.length + (rows.length === 1 ? ' item' : ' items'), cls: 'tag', anchor: 'end' }, D.wComp);
+    let y = D.headH;
+    rows.forEach((r) => {
+      const hh = r.lines.length * D.lh + 2 * D.subPad;
+      prims.push({ t: 'rect', x: D.padX, y, w: inner, h: hh, cls: 'sub', rx: 6 });
+      r.lines.forEach((s, i) => prims.push({ t: 'text', x: D.padX + D.subPad, y: y + D.subPad + D.lh * 0.78 + i * D.lh, s }));
+      y += hh + D.subGap;
+    });
+    if (!rows.length) { prims.push({ t: 'text', x: D.padX, y: D.headH + 14, s: '— none listed', cls: 'tag' }); y += 22; }
+    return { prims, h: Math.max(D.minH, y + D.padY - D.subGap) };
+  };
+
   const ifaceCard = (key, label) => {
     const f = m.interfaces[key];
-    const rows = f.findings.length
-      ? f.findings.map((x, i) => `${i + 1}. ${x.text}${x.severity ? ` [sev ${x.severity}]` : ''}${x.action ? ' → ' + x.action : ''}`)
-      : [f.status === 'match' ? '✓ match' : f.status === 'mismatch' ? '(no findings written)' : '(not assessed)'];
-    const ls = rows.flatMap((r) => lines(r, D.wIface));
-    return { lines: ls, title: `${label} · ${f.status.toUpperCase()}${f.findings.length ? ' (' + f.findings.length + ')' : ''}`, status: f.status, h: Math.max(D.minH, (ls.length + 1) * D.lh + 2 * D.padY) };
+    const inner = D.wIface - 2 * D.padX;
+    const n = f.findings.length;
+    const prims = [
+      { t: 'text', x: D.padX, y: 24, s: label, cls: 'nm' },
+      { t: 'chip', x: D.wIface - D.padX, y: 9, s: STATUS_CHIP[f.status] || STATUS_CHIP.unknown, cls: f.status, anchor: 'end' },
+    ];
+    let y = D.headH;
+    if (!n) {
+      prims.push({ t: 'text', x: D.padX, y: y + 4, s: f.status === 'match' ? 'no findings — the interface matches' : f.status === 'mismatch' ? '(no findings written yet)' : '(not assessed yet)', cls: 'tag' });
+      y += 20;
+    }
+    f.findings.forEach((x) => {
+      const tl = wrap(x.text, inner - 2 * D.subPad);
+      const al = x.action ? wrap('→ ' + x.action, inner - 2 * D.subPad) : [];
+      const hh = 20 + tl.length * D.lh + (al.length ? 4 + al.length * D.lh : 0) + D.subPad;
+      prims.push({ t: 'rect', x: D.padX, y, w: inner, h: hh, cls: 'sub', rx: 6 });
+      prims.push({ t: 'text', x: D.padX + D.subPad, y: y + 14, s: SEV(x.severity || 0) + (x.severity ? ' SEV ' + x.severity : ' SEV ?'), cls: 'tag' });
+      if (x.owner) prims.push({ t: 'text', x: D.padX + inner - D.subPad, y: y + 14, s: x.owner, cls: 'tag mono', anchor: 'end' });
+      tl.forEach((s, i) => prims.push({ t: 'text', x: D.padX + D.subPad, y: y + 20 + D.lh * 0.78 + i * D.lh, s }));
+      al.forEach((s, i) => prims.push({ t: 'text', x: D.padX + D.subPad, y: y + 20 + tl.length * D.lh + 4 + D.lh * 0.78 + i * D.lh, s, cls: 'act' }));
+      y += hh + D.subGap;
+    });
+    return { prims, h: Math.max(D.minH, y + D.padY - D.subGap), status: f.status };
   };
-  const cS = compBox('S', 'S — SOFTWARE');
-  const cH = compBox('H', 'H — HARDWARE');
-  const cE = compBox('E', 'E — ENVIRONMENT');
-  const cL = compBox('L', 'L — OTHER LIVEWARE');
+
+  const cS = compCard('S', 'SOFTWARE');
+  const cH = compCard('H', 'HARDWARE');
+  const cE = compCard('E', 'ENVIRONMENT');
+  const cL = compCard('L', 'OTHER LIVEWARE');
   const iS = ifaceCard('LS', 'L–S');
   const iH = ifaceCard('LH', 'L–H');
   const iE = ifaceCard('LE', 'L–E');
   const iL = ifaceCard('LL', 'L–L');
-  const subjL = lines(m.subject.text, D.wCentre);
-  const focusL = lines(m.focus.text ? 'งาน/สถานการณ์: ' + m.focus.text : '', D.wCentre);
-  const centreH = Math.max(90, (subjL.length + focusL.length + 2) * D.lh + 2 * D.padY);
+
+  // centre card: the liveware in focus + the task
+  const cin = D.wCentre - 2 * D.padX;
+  const subjL = wrap(m.subject.text, cin);
+  const focusL = m.focus.text ? wrap(m.focus.text, cin) : [];
+  const cPrims = header('L', 'LIVEWARE (CORE)', null, D.wCentre);
+  let cy0 = D.headH + 2;
+  subjL.forEach((s, i) => cPrims.push({ t: 'text', x: D.padX, y: cy0 + D.lh * 0.78 + i * D.lh, s, cls: 'nm' }));
+  cy0 += subjL.length * D.lh + 8;
+  if (focusL.length) {
+    cPrims.push({ t: 'text', x: D.padX, y: cy0 + 8, s: 'TASK / SITUATION', cls: 'ttl' });
+    cy0 += 14;
+    focusL.forEach((s, i) => cPrims.push({ t: 'text', x: D.padX, y: cy0 + D.lh * 0.78 + i * D.lh, s }));
+    cy0 += focusL.length * D.lh;
+  }
+  const centreH = Math.max(90, cy0 + D.padY);
 
   const colL = 0;
   const colLL = colL + D.wComp + D.gap;
@@ -192,39 +250,51 @@ export function layoutShell(m) {
 
   const items = [];
   const links = [];
+  const card = (id, kind, x, y, w, c, extra = {}) => items.push({ id, kind, shape: 'card', x, y, w, h: c.h, lines: [], prims: c.prims, ...extra });
   let y = 0;
-  // top: software box, LS card
   const sx = cx - D.wComp / 2;
-  items.push({ id: 'comp_S', kind: 'compS', shape: 'rect', x: sx, y, w: D.wComp, h: cS.h, title: cS.title, lines: cS.lines });
+  card('comp_S', 'compS', sx, y, D.wComp, cS);
   const sBottom = y + cS.h;
   y = sBottom + D.gap;
-  items.push({ id: 'if_LS', kind: 'iface', status: iS.status, shape: 'rect', x: cx - D.wIface / 2, y, w: D.wIface, h: iS.h, title: iS.title, lines: iS.lines });
+  card('if_LS', 'iface', cx - D.wIface / 2, y, D.wIface, iS, { status: iS.status });
   links.push({ kind: 'ifl ' + iS.status, d: `M${cx},${sBottom} V${y}` });
   const iSBottom = y + iS.h;
   y = iSBottom + D.gap;
-  // middle row
   const midH = Math.max(centreH, cL.h, cH.h, iL.h, iH.h);
   const midC = y + midH / 2;
-  items.push({ id: m.subject.id, kind: 'subject', shape: 'rect', x: colC, y: midC - centreH / 2, w: D.wCentre, h: centreH, title: 'L — LIVEWARE (CENTRE)', lines: [...subjL, '', ...focusL] });
+  card(m.subject.id, 'subject', colC, midC - centreH / 2, D.wCentre, { prims: cPrims, h: centreH });
   links.push({ kind: 'ifl ' + iS.status, d: `M${cx},${iSBottom} V${midC - centreH / 2}` });
-  items.push({ id: 'comp_L', kind: 'compL', shape: 'rect', x: colL, y: midC - cL.h / 2, w: D.wComp, h: cL.h, title: cL.title, lines: cL.lines });
-  items.push({ id: 'if_LL', kind: 'iface', status: iL.status, shape: 'rect', x: colLL, y: midC - iL.h / 2, w: D.wIface, h: iL.h, title: iL.title, lines: iL.lines });
+  card('comp_L', 'compL', colL, midC - cL.h / 2, D.wComp, cL);
+  card('if_LL', 'iface', colLL, midC - iL.h / 2, D.wIface, iL, { status: iL.status });
   links.push({ kind: 'ifl ' + iL.status, d: `M${colL + D.wComp},${midC} H${colLL}` });
   links.push({ kind: 'ifl ' + iL.status, d: `M${colLL + D.wIface},${midC} H${colC}` });
-  items.push({ id: 'if_LH', kind: 'iface', status: iH.status, shape: 'rect', x: colLH, y: midC - iH.h / 2, w: D.wIface, h: iH.h, title: iH.title, lines: iH.lines });
-  items.push({ id: 'comp_H', kind: 'compH', shape: 'rect', x: colH, y: midC - cH.h / 2, w: D.wComp, h: cH.h, title: cH.title, lines: cH.lines });
+  card('if_LH', 'iface', colLH, midC - iH.h / 2, D.wIface, iH, { status: iH.status });
+  card('comp_H', 'compH', colH, midC - cH.h / 2, D.wComp, cH);
   links.push({ kind: 'ifl ' + iH.status, d: `M${colC + D.wCentre},${midC} H${colLH}` });
   links.push({ kind: 'ifl ' + iH.status, d: `M${colLH + D.wIface},${midC} H${colH}` });
   y += midH + D.gap;
-  // bottom: LE card, environment box
-  items.push({ id: 'if_LE', kind: 'iface', status: iE.status, shape: 'rect', x: cx - D.wIface / 2, y, w: D.wIface, h: iE.h, title: iE.title, lines: iE.lines });
+  card('if_LE', 'iface', cx - D.wIface / 2, y, D.wIface, iE, { status: iE.status });
   links.push({ kind: 'ifl ' + iE.status, d: `M${cx},${midC + centreH / 2} V${y}` });
   const iEBottom = y + iE.h;
   y = iEBottom + D.gap;
-  items.push({ id: 'comp_E', kind: 'compE', shape: 'rect', x: cx - D.wComp / 2, y, w: D.wComp, h: cE.h, title: cE.title, lines: cE.lines });
+  card('comp_E', 'compE', cx - D.wComp / 2, y, D.wComp, cE);
   links.push({ kind: 'ifl ' + iE.status, d: `M${cx},${iEBottom} V${y}` });
-  const height = y + cE.h;
-  return normalizeGeom({ items, links, width, height });
+  y += cE.h + 22;
+
+  // summary strip under the cross
+  const counts = { match: 0, mismatch: 0, unknown: 0 };
+  let findings = 0;
+  INTERFACES.forEach((i) => { counts[m.interfaces[i].status] = (counts[m.interfaces[i].status] || 0) + 1; findings += m.interfaces[i].findings.length; });
+  const sp = [{ t: 'text', x: D.padX, y: 23, s: 'INTERFACES', cls: 'ttl' }];
+  let px = D.padX + 82;
+  [['match', '■ MATCH ' + counts.match], ['mismatch', '▲ MISMATCH ' + counts.mismatch], ['unknown', '? UNKNOWN ' + counts.unknown]].forEach(([k, s]) => {
+    sp.push({ t: 'chip', x: px, y: 10, s, cls: k });
+    px += textWidth(s, 10) + 12 + 10;
+  });
+  sp.push({ t: 'text', x: px + 8, y: 23, s: 'FINDINGS ' + findings, cls: 'tag' });
+  sp.push({ t: 'text', x: width - D.padX, y: 23, s: 'severity 1 (minor) – 5 (critical)', cls: 'tag', anchor: 'end' });
+  items.push({ id: 'shell_summary', kind: 'legend', inert: true, shape: 'card', x: 0, y, w: width, h: D.sumH, lines: [], prims: sp });
+  return normalizeGeom({ items, links, width, height: y + D.sumH });
 }
 
 export function outlineShell(m) {

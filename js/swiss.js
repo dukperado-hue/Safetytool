@@ -5,7 +5,7 @@
 
 import { uid, controlsOf } from './model.js';
 import { checkEvidence } from './evidence.js';
-import { wrapText } from './textmetrics.js';
+import { wrapText, textWidth } from './textmetrics.js';
 
 export const SCHEMA = 'safetytool.swiss/1';
 export const HOLE_TYPES = ['active', 'latent'];
@@ -207,35 +207,88 @@ export function lintSwiss(m) {
 }
 
 // ---------------- layout (pure geometry; renderer draws it) ----------------
-export const SW = { fs: 12, lh: 15, padX: 10, padY: 8, wEnd: 170, wLayer: 190, gap: 30, holeW: 168, slotH: 64, minHole: 40 };
+export const SW = { fs: 12, lh: 15, padX: 10, padY: 8, wEnd: 170, wLayer: 214, gap: 26, holeW: 192, slotH: 76, minHole: 44, bannerH: 34, legendH: 30, minWidth: 560 };
+
+const SW_TXT = {
+  th: {
+    none: 'ยังไม่ได้เลือกรูที่เรียงตัว — ผู้วิเคราะห์เป็นผู้เลือกจากข้อเท็จจริงเท่านั้น',
+    stop: (n, name) => 'เส้นทางอุบัติเหตุถูกหยุดที่ชั้น ' + n + (name ? ' — ' + name : ''),
+    full: 'รูเรียงตัวครบทุกชั้น: เส้นทางไปถึง Loss',
+    chipNone: '? NO TRAJECTORY', chipStop: '■ STOPPED', chipFull: '▲ REACHES LOSS',
+  },
+  en: {
+    none: 'No holes chosen as lined up yet — only the analyst chooses them, from facts',
+    stop: (n, name) => 'Accident trajectory stopped at layer ' + n + (name ? ' — ' + name : ''),
+    full: 'Holes line up in every layer: the trajectory reaches the loss',
+    chipNone: '? NO TRAJECTORY', chipStop: '■ STOPPED', chipFull: '▲ REACHES LOSS',
+  },
+};
+const HFACS_SHORT = { 'unsafe-acts': 'ACTS', preconditions: 'PRECOND', 'unsafe-supervision': 'SUPERV', 'organisational-influences': 'ORG' };
 
 /**
- * Items: {id, kind, shape:'rect'|'ellipse'|'wall', x,y,w,h, title?, lines:[]}. Links: {kind,d}.
+ * Items: {id, kind, shape:'rect'|'card'|'ellipse'|'wall', x,y,w,h, title?, lines:[], prims?:[]}. Links: {kind,d}.
+ * `prims` are positioned drawing primitives (text / rect / line / chip) relative to the item; the renderer only draws them.
  * The accident trajectory is a straight line at axisY through the aligned hole of each layer
- * (a solid wall where the layer holds).
+ * (a solid wall where the layer holds). A banner above and a legend below say what the picture shows.
+ * @param {object} m
+ * @param {{lang?:'th'|'en'}} opts
  */
-export function layoutSwiss(m) {
+export function layoutSwiss(m, opts = {}) {
   const D = SW;
+  const T = SW_TXT[opts.lang === 'en' ? 'en' : 'th'];
   const items = [];
   const links = [];
   const textLines = (s, w) => wrapText(s || '—', w - 2 * D.padX, D.fs);
   const boxH = (lines, extra = 0) => Math.max(D.minHole, lines.length * D.lh + 2 * D.padY + extra);
-  // holes are ellipses: wrap narrower than the bounding box and leave room for the type label
-  const holeLines = (s) => wrapText(s || '—', D.holeW * 0.74 - D.padX, D.fs);
-  const holeH = (lines) => Math.max(D.minHole + 14, lines.length * D.lh + 13 + 2 * D.padY + 12);
 
-  const headerBlocks = m.layers.map((l) => {
+  const picked = m.trajectory.length > 0;
+  const blockedIdx = picked ? m.layers.findIndex((l) => !l.holes.some((h) => m.trajectory.includes(h.id))) : -1;
+
+  // ---- headers of the layer plates ----
+  const headerBlocks = m.layers.map((l, i) => {
     const nameL = textLines(l.name, D.wLayer);
-    const defL = textLines(l.defence ? '▸ ' + l.defence : '', D.wLayer);
-    return { nameL, defL, h: nameL.length * D.lh + defL.length * D.lh + 3 * D.padY };
+    const defL = l.defence ? textLines('▸ ' + l.defence, D.wLayer) : [];
+    const h = 34 + nameL.length * D.lh + (defL.length ? 6 + defL.length * D.lh : 0) + D.padY;
+    return { nameL, defL, h, no: String(i + 1).padStart(2, '0') };
   });
-  const headerH = Math.max(60, ...headerBlocks.map((b) => b.h));
-  const axisY = headerH + 16 + D.slotH / 2;
+  const headerH = Math.max(72, ...headerBlocks.map((b) => b.h));
 
+  const width = Math.max(D.minWidth, D.wEnd + D.gap + m.layers.length * (D.wLayer + D.gap) + D.wEnd);
+
+  // ---- banner (top) ----
+  let status; let msg; let chip;
+  if (!picked) { status = 'unknown'; msg = T.none; chip = T.chipNone; }
+  else if (blockedIdx >= 0) { status = 'match'; msg = T.stop(blockedIdx + 1, m.layers[blockedIdx].name); chip = T.chipStop; }
+  else { status = 'mismatch'; msg = T.full; chip = T.chipFull; }
+  const bLines = wrapText(msg, width - 2 * D.padX - 150, D.fs);
+  const bannerH = Math.max(D.bannerH, bLines.length * D.lh + 2 * D.padY + 2);
+  const bprims = bLines.map((s, i) => ({ t: 'text', x: D.padX + 2, y: D.padY + 11 + i * D.lh, s, cls: 'nm' }));
+  bprims.push({ t: 'chip', x: width - D.padX, y: (bannerH - 16) / 2, s: chip, cls: status, anchor: 'end' });
+  items.push({ id: 'swiss_banner', kind: 'banner', status, inert: true, shape: 'card', x: 0, y: 0, w: width, h: bannerH, lines: [], prims: bprims });
+  const top = bannerH + 16;
+
+  const axisY = top + headerH + 16 + D.slotH / 2;
   const hazL = textLines(m.hazard.text, D.wEnd);
   const lossL = textLines(m.loss.text, D.wEnd);
   const hazH = boxH(hazL);
   const lossH = boxH(lossL);
+
+  const holeBox = (h) => {
+    const lines = wrapText(h.text || '—', D.holeW - 2 * D.padX, D.fs);
+    const tags = [];
+    if (h.commonCauseId) tags.push('CC ' + h.commonCauseId);
+    if (h.hfacsLevel && HFACS_SHORT[h.hfacsLevel]) tags.push('HFACS ' + HFACS_SHORT[h.hfacsLevel]);
+    const hh = Math.max(D.minHole + 14, 26 + lines.length * D.lh + D.padY + (tags.length ? 14 : 0));
+    return { lines, tags, hh };
+  };
+  const holePrims = (h, box, aligned) => {
+    const latent = h.type === 'latent';
+    const p = [{ t: 'text', x: D.padX, y: 15, s: latent ? 'LATENT CONDITION' : h.type === 'active' ? 'ACTIVE FAILURE' : 'HOLE', cls: 'ttl' }];
+    if (aligned) p.push({ t: 'chip', x: D.holeW - 6, y: 4, s: 'TRAJECTORY', cls: 'bad', anchor: 'end' });
+    box.lines.forEach((s, i) => p.push({ t: 'text', x: D.padX, y: 30 + D.lh * 0.78 + i * D.lh, s }));
+    if (box.tags.length) p.push({ t: 'text', x: D.padX, y: box.hh - 7, s: box.tags.join(' · '), cls: 'tag mono' });
+    return p;
+  };
 
   let x = 0;
   items.push({ id: m.hazard.id, kind: 'hazard', shape: 'rect', x, y: axisY - hazH / 2, w: D.wEnd, h: hazH, title: 'HAZARD', lines: hazL });
@@ -248,49 +301,68 @@ export function layoutSwiss(m) {
     const lx = x;
     const aligned = l.holes.find((h) => m.trajectory.includes(h.id)) || null;
     const others = l.holes.filter((h) => h !== aligned);
-    // plate (cheese slice) behind everything in the layer
-    items.push({ id: l.id, kind: 'layer', shape: 'rect', x: lx, y: 0, w: D.wLayer, h: headerH, title: null, lines: [], nameLines: hb.nameL, defLines: hb.defL });
-    let cy = headerH + 16;
-    const slotCenter = axisY;
+    // plate (cheese slice) behind everything in the layer, with its own header
+    const lp = [{ t: 'text', x: D.padX, y: 15, s: 'LAYER ' + hb.no, cls: 'ttl' }];
+    if (picked) lp.push({ t: 'chip', x: D.wLayer - 8, y: 4, s: aligned ? '▲ PENETRATED' : '■ HELD', cls: aligned ? 'bad' : 'match', anchor: 'end' });
+    hb.nameL.forEach((s, k) => lp.push({ t: 'text', x: D.padX, y: 34 + D.lh * 0.78 + k * D.lh, s, cls: 'nm' }));
+    hb.defL.forEach((s, k) => lp.push({ t: 'text', x: D.padX, y: 34 + hb.nameL.length * D.lh + 6 + D.lh * 0.78 + k * D.lh, s }));
+    items.push({ id: l.id, kind: 'layer', shape: 'rect', x: lx, y: top, w: D.wLayer, h: headerH, title: null, lines: [], prims: lp });
+    const hx = lx + (D.wLayer - D.holeW) / 2;
+    let cy = top + headerH + 16;
     if (aligned) {
-      const lines = holeLines(aligned.text);
-      const h = Math.max(D.slotH, holeH(lines));
-      items.push({ id: aligned.id, kind: aligned.type === 'latent' ? 'holeLatent' : 'holeActive', shape: 'ellipse', x: lx + (D.wLayer - D.holeW) / 2, y: slotCenter - h / 2, w: D.holeW, h, title: aligned.type ? aligned.type.toUpperCase() : null, lines, aligned: true });
-      cy = Math.max(cy + D.slotH, slotCenter + h / 2) + 14;
+      const b = holeBox(aligned);
+      const h = Math.max(D.slotH, b.hh);
+      items.push({ id: aligned.id, kind: aligned.type === 'latent' ? 'holeLatent' : 'holeActive', shape: 'card', x: hx, y: axisY - h / 2, w: D.holeW, h, title: null, lines: b.lines, aligned: true, prims: holePrims(aligned, b, true) });
+      cy = Math.max(cy + D.slotH, axisY + h / 2) + 14;
     } else {
-      items.push({ id: l.id + '_wall', kind: 'wall', shape: 'wall', x: lx + D.wLayer / 2 - 7, y: headerH + 12, w: 14, h: D.slotH + 8, title: null, lines: [] });
-      cy = headerH + 16 + D.slotH + 14;
+      items.push({ id: l.id + '_wall', kind: 'wall', shape: 'wall', x: lx + D.wLayer / 2 - 7, y: top + headerH + 12, w: 14, h: D.slotH + 8, title: null, lines: [] });
+      cy = top + headerH + 16 + D.slotH + 14;
     }
     others.forEach((h) => {
-      const lines = holeLines(h.text);
-      const hh = holeH(lines);
-      items.push({ id: h.id, kind: h.type === 'latent' ? 'holeLatent' : 'holeActive', shape: 'ellipse', x: lx + (D.wLayer - D.holeW) / 2, y: cy, w: D.holeW, h: hh, title: h.type ? h.type.toUpperCase() : null, lines, aligned: false });
-      cy += hh + 12;
+      const b = holeBox(h);
+      items.push({ id: h.id, kind: h.type === 'latent' ? 'holeLatent' : 'holeActive', shape: 'card', x: hx, y: cy, w: D.holeW, h: b.hh, title: null, lines: b.lines, aligned: false, prims: holePrims(h, b, false) });
+      cy += b.hh + 12;
     });
     layerRects.push({ x: lx, bottom: cy, aligned: !!aligned, id: l.id });
     x += D.wLayer + D.gap;
   });
-  const lossX = x;
+  const lossX = Math.max(x, width - D.wEnd);
   items.push({ id: m.loss.id, kind: 'loss', shape: 'rect', x: lossX, y: axisY - lossH / 2, w: D.wEnd, h: lossH, title: 'LOSS', lines: lossL });
 
   // trajectory line: hazard -> through aligned layers -> loss, or stopping at the first wall
-  let endX = lossX;
-  let blockedAt = null;
-  for (const lr of layerRects) { if (!lr.aligned) { blockedAt = lr; break; } }
-  if (m.trajectory.length) {
+  const blockedAt = layerRects.find((lr) => !lr.aligned) || null;
+  if (picked) {
     if (blockedAt) {
       links.push({ kind: 'traj', d: `M${startX},${axisY} H${blockedAt.x + D.wLayer / 2 - 7}` });
       links.push({ kind: 'trajStop', d: `M${blockedAt.x + D.wLayer / 2 + 7},${axisY} H${lossX}` });
     } else {
-      links.push({ kind: 'traj', d: `M${startX},${axisY} H${endX}` });
+      links.push({ kind: 'traj', d: `M${startX},${axisY} H${lossX}` });
     }
   }
 
-  const H = Math.max(...layerRects.map((l) => l.bottom), axisY + lossH / 2, axisY + hazH / 2) + 10;
-  items.filter((i) => i.kind === 'layer').forEach((i) => { i.fullH = H; });
-  const width = lossX + D.wEnd;
-  return normalizeGeom({ items, links, width, height: H });
+  const H = Math.max(...layerRects.map((l) => l.bottom), top + headerH + 16 + D.slotH + 14, axisY + lossH / 2, axisY + hazH / 2) + 10;
+  items.filter((i) => i.kind === 'layer').forEach((i) => { i.fullH = H - top; });
+
+  // ---- legend (bottom) ----
+  const ly = H + 14;
+  const lg = [];
+  let lx = D.padX;
+  const entry = (sample, label) => {
+    sample(lx);
+    lx += 22;
+    lg.push({ t: 'text', x: lx, y: 19, s: label, cls: 'tag' });
+    lx += wrapWidth(label) + 22;
+  };
+  entry((px) => lg.push({ t: 'rect', x: px, y: 10, w: 16, h: 11, cls: 'lg-act', rx: 3 }), 'ACTIVE FAILURE (solid)');
+  entry((px) => lg.push({ t: 'rect', x: px, y: 10, w: 16, h: 11, cls: 'lg-lat', rx: 3 }), 'LATENT CONDITION (dashed)');
+  entry((px) => lg.push({ t: 'line', x1: px, y1: 15.5, x2: px + 18, y2: 15.5, cls: 'lg-traj' }), 'TRAJECTORY');
+  entry((px) => lg.push({ t: 'rect', x: px + 5, y: 8, w: 7, h: 15, cls: 'lg-wall', rx: 2 }), 'LAYER HOLDS');
+  items.push({ id: 'swiss_legend', kind: 'legend', inert: true, shape: 'card', x: 0, y: ly, w: width, h: D.legendH, lines: [], prims: lg });
+
+  return normalizeGeom({ items, links, width, height: ly + D.legendH });
 }
+
+function wrapWidth(s) { return textWidth(s, 10); }
 
 /** Shift to a 24px margin and return final size (shared by swiss/shell). */
 export function normalizeGeom(g, margin = 24) {

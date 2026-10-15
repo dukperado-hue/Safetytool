@@ -11,7 +11,7 @@ const S = {
     hf: 'ระดับ HFACS ของรู', unclassified: 'ยังไม่จัดระดับ',
     lvl: { 'unsafe-acts': 'Unsafe acts', preconditions: 'Preconditions', 'unsafe-supervision': 'Unsafe supervision', 'organisational-influences': 'Organisational influences' },
     nohole: 'ชั้นที่ยังไม่มีรู', unctl: 'รูที่มาจาก Escalation Factor ที่ Bowtie ยังไม่มีมาตรการควบคุม', none: 'ไม่มี',
-    noSrc: 'รายการนี้ต้องใช้ Bowtie ต้นทาง: สร้างมุมมองนี้จากแท็บ Simulate ของ Bowtie ในเซสชันนี้',
+    noSrc: 'รายการนี้ต้องใช้ Bowtie ต้นทาง: สร้างมุมมองนี้จากแท็บ Simulate ของ Bowtie',
     layer: 'ชั้น', hole: 'รู',
   },
   en: {
@@ -22,7 +22,7 @@ const S = {
     hf: 'HFACS level of holes', unclassified: 'unclassified',
     lvl: { 'unsafe-acts': 'Unsafe acts', preconditions: 'Preconditions', 'unsafe-supervision': 'Unsafe supervision', 'organisational-influences': 'Organisational influences' },
     nohole: 'Layers without holes', unctl: 'Holes from escalation factors that have no control in the bowtie', none: 'none',
-    noSrc: 'This list needs the source bowtie: build the view from the bowtie\'s Simulate tab in this session.',
+    noSrc: 'This list needs the source bowtie: build the view from the bowtie\'s Simulate tab.',
     layer: 'Layer', hole: 'Hole',
   },
 };

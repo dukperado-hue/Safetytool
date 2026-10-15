@@ -2,7 +2,7 @@
 // Left side: threats -> preventive controls -> top event. Right side: top event -> recovery controls -> consequences.
 
 import { wrapText } from './textmetrics.js';
-import { controlsOf } from './model.js';
+import { controlsOf, isSharedIn } from './model.js';
 
 export const DIM = {
   fs: 12, lh: 15, padX: 10, padY: 9,
@@ -44,9 +44,10 @@ export function layoutBowtie(m, opts = {}) {
   const rows = (list, side, wEnd, endKind) => list.map((end) => {
     const ctrls = controlsOf(m, side, end.id).map((c) => {
       const h = boxH(c.text, D.wCtrl, D.badgeH);
-      const stack = stackFor(c);
+      const shared = isSharedIn(c, end.id);
+      const stack = shared ? [] : stackFor(c); // escalation factors are drawn once, under the control's own lane
       const stackH = stack.reduce((s, it) => s + it.h + D.escGap, 0);
-      return { c, h, stack, stackH };
+      return { c, h, stack, stackH, shared };
     });
     const he = boxH(end.text, wEnd);
     const A = Math.max(he, ...ctrls.map((x) => x.h), D.minH) / 2;
@@ -85,7 +86,7 @@ export function layoutBowtie(m, opts = {}) {
         const col = side === 'left' ? maxPrev - n + k : k;
         const cx = side === 'left' ? x0 + col * colW : rightStart + col * colW;
         const cy = axis - cc.h / 2;
-        nodes.push({ id: cc.c.id, kind: 'control', x: cx, y: cy, w: D.wCtrl, h: cc.h, ref: cc.c });
+        nodes.push({ id: cc.shared ? cc.c.id + '@' + r.end.id : cc.c.id, realId: cc.c.id, shared: cc.shared || undefined, kind: 'control', x: cx, y: cy, w: D.wCtrl, h: cc.h, ref: cc.c });
         let sy = cy + cc.h;
         let prevId = cc.c.id;
         let prevBottom = sy;

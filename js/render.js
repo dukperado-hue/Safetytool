@@ -2,7 +2,7 @@
 // so exports look the same as the screen and stay vector (sharp at any print size).
 
 import { layoutBowtie, DIM } from './layout.js';
-import { wrapText, setMeasurer } from './textmetrics.js';
+import { wrapText, setMeasurer, textWidth } from './textmetrics.js';
 import { effectivenessBand } from './model.js';
 import { layoutSwiss } from './swiss.js';
 import { layoutShell } from './shell.js';
@@ -18,13 +18,15 @@ export const SVG_CSS = `
  --poor:#c62828;--weak:#b26a00;--fair:#c9a227;--strong:#1e7b45;--none:#6b7785;--sel:#1f5fbf;
  --cheese:#fff3bf;--cheese-b:#c9a227;--act:#fde0e0;--act-b:#c0392b;--lat:#e3e8ff;--lat-b:#4c5fd5;--wall:#6b7480;--traj:#d64545;
  --cS:#e8f3ff;--cH:#e6f6ec;--cE:#fff0dc;--cL:#f1e8fb;--cX:#eef0f3;
- --ok:#1e7b45;--bad:#c62828;--unk:#6b7785}
+ --ok:#1e7b45;--bad:#c62828;--unk:#6b7785;
+ --okbg:#e8f5ec;--badbg:#fdeaea;--unkbg:#f4f5f7;--sub:#f8f9fb}
 .st-root.dark{--bg:#10151c;--ink:#e6ebf2;--muted:#9aa6b5;--line:#7d8898;
  --haz:#3d3210;--haz-b:#d9a31a;--top:#4a2417;--top-b:#e0673f;
  --thr:#14304f;--thr-b:#5b9be0;--con:#4a1a2a;--con-b:#e0708f;
  --ctl:#1a212b;--ctl-b:#8b97a7;--esc:#2b2142;--esc-b:#a98ae0;--ecl:#241c38;--none:#586270;
  --cheese:#4a3f12;--cheese-b:#d9b640;--act:#4a1f1f;--act-b:#ef7b6e;--lat:#1f2650;--lat-b:#8b9bff;--wall:#9aa6b5;
- --cS:#14304f;--cH:#17382a;--cE:#4a3516;--cL:#2f2147;--cX:#222a35}
+ --cS:#14304f;--cH:#17382a;--cE:#4a3516;--cL:#2f2147;--cX:#222a35;
+ --okbg:#143323;--badbg:#4a1f1f;--unkbg:#222a35;--sub:#1a212b}
 .st-bg{fill:var(--bg)}
 .st-link{fill:none;stroke:var(--line);stroke-width:1.6}
 .st-link.esc{stroke-dasharray:4 3;stroke:var(--esc-b)}
@@ -46,6 +48,7 @@ export const SVG_CSS = `
 .k-threat rect.box{fill:var(--thr);stroke:var(--thr-b)}
 .k-consequence rect.box{fill:var(--con);stroke:var(--con-b)}
 .k-control rect.box{fill:var(--ctl);stroke:var(--ctl-b)}
+.k-control.shared rect.box{stroke-dasharray:6 3}
 .k-escalation rect.box{fill:var(--esc);stroke:var(--esc-b)}
 .k-escalationControl rect.box{fill:var(--ecl);stroke:var(--esc-b);stroke-dasharray:4 2}
 .k-loss rect.box{fill:var(--con);stroke:var(--con-b);stroke-width:2.2}
@@ -61,6 +64,30 @@ export const SVG_CSS = `
 .k-iface rect.box{fill:var(--cX);stroke:var(--unk);stroke-dasharray:5 3}
 .k-iface.match rect.box{stroke:var(--ok);stroke-dasharray:none}
 .k-iface.mismatch rect.box{stroke:var(--bad);stroke-dasharray:none;stroke-width:2.2}
+.st-node.inert{cursor:default}
+.k-banner rect.box,.k-legend rect.box{fill:var(--cX);stroke:var(--line);stroke-width:1}
+.k-banner.match rect.box{fill:var(--okbg);stroke:var(--ok)}.k-banner.mismatch rect.box{fill:var(--badbg);stroke:var(--bad)}
+.k-holeActive rect.box,.k-holeLatent rect.box{rx:10}
+.k-holeActive rect.box{fill:var(--act);stroke:var(--act-b);stroke-width:1.6}
+.k-holeLatent rect.box{fill:var(--lat);stroke:var(--lat-b);stroke-width:1.6;stroke-dasharray:5 3}
+.k-holeActive.al rect.box,.k-holeLatent.al rect.box{stroke:var(--traj);stroke-width:2.6}
+.k-layer rect.box{rx:16}
+.k-compS rect.box,.k-compH rect.box,.k-compE rect.box,.k-compL rect.box{fill:var(--bg);stroke-width:1.4}
+.k-subject rect.box{fill:var(--bg)}
+.k-iface rect.box{fill:var(--bg)}
+.pr.sub{fill:var(--sub);stroke:var(--line);stroke-width:1}
+.pr.bd{stroke:none}.pr.bd-S{fill:var(--thr-b)}.pr.bd-H{fill:var(--strong)}.pr.bd-E{fill:var(--weak)}.pr.bd-L{fill:var(--esc-b)}
+.st-node .bdt{fill:#fff;font-weight:700;font-size:13px}
+.st-node .mono{font-family:ui-monospace,"IBM Plex Mono",Consolas,monospace;font-size:10px}
+.st-node .act{fill:var(--ink);font-size:11.5px;font-style:italic}
+.chip-bg{stroke-width:1}
+.chip-bg.chip-match{fill:var(--okbg);stroke:var(--ok)}.chip-bg.chip-bad,.chip-bg.chip-mismatch{fill:var(--badbg);stroke:var(--bad)}.chip-bg.chip-unknown{fill:var(--unkbg);stroke:var(--unk)}
+.st-node .chip-tx{font-size:10px;font-weight:700}
+.st-node .chip-tx-match{fill:var(--ok)}.st-node .chip-tx-bad,.st-node .chip-tx-mismatch{fill:var(--bad)}.st-node .chip-tx-unknown{fill:var(--unk)}
+.pr.lg-act{fill:var(--act);stroke:var(--act-b);stroke-width:1.4}
+.pr.lg-lat{fill:var(--lat);stroke:var(--lat-b);stroke-width:1.4;stroke-dasharray:3 2}
+.pr.lg-wall{fill:var(--wall);stroke:none}
+.pr-line{fill:none}.pr-line.lg-traj{stroke:var(--traj);stroke-width:3}
 .bar{stroke:none}
 .b-poor{fill:var(--poor)}.b-weak{fill:var(--weak)}.b-fair{fill:var(--fair)}.b-strong{fill:var(--strong)}.b-none{fill:var(--none)}
 .crit{fill:var(--top-b);font-weight:700}
@@ -126,10 +153,11 @@ export function renderBowtie(svg, model, opts = {}) {
   L.links.forEach((l) => el('path', { class: 'st-link ' + l.kind, d: l.d }, g));
 
   L.nodes.forEach((n) => {
-    const cls = `st-node k-${n.kind}` + (opts.selectedId === n.id ? ' sel' : '');
-    const grp = el('g', { class: cls, 'data-id': n.id, tabindex: opts.forExport ? null : 0, role: opts.forExport ? null : 'button' }, g);
+    const rid = n.realId || n.id;
+    const cls = `st-node k-${n.kind}` + (n.shared ? ' shared' : '') + (opts.selectedId === rid ? ' sel' : '');
+    const grp = el('g', { class: cls, 'data-id': n.id, 'data-real': rid, tabindex: opts.forExport ? null : 0, role: opts.forExport ? null : 'button' }, g);
     const text = n.ref.text || '';
-    const label = `${KIND_LABEL[n.kind]}: ${text || '(empty)'}`;
+    const label = `${KIND_LABEL[n.kind]}${n.shared ? ' (shared)' : ''}: ${text || '(empty)'}`;
     const tip = opts.explain && !opts.forExport ? opts.explain(n.kind) : '';
     el('title', {}, grp).textContent = tip ? `${label}\n— ${tip}` : label;
     if (!opts.forExport) grp.setAttribute('aria-label', label);
@@ -143,17 +171,34 @@ export function renderBowtie(svg, model, opts = {}) {
       el('rect', { class: 'bar b-' + (effectivenessBand(c) || 'none'), x: n.x + 1, y: n.y + n.h - 5, width: n.w - 2, height: 4, rx: 2 }, grp);
       el('text', { class: 'tag', x: n.x + 8, y: n.y + n.h - 9 }, grp).textContent = (c.function || '').slice(0, 3).toUpperCase();
       if (c.critical) el('text', { class: 'crit', x: n.x + n.w - 8, y: n.y + n.h - 9, 'text-anchor': 'end' }, grp).textContent = '★ critical';
+      const lanes = 1 + (Array.isArray(c.sharedWith) ? c.sharedWith.length : 0);
+      if (lanes > 1) el('text', { class: 'tag', x: n.x + n.w - 8, y: n.y + 11, 'text-anchor': 'end' }, grp).textContent = (n.shared ? '↗ shared ×' : '⇄ shared ×') + lanes;
     }
     if (n.kind === 'threat' && n.ref.exposure) el('text', { class: 'tag', x: n.x + n.w - 8, y: n.y + 11, 'text-anchor': 'end' }, grp).textContent = 'exp ' + n.ref.exposure;
     if (n.kind === 'consequence' && n.ref.severity) el('text', { class: 'tag', x: n.x + n.w - 8, y: n.y + 11, 'text-anchor': 'end' }, grp).textContent = 'sev ' + n.ref.severity;
     if (opts.kindTags) el('text', { class: 'ttl', x: n.x + 8, y: n.y + 11 }, grp).textContent = KIND_LABEL[n.kind];
     if (!opts.forExport && opts.onSelect) {
-      grp.addEventListener('click', (ev) => { ev.stopPropagation(); opts.onSelect(n.id, n.kind); });
-      grp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); opts.onSelect(n.id, n.kind); } });
+      grp.addEventListener('click', (ev) => { ev.stopPropagation(); opts.onSelect(rid, n.kind); });
+      grp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); opts.onSelect(rid, n.kind); } });
     }
   });
   titleText(svg, model);
   return { width: L.width, height: L.height, layout: L };
+}
+
+/** Draw the positioned primitives a layout attached to an item (text / rect / line / chip). */
+function drawPrims(parent, it) {
+  it.prims.forEach((p) => {
+    if (p.t === 'rect') el('rect', { class: 'pr ' + (p.cls || ''), x: it.x + p.x, y: it.y + p.y, width: p.w, height: p.h, rx: p.rx || 0 }, parent);
+    else if (p.t === 'line') el('line', { class: 'pr-line ' + (p.cls || ''), x1: it.x + p.x1, y1: it.y + p.y1, x2: it.x + p.x2, y2: it.y + p.y2 }, parent);
+    else if (p.t === 'text') el('text', { class: p.cls || null, x: it.x + p.x, y: it.y + p.y, 'text-anchor': p.anchor || null }, parent).textContent = p.s;
+    else if (p.t === 'chip') {
+      const w = Math.ceil(textWidth(p.s, 10)) + 14;
+      const x0 = p.anchor === 'end' ? it.x + p.x - w : it.x + p.x;
+      el('rect', { class: 'chip-bg chip-' + p.cls, x: x0, y: it.y + p.y, width: w, height: 16, rx: 8 }, parent);
+      el('text', { class: 'chip-tx chip-tx-' + p.cls, x: x0 + w / 2, y: it.y + p.y + 11.5, 'text-anchor': 'middle' }, parent).textContent = p.s;
+    }
+  });
 }
 
 /** Swiss cheese / SHELL: draws the geometry produced by layoutSwiss/layoutShell. */
@@ -162,17 +207,20 @@ function renderGeometry(svg, model, G, opts) {
   G.links.forEach((l) => el('path', { class: 'st-link ' + l.kind, d: l.d }, g));
   const fs = 12; const lh = 15;
   G.items.forEach((it) => {
-    const cls = `st-node k-${it.kind}` + (it.status ? ' ' + it.status : '') + (opts.selectedId === it.id ? ' sel' : '');
+    const cls = `st-node k-${it.kind}` + (it.status ? ' ' + it.status : '') + (it.aligned ? ' al' : '') + (it.inert ? ' inert' : '') + (opts.selectedId === it.id ? ' sel' : '');
     const grp = el('g', { class: cls, 'data-id': it.id }, g);
     const label = KIND_LABEL[it.kind] || it.kind;
     const tip = opts.explain && !opts.forExport ? opts.explain(it.kind) : '';
     el('title', {}, grp).textContent = tip ? `${label}\n— ${tip}` : label;
-    if (it.shape === 'ellipse') {
+    if (it.prims) {
+      el('rect', { class: 'box', x: it.x, y: it.y, width: it.w, height: it.kind === 'layer' ? it.fullH : it.h, rx: it.kind === 'layer' ? 16 : 10 }, grp);
+      drawPrims(grp, it);
+    } else if (it.shape === 'ellipse') {
       el('ellipse', { class: 'box', cx: it.x + it.w / 2, cy: it.y + it.h / 2, rx: it.w / 2, ry: it.h / 2 }, grp);
     } else {
       el('rect', { class: 'box', x: it.x, y: it.y, width: it.w, height: it.kind === 'layer' ? it.fullH : it.h }, grp);
     }
-    if (it.kind === 'layer') {
+    if (it.prims) { /* drawn above */ } else if (it.kind === 'layer') {
       const t1 = textBlock(grp, it.nameLines, it.x + it.w / 2, it.y + 8 + lh * 0.8, lh);
       t1.setAttribute('class', 'nm');
       textBlock(grp, it.defLines, it.x + it.w / 2, it.y + 8 + it.nameLines.length * lh + 6 + lh * 0.8, lh);
@@ -183,7 +231,7 @@ function renderGeometry(svg, model, G, opts) {
       if (hasTitle) { el('text', { class: 'ttl', x: it.x + it.w / 2, y: y0 + 9, 'text-anchor': 'middle' }, grp).textContent = it.title; y0 += 13; }
       textBlock(grp, it.lines, it.x + it.w / 2, y0 + lh * 0.8, lh);
     }
-    if (!opts.forExport && opts.onSelect) {
+    if (!opts.forExport && opts.onSelect && !it.inert) {
       grp.style.cursor = 'pointer';
       grp.addEventListener('click', (ev) => { ev.stopPropagation(); opts.onSelect(it.id, it.kind); });
     }
@@ -194,7 +242,7 @@ function renderGeometry(svg, model, G, opts) {
   return { width: G.width, height: G.height, layout: G };
 }
 
-export function renderSwiss(svg, model, opts = {}) { return renderGeometry(svg, model, layoutSwiss(model), opts); }
+export function renderSwiss(svg, model, opts = {}) { return renderGeometry(svg, model, layoutSwiss(model, { lang: opts.lang }), opts); }
 export function renderShell(svg, model, opts = {}) { return renderGeometry(svg, model, layoutShell(model), opts); }
 
 /** type: 'bowtie' | 'swiss' | 'shell' */
@@ -208,7 +256,7 @@ export function renderModel(svg, type, model, opts = {}) {
 export function exportSvgString(type, model, opts = {}) {
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('xmlns', NS);
-  const { width, height } = renderModel(svg, type, model, { showEsc: opts.showEsc, forExport: true, dark: false, kindTags: !!opts.kindTags });
+  const { width, height } = renderModel(svg, type, model, { showEsc: opts.showEsc, forExport: true, dark: false, kindTags: !!opts.kindTags, lang: opts.lang });
   svg.setAttribute('width', Math.ceil(width));
   svg.setAttribute('height', Math.ceil(height));
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg);
