@@ -4,6 +4,7 @@
 
 import { controlsOf } from './model.js';
 import { simulateBowtie, assuranceRegister } from './bowtie-analysis.js';
+import { pickMatrix, ercLookup, barrierContext, BARRIER_LEVELS } from './erc.js';
 
 const S = {
   th: {
@@ -18,6 +19,11 @@ const S = {
     summary: (s) => `ทั้งหมด ${s.total} เส้นทาง · ถูกตัด ${s.cut} · ยังไม่ถูกตัด ${s.open} · สรุปไม่ได้ ${s.inconclusive}`,
     warnings: 'ข้อควรระวัง', limits: 'ข้อจำกัดของโมเดล', unctl: 'Escalation Factor ที่ยังไม่มีมาตรการควบคุม',
     setAll: 'ตั้งทุก Barrier เป็น', resetAll: 'รีเซ็ตเป็น "ไม่ทราบ"', col: { threat: 'Threat', cons: 'Consequence', res: 'ผล', why: 'เหตุผล' },
+    erc: { title: 'ERC (Event Risk Classification)', note: 'ผู้วิเคราะห์เป็นผู้เลือกคำตอบทั้งสองข้อเอง โปรแกรมไม่ได้คำนวณจากผล Simulate และตารางนี้ต้องตรวจกับตารางทางการขององค์กรก่อนใช้ตัดสินใจ',
+      pick: '— ยังไม่เลือก —', q1: 'คำถามที่ 1', q2: 'คำถามที่ 2', ctx: 'สถานะ control ในโมเดลนี้ (ข้อมูลประกอบ ไม่ใช่คำตอบ)', score: 'คะแนน ERC', rationale: 'เหตุผลของผู้วิเคราะห์ (หลักฐาน/สมมติฐานที่ใช้)',
+      lvl: { effective: 'Effective', limited: 'Limited', minimal: 'Minimal', notEffective: 'Not effective' },
+      hint: { effective: 'มี barrier ที่ดีเหลืออยู่หลายชั้น', limited: 'สถานการณ์ผิดปกติและจัดการยากขึ้น แต่ยังมีขอบเขตความปลอดภัยพอสมควร', minimal: 'ยังมี barrier เหลืออยู่บ้าง', notEffective: 'ไม่สามารถหลีกเลี่ยงอุบัติเหตุได้ หรือรอดเพราะโชค' },
+      hintSrc: 'ความหมายประกอบจากสไลด์ ATSB 2013 ไม่ใช่นิยามขององค์กร', band: { red: 'แดง', yellow: 'เหลือง', green: 'เขียว' }, none: 'ยังไม่ได้เลือกครบทั้งสองข้อ' },
     empty: 'ต้องมีอย่างน้อย 1 Threat และ 1 Consequence จึงจะจำลองได้', err: 'จำลองไม่ได้: ', gaps: 'ช่องว่างของ Barrier (ตามข้อมูลที่กรอก)', noGaps: 'ไม่มีช่องว่างที่บันทึก',
   },
   en: {
@@ -32,12 +38,25 @@ const S = {
     summary: (s) => `${s.total} paths · cut ${s.cut} · not cut ${s.open} · inconclusive ${s.inconclusive}`,
     warnings: 'Warnings', limits: 'Model limitations', unctl: 'Escalation factors without a control',
     setAll: 'Set every barrier to', resetAll: 'Reset to "unknown"', col: { threat: 'Threat', cons: 'Consequence', res: 'Result', why: 'Reason' },
+    erc: { title: 'ERC (Event Risk Classification)', note: 'The analyst chooses both answers. Nothing is computed from the simulation, and the matrix must be checked against your organisation\'s official one before any decision.',
+      pick: '— not selected —', q1: 'Question 1', q2: 'Question 2', ctx: 'Control states in this model (context only, not an answer)', score: 'ERC score', rationale: 'Analyst rationale (evidence / assumptions used)',
+      lvl: { effective: 'Effective', limited: 'Limited', minimal: 'Minimal', notEffective: 'Not effective' },
+      hint: { effective: 'Several good barriers remaining', limited: 'Abnormal and more demanding to manage, but still a considerable safety margin', minimal: 'Some barrier(s) still in place', notEffective: 'An accident was not avoided, or was avoided by luck' },
+      hintSrc: 'Meaning taken from the ATSB 2013 slides, not an organisational definition', band: { red: 'red', yellow: 'yellow', green: 'green' }, none: 'Both answers are needed' },
     empty: 'Add at least one threat and one consequence to simulate', err: 'Cannot simulate: ', gaps: 'Barrier assurance gaps (from entered data only)', noGaps: 'No gaps recorded',
   },
 };
 const ICON = { cut: '■', open: '▲', inconclusive: '?' }; // shape + text + colour: never colour alone
 
 let pendingFocus = null;
+let ercFile = null;
+let ercLoading = null;
+function loadErc() {
+  if (ercFile) return Promise.resolve(ercFile);
+  if (!ercLoading) ercLoading = fetch('data/erc-matrix.json').then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); }).then((j) => { ercFile = j; return j; });
+  return ercLoading;
+}
+const BAND_ICON = { red: '▲', yellow: '◆', green: '■' };
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
@@ -94,6 +113,73 @@ function group(L, title, result, reason, controls, api) {
   controls.forEach((c) => g.appendChild(controlRow(L, c, api)));
   g.appendChild(el('div', 'muted sim-reason', reason));
   return g;
+}
+
+function drawErc(host, m, L, api) {
+  const E = L.erc;
+  const sec = el('section', 'erc');
+  sec.appendChild(el('h3', null, E.title));
+  sec.appendChild(el('p', 'muted', E.note));
+  host.appendChild(sec);
+  loadErc().then((file) => {
+    const mx = pickMatrix(file, (m.erc && m.erc.matrix) || null);
+    if (!mx) return;
+    const cur = m.erc || { outcome: null, barriers: null, rationale: '' };
+    const set = (patch) => api.mutate((x) => { x.erc = Object.assign({ matrix: mx.id, outcome: null, barriers: null, rationale: '' }, x.erc || {}, patch); });
+
+    const sel = (id, label, question, opts, value, onChange) => {
+      const wrap = el('div', 'erc-q');
+      const lab = el('label', null, label + ': ' + question);
+      lab.htmlFor = id;
+      const s2 = el('select');
+      s2.id = id;
+      const o0 = el('option', null, E.pick); o0.value = ''; s2.appendChild(o0);
+      opts.forEach(([v, t]) => { const o = el('option', null, t); o.value = v; s2.appendChild(o); });
+      s2.value = value || '';
+      s2.addEventListener('change', () => { pendingFocus = id; onChange(s2.value || null); });
+      wrap.append(lab, s2);
+      return wrap;
+    };
+    sec.appendChild(sel('erc-q1', E.q1, mx.question1, mx.rows.map((r) => [r.id, r.outcome + ' — ' + r.definition]), cur.outcome, (v) => set({ outcome: v })));
+    sec.appendChild(sel('erc-q2', E.q2, mx.question2, BARRIER_LEVELS.map((b) => [b, E.lvl[b]]), cur.barriers, (v) => set({ barriers: v })));
+    if (cur.barriers) sec.appendChild(el('p', 'muted', E.hint[cur.barriers] + ' (' + E.hintSrc + ')'));
+    const c = barrierContext(m);
+    sec.appendChild(el('p', 'muted', `${E.ctx}: ${L.status.effective} ${c.effective} · ${L.status.degraded} ${c.degraded} · ${L.status.failed} ${c.failed} · ${L.status.unknown} ${c.unknown}`));
+
+    const hit = ercLookup(mx, cur.outcome, cur.barriers);
+    const res = el('div', 'erc-result');
+    if (hit) {
+      res.appendChild(el('span', 'erc-chip erc-' + hit.band, `${BAND_ICON[hit.band] || '●'} ${E.score}: ${hit.score} · ${E.band[hit.band] || hit.band}`));
+      if (hit.action) res.appendChild(el('span', null, ' ' + hit.action));
+    } else res.appendChild(el('span', 'muted', E.none));
+    sec.appendChild(res);
+
+    const tbl = el('table', 'erc-table');
+    const head = tbl.createTHead().insertRow();
+    head.appendChild(el('th'));
+    mx.columns.forEach((cl) => head.appendChild(el('th', null, E.lvl[cl.id])));
+    const tb = tbl.createTBody();
+    mx.rows.forEach((r) => {
+      const tr = tb.insertRow();
+      tr.appendChild(el('th', null, r.outcome));
+      r.cells.forEach((cell, ci) => {
+        const td = tr.insertCell();
+        td.textContent = String(cell.score);
+        td.className = 'erc-' + cell.band + (r.id === cur.outcome && mx.columns[ci].id === cur.barriers ? ' erc-picked' : '');
+        if (r.id === cur.outcome && mx.columns[ci].id === cur.barriers) td.setAttribute('aria-current', 'true');
+      });
+    });
+    sec.appendChild(tbl);
+
+    const rl = el('label', null, E.rationale);
+    rl.htmlFor = 'erc-why';
+    const why = el('textarea', 'guide-input');
+    why.id = 'erc-why'; why.rows = 3; why.value = cur.rationale || '';
+    why.addEventListener('change', () => { pendingFocus = 'erc-why'; set({ rationale: why.value }); });
+    sec.append(rl, why);
+    sec.appendChild(el('p', 'muted', mx.status));
+    if (pendingFocus) { const fEl = host.querySelector('#' + pendingFocus); if (fEl) fEl.focus(); pendingFocus = null; }
+  }).catch(() => { /* matrix unavailable: the rest of the tab still works */ });
 }
 
 export function drawSimulate(host, m, { lang, mutate }) {
@@ -176,6 +262,7 @@ export function drawSimulate(host, m, { lang, mutate }) {
     gaps.slice(0, 12).forEach((x) => ul.appendChild(el('li', null, `${x.critical ? '★ ' : ''}${short(x.text, 60)} — ${x.gaps.join('; ')}`)));
     host.appendChild(ul);
   }
+  drawErc(host, m, L, api);
   host.appendChild(el('h3', null, L.limits));
   const ul = el('ul', 'sim-list muted');
   run.limitations.forEach((x) => ul.appendChild(el('li', null, x)));
@@ -183,5 +270,5 @@ export function drawSimulate(host, m, { lang, mutate }) {
   host.appendChild(el('p', 'muted', run.id));
 
   host.scrollTop = top;
-  if (pendingFocus) { const f = host.querySelector('#' + pendingFocus); if (f) f.focus(); pendingFocus = null; }
+  if (pendingFocus && !pendingFocus.startsWith('erc-')) { const f = host.querySelector('#' + pendingFocus); if (f) f.focus(); pendingFocus = null; }
 }

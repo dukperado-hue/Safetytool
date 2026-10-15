@@ -5,6 +5,7 @@
 
 import { controlsOf } from './model.js';
 import { checkEvidence, isIsoDate } from './evidence.js';
+import { validateErc } from './erc.js';
 import { seriesResult, runSimulation, compareRuns, fingerprint, MODEL_VERSION, LIMITATIONS, RESULT, BARRIER_STATUS, DEGRADED_LOGIC } from './scenario.js';
 
 /** Treat a control as a barrier. A control with no `status` is `unknown` — we never assume it works. */
@@ -25,6 +26,7 @@ export function validateBowtieExt(m) {
     if (c.status === 'unknown' || c.status == null) warnings.push('V-05 control ' + c.id + ' has no known state: paths through it can only be inconclusive');
     if (c.status === 'degraded' && !c.degradedLogic) warnings.push('V-06 control ' + c.id + ' is degraded without logic: paths through it will be inconclusive');
   }
+  errors.push(...validateErc(m.erc, null));
   const holders = [m.hazard, m.topEvent, ...m.threats, ...m.consequences, ...m.controls, ...m.escalations, ...m.escalationControls];
   const e = checkEvidence(m, holders);
   return { errors: errors.concat(e.errors), warnings: warnings.concat(e.warnings) };

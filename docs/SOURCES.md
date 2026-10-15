@@ -49,3 +49,7 @@ Principle: **we use the public method and general safety knowledge; we do not co
 - Source: R. Taylor (ATSB), "Event Risk Classification (ERC)", 2013 slides, https://asasi.org/wp-content/uploads/2021/05/Event-Risk-Classification-by-Russell-Taylor-2013.pdf (slides 10-12, 22; accessed 2026-10-15). Matrix values transcribed by hand from the slide images.
 - Method: ERC comes from the ARMS working group; Step 1 most credible accident outcome, Step 2 effectiveness of remaining barriers, Step 3 score. Analyst judgement, not a computed value. Organisations may use a 4x4 variant (top-right 2,500); confirm against the organisation's own matrix before use.
 - Also read: galiot.aero and bainessimmons.com blog posts (general description only; they give no matrix values).
+
+## ERC matrix v2 (data/erc-matrix.json, preset "org-reference")
+- Transcribed by hand from an image supplied by the user (Event_risk_classification.png; the image does not name its publisher). 4 outcomes x 4 barrier levels, top-right 2500, three colours (red/yellow/green). The image gives no action text per colour, so none is shown.
+- Barrier-level meanings shown in the UI come from the ATSB 2013 slides (flagged as such). ERC answers are chosen by the analyst and stored in `erc` on the bowtie; they are never computed from the simulation.

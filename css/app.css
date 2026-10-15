@@ -132,3 +132,13 @@ footer{padding:6px 16px;border-top:1px solid var(--line);color:var(--muted);font
 .gal-actions{display:flex;gap:6px;margin-top:auto}
 .net-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 4px 0 8px;vertical-align:middle;background:var(--strong)}
 .net-dot.off{background:var(--weak)}
+
+/* ERC */
+.erc-q{display:flex;flex-direction:column;gap:3px;margin:8px 0}
+.erc-result{margin:8px 0}
+.erc-chip{display:inline-block;padding:4px 12px;border-radius:6px;font-weight:700;border:2px solid #000}
+.erc-red{background:#e00000;color:#fff}.erc-yellow{background:#ffe600;color:#000}.erc-green{background:#9acd00;color:#000}
+.erc-veryHigh{background:#c00000;color:#fff}.erc-high{background:#f79646;color:#000}.erc-medium{background:#ffe600;color:#000}.erc-low{background:#92d050;color:#000}.erc-noAccidentOutcome{background:#00b050;color:#000}
+.erc-table{border-collapse:collapse;margin:8px 0;font-size:13px}.erc-table th,.erc-table td{border:1px solid #000;padding:4px 8px;text-align:center}
+.erc-table th{background:var(--panel);color:var(--ink);font-weight:600}
+td.erc-picked{outline:4px solid var(--accent);outline-offset:-4px;font-weight:800;text-decoration:underline}

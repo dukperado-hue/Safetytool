@@ -94,6 +94,36 @@
     },
     "adrep": {
       "$ref": "#/$defs/adrep"
+    },
+    "erc": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Analyst-chosen ERC answers (never computed). outcome = row id of the matrix in data/erc-matrix.json; barriers = column id.",
+      "properties": {
+        "matrix": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "barriers": {
+          "enum": [
+            "effective",
+            "limited",
+            "minimal",
+            "notEffective",
+            null
+          ]
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
     }
   },
   "$defs": {

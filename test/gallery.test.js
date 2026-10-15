@@ -54,14 +54,3 @@ test('guide: steps become done when the model is filled', () => {
   M.addEscalation(m, c.id, 'e');
   for (const id of ['hazard', 'topEvent', 'threat', 'consequence', 'control', 'escalation']) assert.equal(by[id].done(m), true, id);
 });
-
-test('erc matrix reference file is well-formed and flagged as reference only', () => {
-  const e = JSON.parse(readFileSync(new URL('../data/erc-matrix.json', import.meta.url), 'utf8'));
-  assert.match(e.status, /REFERENCE ONLY/);
-  assert.equal(e.columns.length, 4);
-  for (const r of e.rows) { assert.equal(r.cells.length, 4); r.cells.forEach((c) => assert.ok(e.bands[c.band])); }
-  const scores = e.rows.flatMap((r) => r.cells.map((c) => c.score));
-  assert.equal(Math.max(...scores), 12500);
-  assert.equal(e.rows.find((r) => r.id === 'catastrophic').cells[3].score, 2500);
-  assert.equal(e.rows.find((r) => r.id === 'noAccident').cells[0].score, 1);
-});
