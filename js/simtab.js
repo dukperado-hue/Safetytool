@@ -115,6 +115,32 @@ function group(L, title, result, reason, controls, api) {
   return g;
 }
 
+const SWS = {
+  th: { title: 'มุมมอง Swiss cheese (เจาะลึกเส้นทางเดียว)', note: 'สร้างชั้นป้องกันจาก Barrier บนเส้นทางที่เลือก และรูจาก Escalation Factor ส่วน Trajectory จะว่างไว้ให้ผู้วิเคราะห์เลือกจากข้อเท็จจริง', threat: 'Threat', cons: 'Consequence (ไม่บังคับ)', none: '— ไม่ใช้ —', go: 'สร้างมุมมอง Swiss cheese' },
+  en: { title: 'Swiss cheese view (deep dive on one route)', note: 'Builds layers from the barriers on the chosen route and holes from escalation factors. The trajectory stays empty for the analyst to choose from facts.', threat: 'Threat', cons: 'Consequence (optional)', none: '— none —', go: 'Build Swiss cheese view' },
+};
+function drawSwissLink(host, m, lang, openSwiss) {
+  if (!openSwiss || !m.threats.length) return;
+  const L = SWS[lang] || SWS.th;
+  const sec = el('section', 'swiss-link');
+  sec.appendChild(el('h3', null, L.title));
+  sec.appendChild(el('p', 'muted', L.note));
+  const mk = (id, label, items, withNone) => {
+    const lab = el('label', null, label + ': ');
+    lab.htmlFor = id;
+    const s = el('select'); s.id = id;
+    if (withNone) { const o = el('option', null, L.none); o.value = ''; s.appendChild(o); }
+    items.forEach((x) => { const o = el('option', null, x.text || x.id); o.value = x.id; s.appendChild(o); });
+    return [lab, s];
+  };
+  const [l1, s1] = mk('sw-threat', L.threat, m.threats, false);
+  const [l2, s2] = mk('sw-cons', L.cons, m.consequences, true);
+  const go = el('button', 'primary', L.go); go.type = 'button';
+  go.addEventListener('click', () => openSwiss(s1.value, s2.value || null));
+  sec.append(l1, s1, el('br'), l2, s2, el('br'), go);
+  host.appendChild(sec);
+}
+
 function drawErc(host, m, L, api) {
   const E = L.erc;
   const sec = el('section', 'erc');
@@ -182,7 +208,7 @@ function drawErc(host, m, L, api) {
   }).catch(() => { /* matrix unavailable: the rest of the tab still works */ });
 }
 
-export function drawSimulate(host, m, { lang, mutate }) {
+export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
   const L = S[lang] || S.th;
   const api = { mutate };
   const top = host.scrollTop;
@@ -262,6 +288,7 @@ export function drawSimulate(host, m, { lang, mutate }) {
     gaps.slice(0, 12).forEach((x) => ul.appendChild(el('li', null, `${x.critical ? '★ ' : ''}${short(x.text, 60)} — ${x.gaps.join('; ')}`)));
     host.appendChild(ul);
   }
+  drawSwissLink(host, m, lang, openSwiss);
   drawErc(host, m, L, api);
   host.appendChild(el('h3', null, L.limits));
   const ul = el('ul', 'sim-list muted');
