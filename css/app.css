@@ -209,3 +209,6 @@ td.erc-red::before{content:"\25B2 "}td.erc-yellow::before{content:"\25C6 "}td.er
 }
 
 :root{color-scheme:light}:root[data-theme="dark"]{color-scheme:dark}
+
+.guide-group{margin:12px 0 4px;font-size:13px;color:var(--muted)}
+.guide select.guide-input{width:100%}

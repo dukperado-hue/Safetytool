@@ -2,7 +2,7 @@
 // Strategy: pre-cache the app shell; then "stale-while-revalidate" for same-origin GET requests
 // (answer from cache immediately, refresh the cache in the background when online).
 // Bump VERSION whenever the file list changes.
-const VERSION = 'safetytool-v7';
+const VERSION = 'safetytool-v8';
 const SHELL = [
   './', 'index.html', 'css/app.css',
   'js/app.js', 'js/forms.js', 'js/help.js', 'js/i18n.js', 'js/layout.js', 'js/lint.js', 'js/model.js', 'js/render.js',
