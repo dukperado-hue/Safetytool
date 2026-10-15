@@ -159,7 +159,23 @@ function drawDiagram({ fit = false } = {}) {
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
   svg.setAttribute('width', w);
   svg.setAttribute('height', h);
+  drawStat();
   if (fit) fitView(); else applyView();
+}
+
+/** One quiet row of counts above the picture (derived from the model; no scores). */
+function drawStat() {
+  const host = $('#statline');
+  if (!host) return;
+  host.textContent = '';
+  const m = cur();
+  const chip = (label, n, cls) => { const s = document.createElement('span'); s.className = 'sl' + (cls ? ' ' + cls : ''); s.textContent = n == null ? label : label + ': ' + n; host.appendChild(s); };
+  if (state.type === 'bowtie') { chip('THREATS', m.threats.length); chip('BARRIERS', m.controls.length); chip('CONSEQUENCES', m.consequences.length); chip('ESCALATIONS', m.escalations.length); }
+  else if (state.type === 'swiss') { const holes = m.layers.flatMap((l) => l.holes); chip('LAYERS', m.layers.length); chip('ACTIVE', holes.filter((h) => h.type === 'active').length); chip('LATENT', holes.filter((h) => h.type === 'latent').length); chip('ALIGNED', m.trajectory.length); }
+  else if (state.type === 'shell') { chip('ITEMS', SH.COMPONENTS.reduce((s, c) => s + m.components[c].length, 0)); chip('FINDINGS', SH.INTERFACES.reduce((s, i) => s + m.interfaces[i].findings.length, 0)); chip('MISMATCH', SH.INTERFACES.filter((i) => m.interfaces[i].status === 'mismatch').length, 'bad'); chip('UNKNOWN', SH.INTERFACES.filter((i) => m.interfaces[i].status === 'unknown').length); }
+  else if (state.type === 'hfacs') { const a = HF.analyzeHfacs(m); chip('FACTORS', a.total); chip('LEVELS COVERED', (4 - a.levelsWithNothing.length) + '/4'); chip('UNCLASSIFIED', a.unclassified); }
+  else if (state.type === 'stamp') { const a = ST.analyzeStamp(m); chip('CONTROL ACTIONS', a.counts.controlActions); chip('UCAs', a.counts.ucas); chip('SCENARIOS', a.counts.scenarios); }
+  if (m.meta && m.meta.illustrative) chip(state.lang === 'th' ? 'ตัวอย่างประกอบ' : 'ILLUSTRATIVE EXAMPLE', null, 'warn');
 }
 
 // ---------- quality panel ----------

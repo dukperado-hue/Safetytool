@@ -214,7 +214,7 @@ export function analyzeHfacs(m) {
 export const factorCodes = (m) => Object.fromEntries(m.factors.map((f, i) => [f.id, 'HF-' + String(i + 1).padStart(2, '0')]));
 
 // ---------------- layout ----------------
-export const HF = { fs: 12, lh: 15, labelW: 150, cellW5: 214, gap: 10, padX: 10, headH: 34, cardPad: 8, cardGap: 8, bandGap: 14, evH: 64, minCell: 56 };
+export const HF = { fs: 12, lh: 15, labelW: 150, cellW5: 214, gap: 10, padX: 10, headH: 34, cardPad: 8, cardGap: 8, bandGap: 14, evH: 64, minCell: 68 };
 
 /**
  * Four horizontal bands (organisation at the top, unsafe acts at the bottom) with one cell per category; each factor is a
@@ -273,7 +273,7 @@ export function layoutHfacs(m, opts = {}) {
           { t: 'text', x: w - D.padX + 2, y: 14, s: ev ? '◆ evidence' : '◇ no evidence', cls: 'tag', anchor: 'end' },
           ...lines.map((s, i) => ({ t: 'text', x: D.padX - 2, y: 20 + D.lh * 0.78 + i * D.lh, s })),
         ];
-        const it = { id: f.id, kind: VIOLATIONS.includes(f.category) ? 'hfViolation' : 'hfFactor', shape: 'card', x: x + D.cardPad, y: cy, w, h, lines: [], prims: p };
+        const it = { id: f.id, kind: VIOLATIONS.includes(f.category) ? 'hfViolation' : 'hfFactor', shape: 'card', x: x + D.cardPad, y: cy, w, h, lines: [], prims: p, bandBottom: y + b.h };
         items.push(it);
         pos[f.id] = it;
         cy += h + D.cardGap;
@@ -320,7 +320,7 @@ export function layoutHfacs(m, opts = {}) {
     if (!a || !b) return;
     const x1 = a.x + a.w / 2 + ((k % 3) - 1) * 10; const x2 = b.x + b.w / 2 + ((k % 3) - 1) * 10;
     const y1 = a.y + a.h; const y2 = b.y;
-    const ym = y2 - 5 - (k % 3) * 3;
+    const ym = (a.bandBottom != null ? a.bandBottom : y1) + D.bandGap / 2 + ((k % 3) - 1) * 3; // the horizontal jog runs in the gap under the source band
     links.push({ kind: 'infl', d: `M${Math.round(x1)},${Math.round(y1)} V${Math.round(ym)} H${Math.round(x2)} V${Math.round(y2)}` });
     k += 1;
   }));

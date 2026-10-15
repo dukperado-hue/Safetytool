@@ -223,9 +223,13 @@ export function analyzeStamp(m) {
 }
 
 // ---------------- layout ----------------
-export const ST = { fs: 12, lh: 15, padX: 12, headH: 28, nodeW: 250, gapX: 90, minGapY: 96, lineGap: 16, minH: 60, sumH: 36, labelW: 150 };
+export const ST = { fs: 12, lh: 15, padX: 12, headH: 28, nodeW: 250, gapX: 90, minGapY: 100, lineGap: 22, minH: 60, sumH: 36, labelW: 120, laneW: 190, laneStep: 16, minW: 900, labW: 170 };
 
-/** Control structure: rows by `level` (0 at the top). Control actions run down (solid), feedback runs up (dashed); each has a label. */
+/**
+ * Control structure: rows by `level` (0 at the top). Control actions are solid arrows (labels on the left of their line),
+ * feedback is dashed (labels on the right). Lines between neighbouring rows run in the gap; a line that skips a row goes
+ * round the cards in a side lane (control on the left, feedback on the right) so it never crosses a box.
+ */
 export function layoutStamp(m, opts = {}) {
   const D = ST;
   const lang = opts.lang === 'en' ? 'en' : 'th';
@@ -233,80 +237,111 @@ export function layoutStamp(m, opts = {}) {
   const levels = [...new Set(m.nodes.map((n) => n.level))].sort((a, b) => a - b);
   const items = []; const links = [];
   const ucaCount = (id) => m.ucas.filter((u) => { const a = m.actions.find((x) => x.id === u.actionId); return a && a.from === id; }).length;
+  const rowIdx = new Map(levels.map((lv, i) => [lv, i]));
+  const node = (id) => m.nodes.find((n) => n.id === id);
+  const live = m.actions.filter((a) => node(a.from) && node(a.to));
+  const span = (a) => Math.abs(rowIdx.get(node(a.from).level) - rowIdx.get(node(a.to).level));
+  const skip = live.filter((a) => span(a) > 1);
+  const left = skip.filter((a) => a.kind === 'control');
+  const right = skip.filter((a) => a.kind !== 'control');
 
   const cardOf = (n) => {
     const inner = D.nodeW - 2 * D.padX;
     const tl = wrapText(n.text || '—', inner, D.fs);
     const pm = n.role === 'controller' && n.processModel ? wrapText('PM: ' + n.processModel, inner, 11) : [];
     const h = Math.max(D.minH, D.headH + tl.length * D.lh + (pm.length ? 6 + pm.length * 14 : 0) + 12);
-    const prims = [{ t: 'text', x: D.padX, y: 17, s: (n.role === 'process' ? (lang === 'th' ? 'CONTROLLED PROCESS' : 'CONTROLLED PROCESS') : 'CONTROLLER') + ' · ' + codes[n.id], cls: 'ttl' }];
+    const prims = [{ t: 'text', x: D.padX, y: 17, s: (n.role === 'process' ? 'CONTROLLED PROCESS' : 'CONTROLLER') + ' · ' + codes[n.id], cls: 'ttl' }];
     if (n.role === 'controller') { const k = ucaCount(n.id); if (k) prims.push({ t: 'chip', x: D.nodeW - D.padX, y: 6, s: 'UCA ×' + k, cls: 'bad', anchor: 'end' }); }
     tl.forEach((s, i) => prims.push({ t: 'text', x: D.padX, y: D.headH + 4 + D.lh * 0.78 + i * D.lh, s, cls: 'nm' }));
     pm.forEach((s, i) => prims.push({ t: 'text', x: D.padX, y: D.headH + 4 + tl.length * D.lh + 10 + i * 14, s, cls: 'tag' }));
     return { prims, h };
   };
 
-  // gap between rows grows with the number of lines drawn across it
-  const rowOf = new Map(levels.map((lv, i) => [lv, i]));
   const rowNodes = levels.map((lv) => m.nodes.filter((n) => n.level === lv));
   const rowW = Math.max(1, ...rowNodes.map((r) => r.length));
-  const width = D.labelW + rowW * D.nodeW + (rowW - 1) * D.gapX + 20;
+  const zoneL = left.length ? D.laneW + left.length * D.laneStep : 30;
+  const zoneR = right.length ? D.laneW + right.length * D.laneStep : 30;
+  const cardsW = rowW * D.nodeW + (rowW - 1) * D.gapX;
+  const width = Math.max(D.minW, D.labelW + zoneL + cardsW + zoneR);
+  const innerX = D.labelW + zoneL; const innerW = width - D.labelW - zoneL - zoneR;
   const rowH = rowNodes.map((r) => Math.max(D.minH, ...r.map((n) => cardOf(n).h)));
-  const crossings = (i) => m.actions.filter((a) => { const f = m.nodes.find((n) => n.id === a.from); const t = m.nodes.find((n) => n.id === a.to); if (!f || !t) return false; const ra = rowOf.get(f.level); const rb = rowOf.get(t.level); return Math.min(ra, rb) <= i && Math.max(ra, rb) > i; }).length;
+  const adjacentLines = (i) => live.filter((a) => span(a) === 1 && Math.min(rowIdx.get(node(a.from).level), rowIdx.get(node(a.to).level)) === i);
   const rowY = []; let y = 0;
-  rowNodes.forEach((r, i) => { rowY.push(y); y += rowH[i] + (i < rowNodes.length - 1 ? Math.max(D.minGapY, 40 + crossings(i) * D.lineGap) : 0); });
+  rowNodes.forEach((r, i) => { rowY.push(y); y += rowH[i] + (i < rowNodes.length - 1 ? Math.max(D.minGapY, 50 + adjacentLines(i).length * D.lineGap) : 0); });
 
   const pos = {};
   rowNodes.forEach((r, i) => {
     const total = r.length * D.nodeW + (r.length - 1) * D.gapX;
-    const full = rowW * D.nodeW + (rowW - 1) * D.gapX;
-    let x = D.labelW + (full - total) / 2;
+    let x = innerX + (innerW - total) / 2;
     r.forEach((n) => {
       const c = cardOf(n);
       const it = { id: n.id, kind: n.role === 'process' ? 'stProcess' : 'stController', shape: 'card', x, y: rowY[i] + (rowH[i] - c.h) / 2, w: D.nodeW, h: c.h, lines: [], prims: c.prims };
       items.push(it); pos[n.id] = it; x += D.nodeW + D.gapX;
     });
-    items.push({ id: 'row_' + i, kind: 'stRow', inert: true, shape: 'card', x: 0, y: rowY[i], w: D.labelW - 20, h: rowH[i], lines: [], prims: [
-      { t: 'text', x: 8, y: 20, s: (lang === 'th' ? 'ระดับ ' : 'LEVEL ') + levels[i], cls: 'ttl' },
-    ] });
+    items.push({ id: 'row_' + i, kind: 'stRow', inert: true, shape: 'card', x: 0, y: rowY[i], w: D.labelW - 20, h: rowH[i], lines: [], prims: [{ t: 'text', x: 8, y: 20, s: (lang === 'th' ? 'ระดับ ' : 'LEVEL ') + levels[i], cls: 'ttl' }] });
   });
 
-  // lines: one lane per action between the same pair of rows
+  const label = (a, x, y0, side) => {
+    const lab = wrapText(a.text || '—', D.labW - 8, 11);
+    const w = D.labW;
+    const prims = lab.map((s, i) => ({ t: 'text', x: side === 'left' ? w - 4 : 4, y: 11 + i * 12, s: (i === 0 ? codes[a.id] + ' ' : '') + s, cls: 'lab', anchor: side === 'left' ? 'end' : null }));
+    items.push({ id: a.id, kind: a.kind === 'feedback' ? 'stFeedback' : 'stAction', shape: 'card', x: side === 'left' ? x - 6 - w : x + 6, y: y0, w, h: 6 + lab.length * 12, lines: [], prims });
+  };
+  const rd = Math.round;
+  const kindCls = (a) => (a.kind === 'feedback' ? 'fb' : 'ctl');
+
+  // lines between neighbouring rows: control on the left of the centre, feedback on the right
   const lane = new Map();
-  m.actions.forEach((a) => {
+  live.filter((a) => span(a) <= 1).forEach((a) => {
     const f = pos[a.from]; const t = pos[a.to];
-    if (!f || !t) return;
-    const down = f.y < t.y;
-    const key = [Math.min(rowOf.get(m.nodes.find((n) => n.id === a.from).level), rowOf.get(m.nodes.find((n) => n.id === a.to).level)), Math.max(rowOf.get(m.nodes.find((n) => n.id === a.from).level), rowOf.get(m.nodes.find((n) => n.id === a.to).level))].join('-');
-    const k = lane.get(key) || 0; lane.set(key, k + 1);
-    const sameRow = Math.abs(f.y - t.y) < 4;
-    const lab = wrapText(a.text || '—', 150, 11);
-    const code = codes[a.id];
-    if (sameRow) {
-      const left = f.x < t.x;
-      const x1 = left ? f.x + f.w : f.x; const x2 = left ? t.x : t.x + t.w; const yy = f.y + f.h / 2 + (a.kind === 'feedback' ? 12 : -12);
-      links.push({ kind: a.kind === 'feedback' ? 'fb' : 'ctl', d: `M${Math.round(x1)},${Math.round(yy)} H${Math.round(x2)}` });
-      items.push({ id: a.id, kind: a.kind === 'feedback' ? 'stFeedback' : 'stAction', shape: 'card', x: Math.min(x1, x2) + 4, y: yy - 15 - (lab.length - 1) * 12, w: Math.abs(x2 - x1) - 8, h: 14 + (lab.length - 1) * 12, lines: [], prims: lab.map((s, i) => ({ t: 'text', x: 0, y: 11 + i * 12, s: (i === 0 ? code + ' ' : '') + s, cls: 'lab' })) });
+    if (span(a) === 0) {
+      const toRight = f.x < t.x;
+      const x1 = toRight ? f.x + f.w : f.x; const x2 = toRight ? t.x : t.x + t.w;
+      const yy = f.y + f.h / 2 + (a.kind === 'feedback' ? 14 : -14);
+      links.push({ kind: kindCls(a), d: `M${rd(x1)},${rd(yy)} H${rd(x2)}` });
+      const w = Math.abs(x2 - x1) - 12;
+      const lab = wrapText(a.text || '—', Math.max(60, w), 11);
+      items.push({ id: a.id, kind: a.kind === 'feedback' ? 'stFeedback' : 'stAction', shape: 'card', x: Math.min(x1, x2) + 6, y: yy - 4 - lab.length * 12, w: Math.max(60, w), h: lab.length * 12, lines: [], prims: lab.map((s, i) => ({ t: 'text', x: 0, y: 10 + i * 12, s: (i === 0 ? codes[a.id] + ' ' : '') + s, cls: 'lab' })) });
       return;
     }
-    const spread = 34;
-    const off = ((k % 6) - 2.5) * spread + (a.kind === 'feedback' ? -spread / 2 : spread / 2) * 0;
+    const down = f.y < t.y;
+    const topRow = Math.min(rowIdx.get(node(a.from).level), rowIdx.get(node(a.to).level));
+    const key = topRow + (a.kind === 'feedback' ? 'f' : 'c');
+    const k = lane.get(key) || 0; lane.set(key, k + 1);
+    const side = a.kind === 'feedback' ? 1 : -1;
+    const off = side * (24 + k * D.lineGap);
     const xs = f.x + f.w / 2 + off; const xt = t.x + t.w / 2 + off;
     const ys = down ? f.y + f.h : f.y; const yt = down ? t.y : t.y + t.h;
-    const ym = (ys + yt) / 2 + ((k % 4) - 1.5) * 10;
-    links.push({ kind: a.kind === 'feedback' ? 'fb' : 'ctl', d: `M${Math.round(xs)},${Math.round(ys)} V${Math.round(ym)} H${Math.round(xt)} V${Math.round(yt)}`, down });
-    const ly = down ? ym + 4 : ym - 4 - (lab.length - 1) * 12;
-    items.push({ id: a.id, kind: a.kind === 'feedback' ? 'stFeedback' : 'stAction', shape: 'card', x: xt + 5, y: ly, w: 150, h: 14 + (lab.length - 1) * 12, lines: [], prims: lab.map((s, i) => ({ t: 'text', x: 0, y: 11 + i * 12, s: (i === 0 ? code + ' ' : '') + s, cls: 'lab' })) });
+    const ym = (ys + yt) / 2;
+    links.push({ kind: kindCls(a), d: xs === xt ? `M${rd(xs)},${rd(ys)} V${rd(yt)}` : `M${rd(xs)},${rd(ys)} V${rd(ym)} H${rd(xt)} V${rd(yt)}` });
+    label(a, xt, Math.min(ym, yt) + 4 + (xs === xt ? 0 : 0), side === -1 ? 'left' : 'right');
   });
 
-  const a = analyzeStamp(m);
-  const sy = y + 26;
+  // lines that skip a row: round the cards in a side lane
+  const gutterL = innerX - 20; const gutterR = innerX + innerW + 20;
+  left.forEach((a, i) => {
+    const f = pos[a.from]; const t = pos[a.to];
+    const lx = gutterL - i * D.laneStep;
+    const y1 = f.y + f.h / 2; const y2 = t.y + t.h / 2;
+    links.push({ kind: kindCls(a), d: `M${rd(f.x)},${rd(y1)} H${rd(lx)} V${rd(y2)} H${rd(t.x)}` });
+    label(a, lx, (y1 + y2) / 2 - 12, 'left');
+  });
+  right.forEach((a, i) => {
+    const f = pos[a.from]; const t = pos[a.to];
+    const lx = gutterR + i * D.laneStep;
+    const y1 = f.y + f.h / 2 + 10; const y2 = t.y + t.h / 2 + 10;
+    links.push({ kind: kindCls(a), d: `M${rd(f.x + f.w)},${rd(y1)} H${rd(lx)} V${rd(y2)} H${rd(t.x + t.w)}` });
+    label(a, lx, (y1 + y2) / 2 - 12, 'right');
+  });
+
+  const a2 = analyzeStamp(m);
+  const sy = y + 30;
   const sp = [{ t: 'text', x: 12, y: 23, s: 'STPA', cls: 'ttl' }];
-  let px = 56;
-  [['LOSSES', a.counts.losses], ['HAZARDS', a.counts.hazards], ['CONTROL ACTIONS', a.counts.controlActions], ['UCAs', a.counts.ucas], ['SCENARIOS', a.counts.scenarios]].forEach(([k, v]) => {
+  let px = 58;
+  [['LOSSES', a2.counts.losses], ['HAZARDS', a2.counts.hazards], ['CONTROL ACTIONS', a2.counts.controlActions], ['UCAs', a2.counts.ucas], ['SCENARIOS', a2.counts.scenarios]].forEach(([k, v]) => {
     const s = k + ' ' + v;
     sp.push({ t: 'text', x: px, y: 23, s, cls: 'tag' });
-    px += s.length * 6.6 + 22;
+    px += s.length * 6.4 + 24;
   });
   sp.push({ t: 'text', x: width - 12, y: 23, s: lang === 'th' ? 'เส้นทึบ = control action · เส้นประ = feedback' : 'solid = control action · dashed = feedback', cls: 'tag', anchor: 'end' });
   items.push({ id: 'stamp_summary', kind: 'legend', inert: true, shape: 'card', x: 0, y: sy, w: width, h: D.sumH, lines: [], prims: sp });

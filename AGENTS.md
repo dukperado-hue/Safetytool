@@ -30,6 +30,10 @@ Report findings from these commands, not from memory of the file. When summarisi
 | `safetytool.bowtie/1` | Bowtie | `schema/bowtie.schema.json` | hazard · top event · threats · preventive/recovery controls · escalation factors |
 | `safetytool.swiss/1` | Swiss cheese (J. Reason) | `schema/swiss.schema.json` | defence layers with holes (`active` failure vs `latent` condition); `trajectory` = aligned holes, one per layer |
 | `safetytool.shell/1` | SHELL (human factors; Liveware at centre) | `schema/shell.schema.json` | components S/H/E/L + interfaces LS/LH/LE/LL with `status` (unknown/match/mismatch) and findings (severity 1–5, action, owner) |
+| `safetytool.hfacs/1` | HFACS classification of one occurrence | `schema/hfacs.schema.json` | `event` + `factors[]` each with one of 17 `category` ids (4 levels), `evidence`, and `influences[]` (ids of factors at a LOWER level only) |
+| `safetytool.stamp/1` | STAMP / STPA control structure | `schema/stamp.schema.json` | `system`, `losses`, `hazards` (→ loss ids, `constraint`), `nodes` (controller/process, `level`, `processModel`), `actions` (control down / feedback up), `ucas` (one of 4 types, `context`, hazard ids), `scenarios` |
+
+HFACS and STAMP/STPA rules: the HFACS taxonomy follows Shappell & Wiegmann, DOT/FAA/AM-00/7 (2000) — category names are theirs, definitions are our wording; other editions differ, so say which edition is meant. Skybrary's HFACS page could not be read by our tools (bot check), so it was **not** used as a source. STAMP/STPA follows Leveson, *Engineering a Safer World* (2012) and the MIT 16.63J notes. Neither model has probabilities or scores. An empty HFACS level or an empty UCA cell means **not examined or none found (unknown) — never "safe"**; the lint rules say so. Do not mark a factor as a violation without evidence of intent. Display codes (HF-01, CA-1, UCA-1 …) are derived from list order, never stored.
 
 "Shell" is ambiguous (the human-factors SHELL model vs Shell the company's bowtie style). The tool implements the **human-factors SHELL model**; confirm with the user if they meant something else. Fault tree is planned, not built.
 
@@ -87,4 +91,6 @@ Ask the user. Especially for: scope definitions, which regulator/ICAO document a
 - Persistence (browser-local): pinned baseline `safetytool.baseline`, Swiss source bowtie `safetytool.swissSource` (cleared when another file is loaded).
 - Narrow screens (<=900px): the page scrolls as a whole; toolbar/tabs scroll sideways; the stage is 58vh; two-finger pinch zooms the diagram.
 - Licence (working default, owner may change): MIT for code, CC BY 4.0 for own content; ADREP taxonomy and the ERC matrix are excluded (`LICENSE-CONTENT.md`).
-- Service worker cache name must be bumped when the shell file list changes (currently safetytool-v7).
+- Bowtie cards (Stitch style): header row = derived code (TH-01, CT-03 …) + chip (control state as glyph + word, or EXP/SEV); control footer = function, ★ critical, ⇄ shared, owner, 4-segment strength meter (adequacy × reliability). `bowtieCodes()` in layout.js.
+- New model types follow the Swiss/SHELL pattern: a pure module with `empty/validate/normalize/lint/find/layout/outline`, a layout that returns positioned primitives (`js/hfacs.js`, `js/stamp.js`), a form in `forms.js`, Analysis tab + table rows + CSV in `newtabs.js`, help in `help.js`, guide steps in `guide.js`, an entry in the `TYPES` registry (app.js) and in `cli/safetytool.js`. Layout link paths may only use M/H/V commands (`normalizeGeom` shifts only those).
+- Service worker cache name must be bumped when the shell file list changes (currently safetytool-v9).

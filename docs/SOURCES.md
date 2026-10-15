@@ -26,6 +26,8 @@ Principle: **we use the public method and general safety knowledge; we do not co
 |---|---|---|
 | Swiss cheese | J. Reason's layered-defence model; active failures vs latent conditions; optional layer categories echo HFACS-style groupings (Shappell & Wiegmann) | Written from general knowledge of the public concept; **cite Reason (1990, 1997) directly in any paper and verify our wording**. |
 | SHELL | Human-factors SHELL model (Edwards 1972, Hawkins 1975; used in ICAO human-factors guidance) | Same caveat. "Shell" may also mean the company's bowtie style; we implemented the human-factors model. |
+| HFACS | Shappell, S.A. & Wiegmann, D.A. (2000) *The Human Factors Analysis and Classification System—HFACS*, DOT/FAA/AM-00/7, FAA Office of Aviation Medicine (public report; read from rosap.ntl.bts.gov, accessed 2026-10-15). Four levels, 17 categories. | Category names are the report's; one-line definitions are our own wording. Skybrary's HFACS page could not be read by our tools (bot check) and was **not** used. Other HFACS editions have different category lists. |
+| STAMP / STPA | Leveson, N. (2012) *Engineering a Safer World*, MIT Press; J. Thomas / MIT 16.63J *System Safety* lecture notes "Systems Theoretic Process Analysis (STPA)", MIT OpenCourseWare 2016 (accessed 2026-10-15). Losses, hazards, control structure, four UCA types. | Our own wording and our own data format; no probabilities. The STPA Handbook (Leveson & Thomas 2018) was not read in this session; verify wording against it before citing. |
 
 ## Materials deliberately NOT used
 

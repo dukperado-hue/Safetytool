@@ -110,7 +110,7 @@ export const SVG_CSS = `
 .st-link.infl{stroke:var(--esc-b);stroke-width:1.5;opacity:.85;marker-end:url(#st-arr-i)}
 .st-node .lab{font-size:11px;fill:var(--ink)}
 .st-node .code{font-weight:700}
-.k-hfLevel rect.box{stroke:none}.k-hfCell rect.box{fill:var(--bg);stroke-width:1.2}
+.k-hfLevel rect.box{stroke:none}.k-hfCell rect.box{fill:none;stroke-width:1.2}
 .k-hfLevel.L4 rect.box{fill:var(--esc)}.k-hfLevel.L3 rect.box{fill:var(--thr)}.k-hfLevel.L2 rect.box{fill:var(--haz)}.k-hfLevel.L1 rect.box{fill:var(--act)}
 .k-hfCell.L4 rect.box{stroke:var(--esc-b)}.k-hfCell.L3 rect.box{stroke:var(--thr-b)}.k-hfCell.L2 rect.box{stroke:var(--haz-b)}.k-hfCell.L1 rect.box{stroke:var(--act-b)}
 .k-hfCell.L0 rect.box{stroke:var(--line);stroke-dasharray:5 3}
