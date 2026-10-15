@@ -160,3 +160,16 @@ footer{min-height:24px;padding:4px 16px;font-size:11px;line-height:16px}
 td.erc-red::before{content:"\25B2 "}td.erc-yellow::before{content:"\25C6 "}td.erc-green::before{content:"\25A0 "}
 .guide{border:1px solid var(--accent);border-left-width:4px}
 .guide-dot.ok{background:var(--cut-bg)}
+
+/* Compare tab */
+.cmp-heads{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.cmp-head{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px}
+.cmp-head strong{font-size:11px;letter-spacing:.02em;color:var(--muted);text-transform:uppercase}
+.cmp-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 12px}
+.cmp-card{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border:1px solid currentColor;border-radius:8px}
+.cmp-n{font:600 24px/32px var(--mono)}
+.cmp-card.sim-cut{background:var(--cut-bg)}.cmp-card.sim-open{background:var(--open-bg)}.cmp-card.sim-inconclusive{background:var(--inc-bg);border-style:dashed}
+.cmp-warn{border-left-color:var(--weak);background:var(--inc-bg)}
+.sim-cut-text::marker{color:var(--strong);content:"\25A0  "}.sim-open-text::marker{color:var(--poor);content:"\25B2  "}
+@media (max-width:700px){.cmp-heads,.cmp-cards{grid-template-columns:1fr}}
+.rtabs button{white-space:nowrap;font-size:13px;padding:9px 2px}
