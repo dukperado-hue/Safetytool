@@ -2,13 +2,30 @@
 // Left side: threats -> preventive controls -> top event. Right side: top event -> recovery controls -> consequences.
 
 import { wrapText } from './textmetrics.js';
-import { controlsOf, isSharedIn } from './model.js';
+import { controlsOf, primaryControlsOf, isSharedIn } from './model.js';
 
+// tagH = card header row (code + chip), badgeH = footer row of a control (owner + strength segments)
 export const DIM = {
   fs: 12, lh: 15, padX: 10, padY: 9,
-  wThreat: 190, wCtrl: 170, wTop: 220, wCons: 190, wHaz: 240, wEsc: 170,
-  gapX: 46, gapY: 16, badgeH: 14, tagH: 12, minH: 56, hazGap: 70, margin: 24, escGap: 10,
+  wThreat: 190, wCtrl: 176, wTop: 230, wCons: 190, wHaz: 250, wEsc: 176,
+  gapX: 46, gapY: 16, badgeH: 20, tagH: 22, minH: 56, hazGap: 70, margin: 24, escGap: 10,
 };
+
+/** Display codes (TH-01, CT-03 …) follow the order on the diagram; they are derived, never stored. */
+export function bowtieCodes(m) {
+  const code = {};
+  const pad = (n) => String(n + 1).padStart(2, '0');
+  m.threats.forEach((x, i) => { code[x.id] = 'TH-' + pad(i); });
+  m.consequences.forEach((x, i) => { code[x.id] = 'CO-' + pad(i); });
+  let k = 0;
+  m.threats.forEach((t) => primaryControlsOf(m, 'prevent', t.id).forEach((c) => { code[c.id] = 'CT-' + pad(k++); }));
+  m.consequences.forEach((c0) => primaryControlsOf(m, 'recover', c0.id).forEach((c) => { code[c.id] = 'CT-' + pad(k++); }));
+  m.escalations.forEach((x, i) => { code[x.id] = 'EF-' + pad(i); });
+  m.escalationControls.forEach((x, i) => { code[x.id] = 'EC-' + pad(i); });
+  code[m.hazard.id] = 'HZ-01';
+  code[m.topEvent.id] = 'TE-01';
+  return code;
+}
 
 const r1 = (v) => Math.round(v * 10) / 10;
 
@@ -27,6 +44,7 @@ export function layoutBowtie(m, opts = {}) {
   const showEsc = !!opts.showEsc;
   const nodes = [];
   const links = [];
+  const codes = bowtieCodes(m);
 
   const stackFor = (c) => {
     const items = [];
@@ -80,19 +98,19 @@ export function layoutBowtie(m, opts = {}) {
       const axis = y + r.A;
       const endX = side === 'left' ? 0 : consX;
       const endW = side === 'left' ? D.wThreat : D.wCons;
-      nodes.push({ id: r.end.id, kind: r.endKind, x: endX, y: axis - r.he / 2, w: endW, h: r.he, ref: r.end });
+      nodes.push({ id: r.end.id, kind: r.endKind, x: endX, y: axis - r.he / 2, w: endW, h: r.he, ref: r.end, code: codes[r.end.id] });
       const n = r.ctrls.length;
       r.ctrls.forEach((cc, k) => {
         const col = side === 'left' ? maxPrev - n + k : k;
         const cx = side === 'left' ? x0 + col * colW : rightStart + col * colW;
         const cy = axis - cc.h / 2;
-        nodes.push({ id: cc.shared ? cc.c.id + '@' + r.end.id : cc.c.id, realId: cc.c.id, shared: cc.shared || undefined, kind: 'control', x: cx, y: cy, w: D.wCtrl, h: cc.h, ref: cc.c });
+        nodes.push({ id: cc.shared ? cc.c.id + '@' + r.end.id : cc.c.id, realId: cc.c.id, shared: cc.shared || undefined, kind: 'control', x: cx, y: cy, w: D.wCtrl, h: cc.h, ref: cc.c, code: codes[cc.c.id] });
         let sy = cy + cc.h;
         let prevId = cc.c.id;
         let prevBottom = sy;
         cc.stack.forEach((it) => {
           const ny = prevBottom + D.escGap;
-          nodes.push({ id: it.ref.id, kind: it.kind, x: cx, y: ny, w: D.wEsc, h: it.h, ref: it.ref });
+          nodes.push({ id: it.ref.id, kind: it.kind, x: cx, y: ny, w: D.wEsc, h: it.h, ref: it.ref, code: codes[it.ref.id] });
           links.push({ kind: 'esc', seg: [['M', cx + D.wEsc / 2, prevBottom], ['V', ny]], from: prevId, to: it.ref.id });
           prevId = it.ref.id;
           prevBottom = ny + it.h;
@@ -115,8 +133,8 @@ export function layoutBowtie(m, opts = {}) {
 
   const hazH = boxH(m.hazard.text, D.wHaz);
   const hazY = topCy - topH / 2 - D.hazGap - hazH;
-  nodes.push({ id: m.hazard.id, kind: 'hazard', x: topX + D.wTop / 2 - D.wHaz / 2, y: hazY, w: D.wHaz, h: hazH, ref: m.hazard });
-  nodes.push({ id: m.topEvent.id, kind: 'topEvent', x: topX, y: topCy - topH / 2, w: D.wTop, h: topH, ref: m.topEvent });
+  nodes.push({ id: m.hazard.id, kind: 'hazard', x: topX + D.wTop / 2 - D.wHaz / 2, y: hazY, w: D.wHaz, h: hazH, ref: m.hazard, code: codes[m.hazard.id] });
+  nodes.push({ id: m.topEvent.id, kind: 'topEvent', x: topX, y: topCy - topH / 2, w: D.wTop, h: topH, ref: m.topEvent, code: codes[m.topEvent.id] });
   links.push({ kind: 'haz', from: m.hazard.id, to: m.topEvent.id, seg: [['M', topX + D.wTop / 2, hazY + hazH], ['V', topCy - topH / 2]] });
 
   // normalise to positive coordinates

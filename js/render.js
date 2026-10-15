@@ -19,14 +19,14 @@ export const SVG_CSS = `
  --cheese:#fff3bf;--cheese-b:#c9a227;--act:#fde0e0;--act-b:#c0392b;--lat:#e3e8ff;--lat-b:#4c5fd5;--wall:#6b7480;--traj:#d64545;
  --cS:#e8f3ff;--cH:#e6f6ec;--cE:#fff0dc;--cL:#f1e8fb;--cX:#eef0f3;
  --ok:#1e7b45;--bad:#c62828;--unk:#6b7785;
- --okbg:#e8f5ec;--badbg:#fdeaea;--unkbg:#f4f5f7;--sub:#f8f9fb}
+ --okbg:#e8f5ec;--badbg:#fdeaea;--unkbg:#f4f5f7;--warnbg:#fff3df;--sub:#f8f9fb}
 .st-root.dark{--bg:#10151c;--ink:#e6ebf2;--muted:#9aa6b5;--line:#7d8898;
  --haz:#3d3210;--haz-b:#d9a31a;--top:#4a2417;--top-b:#e0673f;
  --thr:#14304f;--thr-b:#5b9be0;--con:#4a1a2a;--con-b:#e0708f;
  --ctl:#1a212b;--ctl-b:#8b97a7;--esc:#2b2142;--esc-b:#a98ae0;--ecl:#241c38;--none:#586270;
  --cheese:#4a3f12;--cheese-b:#d9b640;--act:#4a1f1f;--act-b:#ef7b6e;--lat:#1f2650;--lat-b:#8b9bff;--wall:#9aa6b5;
  --cS:#14304f;--cH:#17382a;--cE:#4a3516;--cL:#2f2147;--cX:#222a35;
- --okbg:#143323;--badbg:#4a1f1f;--unkbg:#222a35;--sub:#1a212b}
+ --okbg:#143323;--badbg:#4a1f1f;--unkbg:#222a35;--warnbg:#4a3516;--sub:#1a212b}
 .st-bg{fill:var(--bg)}
 .st-link{fill:none;stroke:var(--line);stroke-width:1.6}
 .st-link.esc{stroke-dasharray:4 3;stroke:var(--esc-b)}
@@ -89,6 +89,16 @@ export const SVG_CSS = `
 .pr.lg-wall{fill:var(--wall);stroke:none}
 .pr-line{fill:none}.pr-line.lg-traj{stroke:var(--traj);stroke-width:3}
 .bar{stroke:none}
+.st-node .stripe{stroke:none;fill:var(--ctl-b)}
+.k-hazard .stripe{fill:var(--haz-b)}.k-topEvent .stripe{fill:var(--top-b)}.k-threat .stripe{fill:var(--thr-b)}.k-consequence .stripe{fill:var(--con-b)}
+.k-control .stripe{fill:var(--strong)}.k-escalation .stripe,.k-escalationControl .stripe{fill:var(--esc-b)}
+.st-node .code{font:700 10.5px ui-monospace,"IBM Plex Mono",Consolas,monospace;fill:var(--muted);letter-spacing:.02em}
+.k-topEvent .code{fill:var(--top-b)}.k-hazard .code{fill:var(--haz-b)}
+.chip-bg.chip-plain{fill:var(--unkbg);stroke:var(--line)}.chip-tx-plain{fill:var(--muted)}
+.chip-bg.chip-effective{fill:var(--okbg);stroke:var(--ok)}.chip-tx-effective{fill:var(--ok)}
+.chip-bg.chip-degraded{fill:var(--warnbg);stroke:var(--weak)}.chip-tx-degraded{fill:var(--weak)}
+.chip-bg.chip-failed{fill:var(--badbg);stroke:var(--bad)}.chip-tx-failed{fill:var(--bad)}
+.seg{stroke:none}.seg.b-off{fill:var(--line);opacity:.35}
 .b-poor{fill:var(--poor)}.b-weak{fill:var(--weak)}.b-fair{fill:var(--fair)}.b-strong{fill:var(--strong)}.b-none{fill:var(--none)}
 .crit{fill:var(--top-b);font-weight:700}
 .st-title{font:600 14px ${FONT};fill:var(--ink)}
@@ -99,6 +109,14 @@ const KIND_LABEL = {
   control: 'CONTROL', escalation: 'ESCALATION', escalationControl: 'ESC. CONTROL',
   loss: 'LOSS', layer: 'LAYER', holeActive: 'ACTIVE FAILURE', holeLatent: 'LATENT CONDITION', wall: 'DEFENCE HOLDS',
   subject: 'LIVEWARE', compS: 'SOFTWARE', compH: 'HARDWARE', compE: 'ENVIRONMENT', compL: 'OTHER LIVEWARE', iface: 'INTERFACE',
+};
+
+// control state chip text [th, en]; glyph + word so state never depends on colour alone
+const CTRL_STATE = {
+  effective: ['✓ ทำงาน', '✓ EFFECTIVE'],
+  degraded: ['◐ เสื่อม', '◐ DEGRADED'],
+  failed: ['✕ ล้มเหลว', '✕ FAILED'],
+  unknown: ['? ไม่ทราบ', '? UNKNOWN'],
 };
 
 const el = (name, attrs = {}, parent) => {
@@ -166,17 +184,40 @@ export function renderBowtie(svg, model, opts = {}) {
     const extra = n.kind === 'control' ? DIM.badgeH : 0;
     const ty = n.y + DIM.tagH + (n.h - DIM.tagH - extra - lines.length * DIM.lh) / 2 + DIM.lh * 0.78;
     textBlock(grp, lines, n.x + n.w / 2, ty, DIM.lh);
+    // card chrome: colour stripe, code (+ kind name when help is on) at the left of the header row, a chip at the right
+    el('rect', { class: 'stripe', x: n.x, y: n.y + 6, width: 4, height: n.h - 12, rx: 2 }, grp);
+    const headY = n.y + 15;
+    el('text', { class: 'code', x: n.x + 12, y: headY }, grp).textContent = (opts.kindTags ? KIND_LABEL[n.kind] + ' · ' : '') + (n.code || '');
+    const chipR = (s, cls) => {
+      const w = Math.ceil(textWidth(s, 10)) + 12;
+      el('rect', { class: 'chip-bg chip-' + cls, x: n.x + n.w - 8 - w, y: n.y + 5, width: w, height: 15, rx: 7.5 }, grp);
+      el('text', { class: 'chip-tx chip-tx-' + cls, x: n.x + n.w - 8 - w / 2, y: n.y + 15.5, 'text-anchor': 'middle' }, grp).textContent = s;
+    };
     if (n.kind === 'control') {
       const c = n.ref;
-      el('rect', { class: 'bar b-' + (effectivenessBand(c) || 'none'), x: n.x + 1, y: n.y + n.h - 5, width: n.w - 2, height: 4, rx: 2 }, grp);
-      el('text', { class: 'tag', x: n.x + 8, y: n.y + n.h - 9 }, grp).textContent = (c.function || '').slice(0, 3).toUpperCase();
-      if (c.critical) el('text', { class: 'crit', x: n.x + n.w - 8, y: n.y + n.h - 9, 'text-anchor': 'end' }, grp).textContent = '★ critical';
+      const st = c.status || 'unknown';
+      chipR(CTRL_STATE[st][opts.lang === 'en' ? 1 : 0], st);
+      const fy = n.y + n.h - 7;
+      const own = (c.owner || '').trim();
+      const fnTxt = (c.function || '').slice(0, 3).toUpperCase();
       const lanes = 1 + (Array.isArray(c.sharedWith) ? c.sharedWith.length : 0);
-      if (lanes > 1) el('text', { class: 'tag', x: n.x + n.w - 8, y: n.y + 11, 'text-anchor': 'end' }, grp).textContent = (n.shared ? '↗ shared ×' : '⇄ shared ×') + lanes;
+      const left = [fnTxt, c.critical ? '★' : '', lanes > 1 ? (n.shared ? '↗×' : '⇄×') + lanes : ''].filter(Boolean).join(' ');
+      el('text', { class: 'tag mono', x: n.x + 12, y: fy }, grp).textContent = left;
+      if (own) {
+        const room = n.w - 24 - 52 - textWidth(left, 10) - 6;
+        let s = own;
+        while (s.length > 3 && textWidth(s, 10) > room) s = s.slice(0, -2);
+        if (s !== own) s += '…';
+        el('text', { class: 'tag', x: n.x + 12 + textWidth(left, 10) + 8, y: fy }, grp).textContent = s;
+      }
+      const band = effectivenessBand(c);
+      const filled = { poor: 1, weak: 2, fair: 3, strong: 4 }[band] || 0;
+      for (let i = 0; i < 4; i += 1) {
+        el('rect', { class: 'seg ' + (i < filled ? 'b-' + band : 'b-off'), x: n.x + n.w - 8 - (4 - i) * 11 + 3, y: fy - 7, width: 8, height: 5, rx: 1.5 }, grp);
+      }
     }
-    if (n.kind === 'threat' && n.ref.exposure) el('text', { class: 'tag', x: n.x + n.w - 8, y: n.y + 11, 'text-anchor': 'end' }, grp).textContent = 'exp ' + n.ref.exposure;
-    if (n.kind === 'consequence' && n.ref.severity) el('text', { class: 'tag', x: n.x + n.w - 8, y: n.y + 11, 'text-anchor': 'end' }, grp).textContent = 'sev ' + n.ref.severity;
-    if (opts.kindTags) el('text', { class: 'ttl', x: n.x + 8, y: n.y + 11 }, grp).textContent = KIND_LABEL[n.kind];
+    if (n.kind === 'threat' && n.ref.exposure) chipR('EXP ' + n.ref.exposure, 'plain');
+    if (n.kind === 'consequence' && n.ref.severity) chipR('SEV ' + n.ref.severity, 'plain');
     if (!opts.forExport && opts.onSelect) {
       grp.addEventListener('click', (ev) => { ev.stopPropagation(); opts.onSelect(rid, n.kind); });
       grp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); opts.onSelect(rid, n.kind); } });
