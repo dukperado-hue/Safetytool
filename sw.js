@@ -2,11 +2,11 @@
 // Strategy: pre-cache the app shell; then "stale-while-revalidate" for same-origin GET requests
 // (answer from cache immediately, refresh the cache in the background when online).
 // Bump VERSION whenever the file list changes.
-const VERSION = 'safetytool-v5';
+const VERSION = 'safetytool-v6';
 const SHELL = [
   './', 'index.html', 'css/app.css',
   'js/app.js', 'js/forms.js', 'js/help.js', 'js/i18n.js', 'js/layout.js', 'js/lint.js', 'js/model.js', 'js/render.js',
-  'js/shell.js', 'js/swiss.js', 'js/textmetrics.js', 'js/simtab.js', 'js/comparetab.js', 'js/report.js', 'js/swisstab.js', 'js/reporttab.js', 'js/guide.js', 'js/gallery.js',
+  'js/shell.js', 'js/swiss.js', 'js/textmetrics.js', 'js/simtab.js', 'js/comparetab.js', 'js/report.js', 'js/swisstab.js', 'js/assurancepanel.js', 'js/reporttab.js', 'js/guide.js', 'js/gallery.js',
   'js/erc.js', 'data/erc-matrix.json', 'js/scenario.js', 'js/bowtie-analysis.js', 'js/evidence.js',
   'data/example-wildlife.json', 'data/example-swiss.json', 'data/example-shell.json',
 ];

@@ -75,3 +75,11 @@ Ask the user. Especially for: scope definitions, which regulator/ICAO document a
 - New CLI: `simulate [--set id=status[:blocks|fails]]`, `impact`, `register [--as-of]`, `diff`, `swiss-from-bowtie`. Report these outputs, not memory.
 - Wording rule: a changed path count is a **Path Count Difference**, never "risk reduction"; "reachable" means "not shown to be cut", never "will occur".
 - `data/adrep-taxonomy.json`: ICAO ADREP ids/codes/names only (see docs/SOURCES.md); source PDFs stay outside the repo.
+
+## UI tabs added after the engine (2026-10)
+- Bowtie tabs: diagram, Simulate (barrier states, Swiss builder, ERC), Compare (pinned baseline vs open model), Report, table, info.
+- Swiss tabs: form, diagram, Analysis (common cause, HFACS counts, trajectory, uncontrolled holes), table, info.
+- Inspector for a control: state, assurance, evidence, assumptions (js/assurancepanel.js).
+- js/report.js is pure (HTML string, escapes all text); js/reporttab.js does print/download. Reports never print signatures, approvals or compliance claims.
+- Not done: shared controls across threats (needs a schema change), SHELL/Swiss renderer re-layout from the Stitch designs, persistent baselines.
+- Service worker cache name must be bumped when the shell file list changes (currently safetytool-v6).

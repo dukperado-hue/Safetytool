@@ -177,3 +177,8 @@ td.erc-red::before{content:"\25B2 "}td.erc-yellow::before{content:"\25C6 "}td.er
 /* Report tab */
 .rpt-sections{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 12px;margin:8px 0}
 .rpt-preview{border:1px solid var(--line);background:#f5f4f1;margin-top:10px;overflow:auto;max-height:70vh}
+
+/* assurance panel (inspector) */
+.assure{border-top:1px solid var(--line);margin-top:10px;padding-top:4px}
+.assure input[aria-invalid=true]{border-color:var(--danger)}
+.assure .fcard{background:var(--bg)}

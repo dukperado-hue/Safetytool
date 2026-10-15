@@ -6,6 +6,7 @@ import { lint as lintBowtie, summarize } from './lint.js';
 import { renderModel, exportSvgString, exportPngBlob, installCanvasMeasurer } from './render.js';
 import { buildSwissForm, buildShellForm } from './forms.js';
 import { STR } from './i18n.js';
+import { drawAssurance } from './assurancepanel.js';
 import { drawSwissAnalysis } from './swisstab.js';
 import { drawReport } from './reporttab.js';
 import { drawCompare } from './comparetab.js';
@@ -356,6 +357,7 @@ function drawInspector() {
   host.appendChild(h);
   if (state.help) { const c = callout(kind); if (c) host.appendChild(c); }
   SPECS[kind].forEach(([k, ty]) => host.appendChild(fieldEl(ref, k, ty)));
+  if (kind === 'control') drawAssurance(host, cur(), ref, { lang: state.lang, mutate });
   const row = document.createElement('div');
   row.className = 'btnrow';
   const pick = (id, kd) => { state.selectedId = id; state.selectedKind = kd; refresh({ inspector: true }); };
