@@ -5,6 +5,7 @@
 import { simulateBowtie, assuranceRegister, compareBowties } from './bowtie-analysis.js';
 import { ercLookup, pickMatrix } from './erc.js';
 import { localizeMsg } from './msgs.js';
+import { bowtieCodes } from './layout.js';
 
 export const SECTIONS = ['summary', 'diagram', 'paths', 'barriers', 'erc', 'evidence', 'compare', 'limits'];
 
@@ -64,6 +65,7 @@ export function buildReport(m, opts = {}) {
   const asOf = opts.asOf || new Date().toISOString().slice(0, 10);
   const sim = m.threats.length && m.consequences.length ? simulateBowtie(m, { now: opts.now }) : { ok: false, errors: ['needs a threat and a consequence'] };
   const out = [];
+  const codes = bowtieCodes(m);   // the report shows CT-01 etc., the same codes as the diagram, never the internal ids
   const h = (k) => `<h2>${esc(L.s[k])}</h2>`;
 
   out.push(`<header class="rh"><h1>${esc(L.doc)}</h1><p>${esc((m.meta && m.meta.title) || m.hazard.text || '')}</p><p class="rm">${esc(L.sub)}</p></header>`);
@@ -84,7 +86,7 @@ export function buildReport(m, opts = {}) {
   if (want.has('paths')) {
     if (!sim.ok) out.push(`<section>${h('paths')}<p>${esc((sim.errors || []).slice(0, 3).join('; '))}</p></section>`);
     else {
-      const rows = sim.run.paths.map((p) => [esc(nm(m, p.threatId)), esc(nm(m, p.consequenceId)), badge(L, p.result) + (p.fragileCut ? ' *' : ''), esc(localizeMsg(p.reason || '', opts.lang))]);
+      const rows = sim.run.paths.map((p) => [esc(nm(m, p.threatId)), esc(nm(m, p.consequenceId)), badge(L, p.result) + (p.fragileCut ? ' *' : ''), esc(localizeMsg(p.reason || '', opts.lang, codes))]);
       let html = `<section>${h('paths')}${table([L.threat, L.cons, L.res, L.why], rows)}`;
       if (sim.run.uncontrolledEscalations.length) html += `<h3>${esc(L.unctl)}</h3><ul>${sim.run.uncontrolledEscalations.map((u) => `<li>${esc(u.text)}</li>`).join('')}</ul>`;
       out.push(html + '</section>');
@@ -93,7 +95,7 @@ export function buildReport(m, opts = {}) {
 
   if (want.has('barriers')) {
     const reg = assuranceRegister(m, asOf);
-    const rows = reg.map((r) => [`<code>${esc(r.controlId)}</code>`, esc(r.text), esc(L[r.side === 'prevent' ? 'prevent' : 'recover']), esc(L.st[r.status] || r.status) + (r.critical ? ` · ${esc(L.crit)}` : ''), esc(r.owner), esc(r.gaps.join(', ') || L.noGaps)]);
+    const rows = reg.map((r) => [`<code>${esc(codes[r.controlId] || r.controlId)}</code>`, esc(r.text), esc(L[r.side === 'prevent' ? 'prevent' : 'recover']), esc(L.st[r.status] || r.status) + (r.critical ? ` · ${esc(L.crit)}` : ''), esc(r.owner), esc(r.gaps.map((g) => localizeMsg(g, opts.lang, codes)).join(opts.lang === 'en' ? ', ' : ' · ') || L.noGaps)]);
     out.push(`<section>${h('barriers')}${rows.length ? table([L.bid, L.btext, L.side, L.status, L.owner, L.gaps], rows) : `<p>${esc(L.none)}</p>`}</section>`);
   }
 
@@ -132,7 +134,7 @@ export function buildReport(m, opts = {}) {
   return `<article class="rpt">${out.join('\n')}</article>`;
 }
 
-export const REPORT_CSS = `.rpt{font:13px/20px "IBM Plex Sans","IBM Plex Sans Thai",system-ui,"Noto Sans Thai",sans-serif;color:#14202e;background:#fff;max-width:900px;margin:0 auto;padding:24px}
+export const REPORT_CSS = `.rpt{font:13px/20px "Sarabun","IBM Plex Sans","IBM Plex Sans Thai",system-ui,"Noto Sans Thai",sans-serif;color:#14202e;background:#fff;max-width:900px;margin:0 auto;padding:24px}
 .rpt h1{font-size:22px;margin:0 0 4px}.rpt h2{font-size:16px;margin:20px 0 6px;border-bottom:1px solid #d8dce2;padding-bottom:3px}.rpt h3{font-size:13px;margin:12px 0 4px}
 .rpt .rm{color:#5b6675;font-size:12px}.rpt .rn{border-left:4px solid #1f5fbf;background:#eef4ff;padding:8px 12px;margin:12px 0}
 .rpt table{border-collapse:collapse;width:100%;font-size:12px;margin:6px 0}.rpt th,.rpt td{border:1px solid #d8dce2;padding:4px 6px;text-align:left;vertical-align:top}.rpt th{background:#f5f4f1}
@@ -145,5 +147,5 @@ export const REPORT_CSS = `.rpt{font:13px/20px "IBM Plex Sans","IBM Plex Sans Th
 /** A complete standalone HTML document (download / email / archive). */
 export function standaloneHtml(m, opts) {
   const title = esc((m.meta && m.meta.title) || 'Safetytool report');
-  return `<!doctype html><html lang="${opts && opts.lang === 'en' ? 'en' : 'th'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>body{margin:0;background:#f5f4f1}@page{size:A4 portrait;margin:12mm}@media print{body{background:#fff}.rpt{padding:0}}${REPORT_CSS}</style></head><body>${buildReport(m, opts)}</body></html>`;
+  return `<!doctype html><html lang="${opts && opts.lang === 'en' ? 'en' : 'th'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>${(opts && opts.fontCss) || ''}body{margin:0;background:#f5f4f1}@page{size:A4 portrait;margin:12mm}@media print{body{background:#fff}.rpt{padding:0}}${REPORT_CSS}</style></head><body>${buildReport(m, opts)}</body></html>`;
 }

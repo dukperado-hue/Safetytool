@@ -12,6 +12,9 @@ import * as FR from './fram.js';
 import * as PY from './pyramid.js';
 import * as IC from './interchange.js';
 import * as SO from './safeopen.js';
+import { keepFocus } from './keepfocus.js';
+import { modelExample } from './modelintro.js';
+import { embeddedFontCss, loadThaiFont } from './fonts.js';
 import * as FP from './fptabs.js';
 import { buildFramForm, buildPyramidForm, buildSourcesEditor, evidenceChoices } from './forms-fp.js';
 import { drawConnections } from './linkspanel.js';
@@ -26,6 +29,7 @@ import { drawGallery, readWorks, writeWorks, upsertWork, newId } from './gallery
 import { HELP, GLOSSARY_ORDER, MODEL_INTRO, helpFor, explainShort } from './help.js';
 
 const $ = (s) => document.querySelector(s);
+const FOCUS_ROOTS = '#form, #meta, #inspector';   // containers that are redrawn while the user is typing in them
 const PREF = 'safetytool.prefs';
 
 // ---------- model-type registry ----------
@@ -108,12 +112,26 @@ function snapshot() {
   if (u.length > 100) u.shift();
   state.redo[state.type] = [];
 }
-function mutate(fn, { rebuild = false } = {}) {
+/**
+ * Apply an edit. `rebuild` redraws the form and the inspector (structure changed). `keepMeta` is for the model-info tab itself:
+ * its fields already show what was typed, so redrawing them only destroys the field the user is moving to.
+ * When the edit comes from a field's "change" event (focus is on its way to another field) the rebuild waits until focus has
+ * landed, then focus and caret are put back on the same field.
+ */
+function mutate(fn, { rebuild = false, keepMeta = false } = {}) {
   snapshot();
+  const wasExample = !!cur().meta.illustrative;
+  const period = state.type === 'pyramid' ? cur().dataset.periodStart + '|' + cur().dataset.periodEnd : null;
   fn(cur());
   M.touch(cur());
+  if (wasExample && cur().meta.illustrative) exEdited.add(exKey());
   save();
-  refresh({ inspector: rebuild, form: rebuild });
+  refresh({ meta: !keepMeta });
+  if (period != null && period !== cur().dataset.periodStart + '|' + cur().dataset.periodEnd && cur().exposure.value != null) flash(t('pyPeriodDenom'));
+  if (!rebuild) return;
+  const redo = () => keepFocus(FOCUS_ROOTS, document, () => { if (state.tab === 'form') drawForm(); drawInspector(); });
+  const fromChange = typeof window.event !== 'undefined' && window.event && window.event.type === 'change';
+  if (fromChange) setTimeout(redo, 0); else redo();
 }
 function restore(json) {
   state.models[state.type] = JSON.parse(json);
@@ -161,6 +179,43 @@ function flash(msg) {
   flashTimer = setTimeout(() => { f.hidden = true; }, 3500);
 }
 
+// ---------- an example the user has started to edit: offer to make it their own work ----------
+const exEdited = new Set();      // modelIds of examples the user has edited
+const exKept = new Set();        // ...and chose to keep editing as the example
+const exKey = () => cur().meta.modelId || state.type;
+function drawExampleBar() {
+  const b = $('#exbar');
+  if (!b) return;
+  const m = state.models[state.type];
+  if (!m || !(m.meta.illustrative && exEdited.has(exKey()) && !exKept.has(exKey()))) { b.hidden = true; return; }
+  b.textContent = '';
+  const p = document.createElement('p');
+  p.textContent = t('exMsg');
+  const row = document.createElement('div');
+  row.className = 'wl-actions';
+  const copy = btn(t('exCopy'), makeOwnWork, 'primary');
+  const keep = btn(t('exKeep'), () => { exKept.add(exKey()); drawExampleBar(); });
+  row.append(copy, keep);
+  b.append(p, row);
+  b.hidden = false;
+}
+/** The user's edits stay; what marks the model as the teaching example (title, author, scope, flag, identity, a borrowed denominator) goes. */
+function makeOwnWork() {
+  snapshot();
+  const m = cur();
+  m.meta.title = ''; m.meta.author = ''; m.meta.scope = ''; m.meta.illustrative = false;
+  m.meta.modelId = IC.rid('md');
+  if (state.type === 'pyramid') {
+    m.exposure = { value: null, unit: '', definition: '', rateScale: 1000 };
+    ['name', 'description', 'observationNote', 'inclusion', 'exclusion', 'duplicateHandling', 'reportingLimitations'].forEach((k) => { if (/synthetic/i.test(m.dataset[k] || '')) m.dataset[k] = ''; });
+  }
+  state.galleryId = null;       // saving must not overwrite the example's gallery entry
+  M.touch(m);
+  save();
+  refresh({ inspector: true, form: true });
+  flash(t('exCopied') + (state.type === 'pyramid' ? ' ' + t('exCopiedPy') : ''));
+}
+
 // ---------- diagram ----------
 function stageSize() {
   const r = $('#stage').getBoundingClientRect();
@@ -182,10 +237,23 @@ const explain = (kind) => (state.help ? explainShort(state.type, kind, state.lan
 function onSelect(id, kind) {
   state.selectedId = id;
   state.selectedKind = kind || (spec().find(cur(), id) || {}).kind || null;
-  if (state.help) state.rtab = 'help';
-  else if (state.type === 'bowtie') state.rtab = 'inspector';
+  // choosing a bow-tie element always shows its details (it used to open whichever panel was used last, leaving the details one click away)
+  const tab = id && state.type === 'bowtie' ? 'inspector' : state.help ? 'help' : state.type === 'bowtie' ? 'inspector' : state.rtab;
+  if (tab !== state.rtab) setRightTab(tab);
   refresh({ inspector: true });
   if (id && narrowMQ.matches && !state.panelOpen) setPanel(true); // on a phone the details open as a sheet when something is chosen
+}
+
+/** A node that was just added must not sit outside the visible stage: if any part of it is cut off, centre on it. */
+function revealNode(id) {
+  const lay = state.last && state.last.layout;
+  const items = lay && (lay.items || lay.nodes);
+  const it = items && items.find((x) => x.id === id || x.realId === id);
+  if (!it || ![it.x, it.y, it.w, it.h].every(Number.isFinite)) return;
+  const { w, h } = stageSize();
+  const k = state.view.k;
+  const x0 = it.x * k + state.view.x; const y0 = it.y * k + state.view.y;
+  if (x0 < 0 || y0 < 0 || x0 + it.w * k > w || y0 + it.h * k > h) centerOn(id);
 }
 
 function drawDiagram({ fit = false } = {}) {
@@ -255,7 +323,7 @@ function gotoTarget(id, node) {
   state.selectedId = id;
   state.selectedKind = node ? node.kind : null;
   if (state.type === 'bowtie') {
-    state.rtab = 'inspector';
+    setRightTab('inspector');
     refresh({ inspector: true });
     return;
   }
@@ -353,14 +421,14 @@ const SPECS = {
   escalationControl: [['text', 'area'], ['owner', 'line'], ['notes', 'area']],
 };
 
-function fieldEl(ref, key, type) {
+function fieldEl(ref, key, type, { keepMeta = false } = {}) {
   const wrap = document.createElement('label');
   wrap.className = 'fld';
   const cap = document.createElement('span');
   cap.textContent = t('f.' + key);
   wrap.appendChild(cap);
   let input;
-  const commit = (v) => mutate(() => { ref[key] = v; });
+  const commit = (v) => mutate(() => { ref[key] = v; }, { keepMeta });
   if (type === 'area' || type === 'line') {
     input = document.createElement(type === 'area' ? 'textarea' : 'input');
     if (type === 'area') input.rows = key === 'text' ? 3 : 2;
@@ -465,7 +533,7 @@ function drawInspector() {
   if (kind === 'control') { drawSharing(host, cur(), ref); drawAssurance(host, cur(), ref, { lang: state.lang, mutate, flash, confirmDelete }); }
   const row = document.createElement('div');
   row.className = 'btnrow';
-  const pick = (id, kd) => { state.selectedId = id; state.selectedKind = kd; refresh({ inspector: true }); };
+  const pick = (id, kd) => { state.selectedId = id; state.selectedKind = kd; refresh({ inspector: true }); requestAnimationFrame(() => revealNode(id)); };
   if (kind === 'threat') row.appendChild(btn(t('addControl'), () => { let id; mutate((m) => { id = M.addControl(m, 'prevent', ref.id).id; }); pick(id, 'control'); }));
   if (kind === 'consequence') row.appendChild(btn(t('addControl'), () => { let id; mutate((m) => { id = M.addControl(m, 'recover', ref.id).id; }); pick(id, 'control'); }));
   if (kind === 'control') {
@@ -520,6 +588,14 @@ function drawHelp() {
 
   host.appendChild(mk('h3', t('helpAbout')));
   host.appendChild(mk('p', MODEL_INTRO[state.type][state.lang]));
+  const ex = modelExample(state.type, state.lang);
+  if (ex) {   // optional, collapsed: a small picture of what this model looks like (drawn for this tool, js/modelintro.js)
+    const d = mk('details', null, 'gloss model-ex');
+    d.appendChild(mk('summary', t('viewExample')));
+    const fig = mk('div'); fig.innerHTML = ex.svg;   // static markup from our own module, no user data
+    d.append(fig, mk('p', ex.caption, 'muted'));
+    host.appendChild(d);
+  }
 
   const entry = (kind, open) => {
     const h = helpFor(state.type, kind, state.lang);
@@ -573,8 +649,8 @@ function drawMeta() {
   const host = $('#meta');
   host.textContent = '';
   const m = cur().meta;
-  [['title', 'line'], ['scope', 'area'], ['author', 'line']].forEach(([k, ty]) => host.appendChild(fieldEl(m, k, ty)));
-  host.appendChild(fieldEl(m, 'illustrative', 'bool'));
+  [['title', 'line'], ['scope', 'area'], ['author', 'line']].forEach(([k, ty]) => host.appendChild(fieldEl(m, k, ty, { keepMeta: true })));
+  host.appendChild(fieldEl(m, 'illustrative', 'bool', { keepMeta: true }));
   const p = document.createElement('p');
   p.className = 'muted';
   p.textContent = t('disclaimer');
@@ -683,13 +759,14 @@ function drawWelcome() {
 }
 function labels() {
   drawWelcome();
+  drawExampleBar();
   document.documentElement.lang = state.lang;
   document.title = `${t('app')} — ${t('m' + state.type[0].toUpperCase() + state.type.slice(1))}`;
   const map = {
     '#b-save .lbs': 'saveShort', '#b-file': 'fileMenu', '#b-view': 'viewMenu', '#b-settings': 'settingsMenu', '#b-panel': 'panel', '#b-panel-fab': 'panel', '#b-panel-close': 'panelClose',
     '#fs-legend': 'fsLegend', '#fs-l90': 'fs90', '#fs-l100': 'fs100', '#fs-l110': 'fs110', '#fs-l120': 'fs120', '#fs-reset': 'fsReset',
     '#b-example': 'example', '#b-new': 'new', '#b-open': 'open', '#b-save': 'save', '#b-svg': 'svg', '#b-png': 'png', '#b-csv': 'csv', '#b-print': 'print',
-    '#b-undo': 'undo', '#b-redo': 'redo', '#b-fit': 'fit', '#b-lang': 'lang', '#b-theme': 'theme', '#b-help': 'help',
+    '#b-undo': 'undo', '#b-redo': 'redo', '#b-fit': 'fit', '#b-lang': 'lang', '#b-clear': 'clearModel', '#b-fit2': 'fit', '#b-lang2': 'lang', '#b-theme': 'theme', '#b-help': 'help',
     '#tab-diagram': 'tabDiagram', '#tab-simulate': 'tabSimulate', '#tab-compare': 'tabCompare', '#tab-report': 'tabReport', '#tab-analysis': 'tabAnalysis', '#tab-table': 'tabTable', '#tab-meta': 'tabMeta', '#tab-form': 'tabForm',
     '#r-inspector': 'rInspector', '#r-help': 'rHelp', '#r-gallery': 'rGallery', '#r-links': 'rLinks',
     '#m-bowtie': 'mBowtie', '#m-swiss': 'mSwiss', '#m-shell': 'mShell', '#m-hfacs': 'mHfacs', '#m-stamp': 'mStamp', '#m-fram': 'mFram', '#m-pyramid': 'mPyramid', '#events-label': 'eventsLabel',
@@ -759,8 +836,9 @@ function loadBaseline() {
 
 function applyTheme() { document.documentElement.dataset.theme = state.dark ? 'dark' : 'light'; }
 
-function refresh({ inspector = false, fit = false, form = false } = {}) {
+function refresh({ inspector = false, fit = false, form = false, meta = true } = {}) {
   drawLint();
+  drawExampleBar();
   if (state.tab === 'diagram') drawDiagram({ fit });
   if (state.tab === 'simulate') drawSimulate($('#simulate'), cur(), { lang: state.lang, mutate, openSwiss });
   if (state.tab === 'analysis') {
@@ -773,7 +851,7 @@ function refresh({ inspector = false, fit = false, form = false } = {}) {
   if (state.tab === 'report') drawReport($('#report'), cur(), { lang: state.lang, baseline: state.baseline, svg: reportSvg, download, fileBase });
   if (state.tab === 'compare') drawCompare($('#compare'), cur(), { lang: state.lang, baseline: state.baseline, setBaseline });
   if (state.tab === 'table') drawTable();
-  if (state.tab === 'meta') drawMeta();
+  if (state.tab === 'meta' && meta) drawMeta();
   if (state.tab === 'form' && form) drawForm();
   if (inspector) drawInspector();
   if (state.rtab === 'help') drawHelp();
@@ -1062,13 +1140,17 @@ function bind() {
     try { openGuarded(JSON.parse(await f.text())); } catch (e) { alert(e instanceof SyntaxError ? t('notJson') : t('badFile') + e.message); }
   });
   $('#b-save').addEventListener('click', () => download(fileBase() + '.' + state.type + '.json', new Blob([JSON.stringify(cur(), null, 2)], { type: 'application/json' })));
-  $('#b-svg').addEventListener('click', () => download(fileBase() + '.svg', new Blob([exportSvgString(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help, lang: state.lang })], { type: 'image/svg+xml' })));
+  $('#b-svg').addEventListener('click', async () => download(fileBase() + '.svg', new Blob([exportSvgString(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help, lang: state.lang, fontCss: await embeddedFontCss() })], { type: 'image/svg+xml' })));
   $('#b-png').addEventListener('click', async () => download(fileBase() + '.png', await exportPngBlob(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help, lang: state.lang }, 3)));
   $('#b-csv').addEventListener('click', () => download(fileBase() + '.csv', new Blob([toCsv()], { type: 'text/csv;charset=utf-8' })));
   $('#b-print').addEventListener('click', printDiagram);
   $('#b-undo').addEventListener('click', doUndo);
   $('#b-redo').addEventListener('click', doRedo);
   $('#b-fit').addEventListener('click', fitView);
+  // quick copies of Clear / Fit / Language on the toolbar row: they run the same handlers as the menu entries (Clear = "New": confirms and backs up first)
+  $('#b-clear').addEventListener('click', () => $('#b-new').click());
+  $('#b-fit2').addEventListener('click', () => $('#b-fit').click());
+  $('#b-lang2').addEventListener('click', () => $('#b-lang').click());
   $('#b-lang').addEventListener('click', () => { state.lang = state.lang === 'th' ? 'en' : 'th'; savePrefs(); labels(); refresh({ inspector: true, form: true }); });
   $('#b-theme').addEventListener('click', () => { state.dark = !state.dark; applyTheme(); savePrefs(); refresh(); });
   $('#b-help').addEventListener('click', () => setHelp(!state.help));
@@ -1082,8 +1164,8 @@ function bind() {
     if (ev.key === 'Escape' && narrowMQ.matches && state.panelOpen && !document.querySelector('details.more[open]') && ev.target.closest && $('#side').contains(ev.target)) setPanel(false, { focus: true });
   });
   narrowMQ.addEventListener('change', () => setPanel(!narrowMQ.matches));   // each width class starts from its own default
-  $('#b-addthreat').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addThreat(m).id; }); state.selectedId = id; state.selectedKind = 'threat'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
-  $('#b-addcons').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addConsequence(m).id; }); state.selectedId = id; state.selectedKind = 'consequence'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
+  $('#b-addthreat').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addThreat(m).id; }); state.selectedId = id; state.selectedKind = 'threat'; setRightTab('inspector'); setTab('diagram'); drawInspector(); requestAnimationFrame(() => revealNode(id)); });
+  $('#b-addcons').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addConsequence(m).id; }); state.selectedId = id; state.selectedKind = 'consequence'; setRightTab('inspector'); setTab('diagram'); drawInspector(); requestAnimationFrame(() => revealNode(id)); });
   ['form', 'diagram', 'simulate', 'compare', 'report', 'analysis', 'table', 'meta'].forEach((n) => $('#tab-' + n).addEventListener('click', () => setTab(n)));
   ['inspector', 'quality', 'help', 'gallery', 'links'].forEach((n) => $('#r-' + n).addEventListener('click', () => setRightTab(n)));
   TYPE_IDS.forEach((id) => $('#m-' + id).addEventListener('click', () => { switchType(id); }));
@@ -1144,6 +1226,7 @@ function bind() {
 }
 
 async function init() {
+  await loadThaiFont();   // text is measured for wrapping with this face: have it ready (waits at most 2 s, then the fallback is used)
   installCanvasMeasurer();
   registerOffline();
   window.addEventListener('online', netStatus);
@@ -1172,6 +1255,12 @@ async function init() {
     try { const m = JSON.parse(saved); if (!spec().validate(m).length) { state.models[state.type] = spec().normalize(m); loaded = true; } } catch { /* ignore */ }
   }
   setRightTab(state.rtab === 'inspector' && state.type !== 'bowtie' ? 'quality' : state.rtab);
+  if (!loaded && state.type === 'bowtie') {
+    // first visit: an empty bow-tie to start on (no example name, author, flag or numbers to carry into real work); examples are one click away
+    state.models.bowtie = spec().empty();
+    save();
+    loaded = true;
+  }
   if (!loaded) { await loadExample(); return; }
   state.tab = null;
   applyType({ fit: true });

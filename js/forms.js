@@ -34,6 +34,7 @@ export function select(value, options, onChange) {
 }
 export function button(label, fn, cls) {
   const b = mk('button', { type: 'button', class: cls }, label);
+  if (/\bdanger\b/.test(cls || '')) b.tabIndex = -1;   // Tab from a text field must never land on a Delete button (Enter there would delete); the mouse still works
   b.addEventListener('click', fn);
   return b;
 }

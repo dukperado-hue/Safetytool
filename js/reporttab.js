@@ -2,6 +2,7 @@
 // All content comes from js/report.js.
 
 import { buildReport, standaloneHtml, SECTIONS, REPORT_CSS } from './report.js';
+import { relativeFontCss, embeddedFontCss } from './fonts.js';
 
 const S = {
   th: { title: 'รายงาน', note: 'เลือกหัวข้อที่จะใส่ในรายงาน ดูตัวอย่างด้านล่าง แล้วพิมพ์/บันทึกเป็น PDF หรือดาวน์โหลดเป็นไฟล์ HTML ที่เปิดได้โดยไม่ต้องใช้โปรแกรมนี้',
@@ -46,12 +47,15 @@ export function drawReport(host, m, ctx) {
   pr.addEventListener('click', () => {
     const f = document.createElement('iframe');
     f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
-    f.srcdoc = standaloneHtml(m, opts());
-    f.onload = () => { f.contentWindow.focus(); f.contentWindow.print(); setTimeout(() => f.remove(), 2000); };
+    f.srcdoc = standaloneHtml(m, { ...opts(), fontCss: relativeFontCss() });   // the print frame shares the app's base URL, so fonts/ resolves
+    f.onload = async () => {
+      try { await Promise.race([f.contentDocument.fonts.ready, new Promise((r) => setTimeout(r, 2500))]); } catch { /* print anyway */ }
+      f.contentWindow.focus(); f.contentWindow.print(); setTimeout(() => f.remove(), 2000);
+    };
     document.body.appendChild(f);
   });
   const dl = el('button', null, L.html); dl.type = 'button';
-  dl.addEventListener('click', () => ctx.download(ctx.fileBase() + '.report.html', new Blob([standaloneHtml(m, opts())], { type: 'text/html;charset=utf-8' })));
+  dl.addEventListener('click', async () => ctx.download(ctx.fileBase() + '.report.html', new Blob([standaloneHtml(m, { ...opts(), fontCss: await embeddedFontCss() })], { type: 'text/html;charset=utf-8' })));
   bar.append(pr, dl);
   host.appendChild(bar);
 

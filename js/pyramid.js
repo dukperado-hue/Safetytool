@@ -351,6 +351,7 @@ export const PYRAMID_RULES = {
   PY016: { sev: 'info', th: 'record นี้ยังไม่ได้จัดระดับ', en: 'Record has no tier' },
   PY018: { sev: 'warn', th: 'จำนวนรวมที่กรอกไว้ไม่ตรงกับจำนวน record ในช่วงเวลา — ระบบไม่ตัดสินว่าอันไหนถูก', en: 'The aggregate counts differ from the records inside the window: the tool does not decide which is right' },
   PY017: { sev: 'info', th: 'อาจซ้ำกับ record อื่น (วันที่ ระดับ และเลขอ้างอิงเหมือนกัน) — ระบบไม่ลบให้เอง', en: 'Possible duplicate (same date, tier and reference); nothing was removed automatically' },
+  PY019: { sev: 'warn', th: 'ตัวหารยังเป็นของชุดตัวอย่าง (นิยามระบุว่า Synthetic) ทั้งที่งานนี้ไม่ได้ติดธงตัวอย่าง — ตรวจหรือล้างตัวหารก่อนใช้อัตรา', en: 'The denominator still comes from the example data (its definition says Synthetic) but this work is not flagged as an example: check or clear it before using any rate' },
 };
 
 export function lintPyramid(m) {
@@ -371,6 +372,7 @@ export function lintPyramid(m) {
   if (t.basis === 'aggregate') t.rows.filter((r) => r.unknown).forEach((r) => add('PY008', r.categoryId));
   const ex = m.exposure; const any = ex.value != null || (ex.unit || '').trim() || (ex.definition || '').trim();
   if (!any) add('PY009', d.id); else if (!exposureCheck(m).valid) add('PY010', d.id);
+  if (!m.meta.illustrative && ex.value != null && /synthetic/i.test(ex.definition || '')) add('PY019', d.id);
   if (!(d.inclusion || '').trim()) add('PY011', d.id);
   if (!(d.duplicateHandling || '').trim()) add('PY012', d.id);
   if (!(d.reportingLimitations || '').trim()) add('PY013', d.id);

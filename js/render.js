@@ -10,9 +10,10 @@ import { layoutHfacs } from './hfacs.js';
 import { layoutStamp } from './stamp.js';
 import { layoutFram } from './fram.js';
 import { layoutPyramid } from './pyramid.js';
+import { embeddedFontCss } from './fonts.js';
 
 const NS = 'http://www.w3.org/2000/svg';
-const FONT = 'system-ui,-apple-system,"Segoe UI","Noto Sans Thai","Leelawadee UI",sans-serif';
+const FONT = '"Sarabun",system-ui,-apple-system,"Segoe UI","Noto Sans Thai","Leelawadee UI",sans-serif';
 
 export const SVG_CSS = `
 .st-root{--bg:#ffffff;--ink:#14202e;--muted:#5b6675;--line:#7a8594;
@@ -20,7 +21,7 @@ export const SVG_CSS = `
  --thr:#e6eef8;--thr-b:#3b6ea8;--con:#f6e6f0;--con-b:#8a3b6e;
  --ctl:#ffffff;--ctl-b:#475569;--esc:#efe7fb;--esc-b:#7a55b8;--ecl:#f6f1fd;
  --poor:#c62828;--weak:#b26a00;--fair:#c9a227;--strong:#1e7b45;--none:#6b7785;--sel:#1f5fbf;
- --cheese:#fff3bf;--cheese-b:#c9a227;--act:#fde0e0;--act-b:#c0392b;--lat:#e3e8ff;--lat-b:#4c5fd5;--wall:#6b7480;--traj:#d64545;
+ --cheese:#ffe680;--cheese-b:#b8860b;--act:#fde0e0;--act-b:#c0392b;--lat:#e3e8ff;--lat-b:#4c5fd5;--wall:#6b7480;--traj:#d64545;
  --cS:#e8f3ff;--cH:#e6f6ec;--cE:#fff0dc;--cL:#f1e8fb;--cX:#eef0f3;
  --ok:#1e7b45;--bad:#c62828;--unk:#6b7785;
  --okbg:#e8f5ec;--badbg:#fdeaea;--unkbg:#f4f5f7;--warnbg:#fff3df;--sub:#f8f9fb}
@@ -330,7 +331,7 @@ function renderGeometry(svg, model, G, opts) {
 }
 
 export function renderSwiss(svg, model, opts = {}) { return renderGeometry(svg, model, layoutSwiss(model, { lang: opts.lang }), opts); }
-export function renderShell(svg, model, opts = {}) { return renderGeometry(svg, model, layoutShell(model), opts); }
+export function renderShell(svg, model, opts = {}) { return renderGeometry(svg, model, layoutShell(model, { lang: opts.lang }), opts); }
 export function renderHfacs(svg, model, opts = {}) { return renderGeometry(svg, model, layoutHfacs(model, { lang: opts.lang }), opts); }
 export function renderStamp(svg, model, opts = {}) { return renderGeometry(svg, model, layoutStamp(model, { lang: opts.lang }), opts); }
 export function renderFram(svg, model, opts = {}) { return renderGeometry(svg, model, layoutFram(model, { lang: opts.lang }), opts); }
@@ -354,12 +355,14 @@ export function exportSvgString(type, model, opts = {}) {
   const { width, height } = renderModel(svg, type, model, { showEsc: opts.showEsc, forExport: true, dark: false, kindTags: !!opts.kindTags, lang: opts.lang });
   svg.setAttribute('width', Math.ceil(width));
   svg.setAttribute('height', Math.ceil(height));
+  // a page's @font-face does not reach inside a downloaded SVG (or an SVG drawn into a PNG): opts.fontCss carries the Thai face with the file
+  if (opts.fontCss) { const st = document.createElementNS(NS, 'style'); st.textContent = opts.fontCss; svg.insertBefore(st, svg.firstChild); }
   return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(svg);
 }
 
 /** PNG at an explicit pixel scale (default 3x). Large diagrams are capped to stay within canvas limits. */
 export async function exportPngBlob(type, model, opts = {}, scale = 3) {
-  const svgText = exportSvgString(type, model, opts);
+  const svgText = exportSvgString(type, model, { ...opts, fontCss: opts.fontCss ?? await embeddedFontCss() });
   const url = URL.createObjectURL(new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' }));
   try {
     const img = new Image();

@@ -3,7 +3,7 @@
 export const STR = {
   th: {
     app: 'Safetytool', tagline: 'เครื่องมือสร้างโมเดลความปลอดภัยทางการบิน (ฟรี)',
-    example: 'ตัวอย่าง', new: 'ใหม่', open: 'เปิดไฟล์', save: 'บันทึก JSON', svg: 'ส่งออก SVG', png: 'ส่งออก PNG', csv: 'ส่งออก CSV', print: 'พิมพ์ / PDF',
+    viewExample: 'ดูภาพตัวอย่างโมเดลนี้', clearModel: 'ล้าง', example: 'ตัวอย่าง', new: 'ใหม่', open: 'เปิดไฟล์', save: 'บันทึก JSON', svg: 'ส่งออก SVG', png: 'ส่งออก PNG', csv: 'ส่งออก CSV', print: 'พิมพ์ / PDF',
     undo: 'เลิกทำ', redo: 'ทำซ้ำ', fit: 'พอดีหน้าจอ', esc: 'แสดง Escalation', theme: 'ธีม', lang: 'EN', help: 'ช่วยเหลือ',
     models: 'ชนิดโมเดล', mBowtie: 'Bowtie', mSwiss: 'Swiss cheese', mShell: 'SHELL',
     tabDiagram: 'แผนภาพ', tabSimulate: 'จำลอง (Simulate)', tabCompare: 'เปรียบเทียบ (Compare)', tabReport: 'รายงาน (Report)', tabAnalysis: 'วิเคราะห์', replaceSwiss: 'โมเดล Swiss cheese ที่เปิดอยู่จะถูกแทนที่ ต้องการดำเนินการต่อหรือไม่?', tabTable: 'ตาราง', tabMeta: 'ข้อมูลโมเดล', tabForm: 'ฟอร์มกรอกข้อมูล',
@@ -48,7 +48,7 @@ export const STR = {
   },
   en: {
     app: 'Safetytool', tagline: 'Free safety-model workbench for aviation',
-    example: 'Example', new: 'New', open: 'Open', save: 'Save JSON', svg: 'Export SVG', png: 'Export PNG', csv: 'Export CSV', print: 'Print / PDF',
+    viewExample: 'View a picture of this model', clearModel: 'Clear', example: 'Example', new: 'New', open: 'Open', save: 'Save JSON', svg: 'Export SVG', png: 'Export PNG', csv: 'Export CSV', print: 'Print / PDF',
     undo: 'Undo', redo: 'Redo', fit: 'Fit', esc: 'Show escalation', theme: 'Theme', lang: 'ไทย', help: 'Help',
     models: 'Model type', mBowtie: 'Bowtie', mSwiss: 'Swiss cheese', mShell: 'SHELL',
     tabDiagram: 'Diagram', tabSimulate: 'Simulate', tabCompare: 'Compare', tabReport: 'Report', tabAnalysis: 'Analysis', replaceSwiss: 'The open Swiss cheese model will be replaced. Continue?', tabTable: 'Table', tabMeta: 'Model info', tabForm: 'Data entry form',
@@ -146,6 +146,11 @@ Object.assign(STR.th, {
   welcomeSteps: '1) เลือกชนิดโมเดลที่แถบด้านบน  2) เมนู "ไฟล์ → ใหม่" เพื่อเริ่มงานของคุณ หรือแก้ตัวอย่างเพื่อลองใช้  3) กด "บันทึก JSON" เก็บงานเป็นไฟล์ (เบราว์เซอร์นี้เก็บให้อัตโนมัติอีกชั้นหนึ่ง)  4) "ไฟล์ → พิมพ์ / PDF" เพื่อนำไปใช้ในที่ประชุม',
   welcomeNote: 'เครื่องมือช่วยคิดและสื่อสาร ไม่ใช่คำแนะนำด้านความปลอดภัยที่รับรองแล้ว',
   welcomeGuide: 'ดูคู่มือทีละขั้น', welcomeNew: 'เริ่มโมเดลว่าง', welcomeFeedback: 'ส่งความเห็น (2 นาที)', welcomeClose: 'เข้าใจแล้ว ปิด',
+  exMsg: 'คุณกำลังแก้ตัวอย่างประกอบ ชื่อ ผู้จัดทำ และธง "ตัวอย่าง" ของตัวอย่างจะยังติดอยู่ ถ้านี่คืองานของคุณ ให้ทำสำเนาเป็นงานใหม่',
+  exCopy: 'ทำสำเนาเป็นงานใหม่', exKeep: 'แก้ตัวอย่างนี้ต่อ',
+  exCopied: 'ทำเป็นงานใหม่แล้ว: ล้างชื่อ ผู้จัดทำ ขอบเขต และธงตัวอย่างออก เนื้อหาโมเดลยังอยู่ — ตรวจและแก้ให้เป็นข้อมูลของคุณก่อนใช้',
+  exCopiedPy: 'ล้างตัวหารและข้อความ "Synthetic" ของชุดข้อมูลแล้ว ส่วนจำนวนในแต่ละระดับยังเป็นตัวเลขของตัวอย่าง ต้องแก้เอง',
+  pyPeriodDenom: 'เปลี่ยนช่วงเวลาแล้ว แต่ตัวหาร (exposure) ยังเป็นค่าเดิม — ตรวจว่าตัวหารตรงกับช่วงเวลาใหม่ก่อนดูอัตรา',
   notJson: 'ไฟล์นี้ไม่ใช่ไฟล์ JSON ที่อ่านได้ (อาจไม่ใช่ไฟล์ที่บันทึกจาก Safetytool หรือไฟล์เสียหาย) โมเดลปัจจุบันไม่ถูกเปลี่ยน',
 });
 Object.assign(STR.en, {
@@ -154,5 +159,10 @@ Object.assign(STR.en, {
   welcomeSteps: '1) Pick a model type in the top bar  2) File → New to start your own, or edit the example to try things  3) "Save JSON" keeps your work as a file (this browser also autosaves)  4) File → Print / PDF for your meeting',
   welcomeNote: 'A thinking and communication aid, not certified safety advice.',
   welcomeGuide: 'Step-by-step guide', welcomeNew: 'Start a blank model', welcomeFeedback: 'Give feedback (2 min)', welcomeClose: 'Got it, close',
+  exMsg: 'You are editing a teaching example. Its title, author and "example" flag stay attached. If this is your own work, make a copy as a new work.',
+  exCopy: 'Make a copy as a new work', exKeep: 'Keep editing the example',
+  exCopied: 'Now a new work: title, author, scope and the example flag were cleared. The model content is still there: check it and make it your own data before use.',
+  exCopiedPy: 'The denominator and the "Synthetic" dataset text were cleared. The counts in each tier are still the example numbers: change them yourself.',
+  pyPeriodDenom: 'The period changed but the denominator (exposure) is the old value: check it matches the new period before reading any rate.',
   notJson: 'This file is not readable JSON (it may not be a file saved from Safetytool, or it is damaged). The current model was not changed.',
 });

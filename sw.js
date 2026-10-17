@@ -2,11 +2,11 @@
 // Strategy: pre-cache the app shell; then "stale-while-revalidate" for same-origin GET requests
 // (answer from cache immediately, refresh the cache in the background when online).
 // Bump VERSION whenever the file list changes.
-const VERSION = 'safetytool-v13';
+const VERSION = 'safetytool-v14';
 const SHELL = [
   './', 'index.html', 'css/app.css',
   'js/app.js', 'js/forms.js', 'js/help.js', 'js/i18n.js', 'js/layout.js', 'js/lint.js', 'js/model.js', 'js/render.js',
-  'js/shell.js', 'js/fram.js', 'js/pyramid.js', 'js/interchange.js', 'js/safeopen.js', 'js/transform.js', 'js/forms-fp.js', 'js/fptabs.js', 'js/linkspanel.js', 'js/hfacs.js', 'js/stamp.js', 'js/newtabs.js', 'js/swiss.js', 'js/textmetrics.js', 'js/simtab.js', 'js/comparetab.js', 'js/report.js', 'js/swisstab.js', 'js/msgs.js', 'js/assurancepanel.js', 'js/reporttab.js', 'js/guide.js', 'js/gallery.js',
+  'js/shell.js', 'js/fram.js', 'js/pyramid.js', 'js/interchange.js', 'js/safeopen.js', 'js/transform.js', 'js/forms-fp.js', 'js/fptabs.js', 'js/linkspanel.js', 'js/hfacs.js', 'js/stamp.js', 'js/newtabs.js', 'js/swiss.js', 'js/textmetrics.js', 'js/simtab.js', 'js/comparetab.js', 'js/report.js', 'js/swisstab.js', 'js/msgs.js', 'js/assurancepanel.js', 'js/reporttab.js', 'js/guide.js', 'js/gallery.js', 'js/keepfocus.js', 'js/fonts.js', 'js/modelintro.js', 'fonts/sarabun-regular.woff', 'fonts/sarabun-bold.woff',
   'js/erc.js', 'data/erc-matrix.json', 'js/scenario.js', 'js/bowtie-analysis.js', 'js/actions.js', 'js/evidence.js',
   'data/example-wildlife.json', 'data/example-swiss.json', 'data/example-shell.json', 'data/example-hfacs.json', 'data/example-stamp.json', 'data/example-fram.json', 'data/example-pyramid.json',
 ];

@@ -2,6 +2,7 @@
 
 import * as FR from './fram.js';
 import * as PY from './pyramid.js';
+import { localizeMsg } from './msgs.js';
 
 const S = {
   th: {
@@ -59,7 +60,7 @@ export function drawPyramidAnalysis(host, m, ctx) {
   host.textContent = '';
   host.appendChild(el('h2', 'sim-title', L.pyTitle));
   host.appendChild(el('p', 'muted', L.pyNote));
-  if (!ck.valid) host.appendChild(el('p', 'warn-note', L.countsOnly + ck.missing.join('; ')));
+  if (!ck.valid) host.appendChild(el('p', 'warn-note', L.countsOnly + ck.missing.map((x) => localizeMsg(x, ctx.lang)).join('; ')));
   const tbl = el('table', 'sim-table');
   const head = tbl.createTHead().insertRow();
   [L.tier, L.def, L.count, L.rate].forEach((x) => head.appendChild(el('th', null, x)));

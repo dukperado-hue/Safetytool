@@ -1,3 +1,6 @@
+/* Thai typeface: Sarabun, Thai characters only (Latin letters, digits and codes keep the interface font). See js/fonts.js */
+@font-face{font-family:"Sarabun";src:url(../fonts/sarabun-regular.woff) format("woff");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0E00-0E7F,U+200B-200D,U+25CC;size-adjust:118%}
+@font-face{font-family:"Sarabun";src:url(../fonts/sarabun-bold.woff) format("woff");font-weight:700;font-style:normal;font-display:swap;unicode-range:U+0E00-0E7F,U+200B-200D,U+25CC;size-adjust:118%}
 :root{--bg:#f5f4f1;--panel:#fff;--ink:#14202e;--muted:#5b6675;--line:#d8dce2;--accent:#1f5fbf;--danger:#c62828;
  --poor:#c62828;--weak:#b26a00;--fair:#c9a227;--strong:#1e7b45;--none:#6b7785;--callout:#eef4ff;
  --cut-bg:#e8f5ec;--open-bg:#fde8e8;--inc-bg:#fff3e0;--unk-bg:#f4f5f7;--mono:"IBM Plex Mono",ui-monospace,Consolas,monospace}
@@ -6,7 +9,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font:calc(14px*var(--fs,1))/calc(20px*var(--fs,1)) "IBM Plex Sans","IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI","Noto Sans Thai","Leelawadee UI",sans-serif;display:flex;flex-direction:column}
+body{background:var(--bg);color:var(--ink);font:calc(14px*var(--fs,1))/calc(20px*var(--fs,1)) "Sarabun","IBM Plex Sans","IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI","Noto Sans Thai","Leelawadee UI",sans-serif;display:flex;flex-direction:column}
 .skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:var(--panel);padding:6px 10px;z-index:10}
 header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
 .brand span{color:var(--muted);margin-left:6px}
@@ -191,19 +194,19 @@ td.erc-red::before{content:"\25B2 "}td.erc-yellow::before{content:"\25C6 "}td.er
 /* Narrow screens (phones, small tablets): the page scrolls as a whole, toolbars and tabs scroll sideways */
 @media (max-width:900px){
   html,body{height:auto;min-height:100%}
-  body{display:block}
+  body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}   /* short views (diagram, table) fill the screen; long forms still scroll the page */
   header{gap:6px 10px;padding:8px 10px}
   .brand span{display:none}
   .models{flex-wrap:wrap}
   .tools{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:4px;-webkit-overflow-scrolling:touch}
   .tools>*{flex:0 0 auto}
-  main{display:block}
-  .work{min-height:0}
+  main{display:flex;flex-direction:column;flex:1 0 auto}
+  .work{flex:1 0 auto;min-height:0}
   .tabs{flex-wrap:nowrap;overflow-x:auto;padding:0 8px;-webkit-overflow-scrolling:touch}
   .tabs>*{flex:0 0 auto;white-space:nowrap}
   .tabs .grow{display:none}
-  #stage{height:58vh;min-height:300px;flex:none}
-  [role=tabpanel]{min-height:0}
+  #stage{height:auto;min-height:300px;flex:1 1 auto}
+  [role=tabpanel]{flex:1 0 auto;min-height:0}
   .scroll{max-height:none;overflow:visible}
   .side{max-height:none;overflow:visible;border-top:1px solid var(--line)}
   .rpanel{overflow:visible}
@@ -256,6 +259,12 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;padding:3px 1
 .tgroup{display:flex;gap:4px;align-items:center;padding:2px 0}
 .tg-main{order:2;margin-left:auto}
 .tg-settings{order:3}
+/* Swiss cheese is recognised by yellow (dark text on yellow keeps the contrast) */
+#m-swiss{border-bottom:3px solid #f5c400}
+.models button#m-swiss[aria-pressed=true]{background:#f5c400;color:#1b1500;border-color:#b8860b}
+.tg-quick{order:2;border-left:1px solid var(--line);padding-left:6px;margin-left:2px}
+.tg-quick button{min-width:44px}
+.tg-quick button.danger:hover:not(:disabled){background:color-mix(in srgb,var(--danger) 10%,transparent);border-color:var(--danger)}
 .models{order:4;flex:1 1 100%;min-width:0;display:flex;flex-wrap:nowrap;gap:2px;align-items:flex-end;overflow-x:auto;scrollbar-width:thin}
 .models>*{flex:0 0 auto}
 .models .muted{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -309,6 +318,7 @@ body[data-panel=closed] main{grid-template-columns:minmax(0,1fr)}
   .brand{order:1}
   .models{order:2;flex:1 1 0}
   .tg-main{order:3;margin-left:0}
+  .tg-quick{order:3}
   .tg-settings{order:4}
 }
 @media (max-width:1180px){
@@ -329,8 +339,9 @@ body[data-panel=closed] main{grid-template-columns:minmax(0,1fr)}
   .models::-webkit-scrollbar,.tabs::-webkit-scrollbar,.statline::-webkit-scrollbar{display:none}
   .statline{flex-wrap:nowrap;overflow-x:auto;padding:4px 8px}
   .statline .sl{flex:0 0 auto}
-  #stage{height:calc(100vh - 225px);height:calc(100dvh - 225px);min-height:280px}
-  .side{position:fixed;left:0;right:0;bottom:0;z-index:30;height:64vh;max-height:64vh;overflow:auto;border:0;border-top:2px solid var(--ink);background:var(--panel);box-shadow:0 -8px 24px rgba(0,0,0,.28);padding-top:34px}
+  #stage{min-height:280px}
+  .rpanel{overflow:auto;flex:1 1 auto;min-height:0}   /* only the panel body scrolls: the close button and the tabs stay in reach */
+  .side{position:fixed;left:0;right:0;bottom:0;z-index:30;height:64vh;max-height:64vh;overflow:hidden;border:0;border-top:2px solid var(--ink);background:var(--panel);box-shadow:0 -8px 24px rgba(0,0,0,.28);padding-top:34px}
   .panel-close{display:block;position:absolute;top:2px;right:6px;min-height:28px;padding:2px 10px}
   body[data-panel=closed] .side{display:none}
   /* when the sheet is closed, a small pill keeps the details one tap away */
@@ -341,6 +352,8 @@ body[data-panel=closed] main{grid-template-columns:minmax(0,1fr)}
   .tg-settings{order:2;margin-left:auto}
   .models{order:3}
   .tg-main{order:4;flex:1 1 100%;margin-left:0;justify-content:space-between}
+  .tg-quick{order:5;flex:1 1 100%;border-left:0;padding-left:0;margin-left:0;justify-content:space-between}
+  .tg-quick button{flex:1 1 0}
   .tools .lb{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .tools .ic{margin-right:0;font-size:1.3em}
   .tools #b-save .lbs{display:inline}     /* "Save" instead of "Save JSON" */

@@ -158,8 +158,9 @@ const SEV = (n) => '●'.repeat(Math.max(0, Math.min(5, n))) + '○'.repeat(5 - 
  * Software above (LS card between), Environment below (LE card between), a summary strip underneath.
  * Cards carry `prims` (text / rect / chip primitives relative to the card); the renderer only draws them.
  */
-export function layoutShell(m) {
+export function layoutShell(m, { lang = 'en' } = {}) {
   const D = SH;
+  const th = lang === 'th';
   const wrap = (s, w) => wrapText(s || '—', w, D.fs);
 
   const header = (letter, title, right, w) => {
@@ -198,7 +199,7 @@ export function layoutShell(m) {
     ];
     let y = D.headH;
     if (!n) {
-      prims.push({ t: 'text', x: D.padX, y: y + 4, s: f.status === 'match' ? 'no findings — the interface matches' : f.status === 'mismatch' ? '(no findings written yet)' : '(not assessed yet)', cls: 'tag' });
+      prims.push({ t: 'text', x: D.padX, y: y + 4, s: th ? (f.status === 'match' ? 'ไม่มีข้อค้นพบ — ส่วนเชื่อมประสานกันดี' : f.status === 'mismatch' ? '(ยังไม่ได้เขียนข้อค้นพบ)' : '(ยังไม่ได้ประเมิน)') : (f.status === 'match' ? 'no findings — the interface matches' : f.status === 'mismatch' ? '(no findings written yet)' : '(not assessed yet)'), cls: 'tag' });
       y += 20;
     }
     f.findings.forEach((x) => {

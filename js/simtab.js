@@ -4,6 +4,7 @@
 
 import { controlsOf } from './model.js';
 import { localizeMsg } from './msgs.js';
+import { bowtieCodes } from './layout.js';
 import { simulateBowtie, assuranceRegister } from './bowtie-analysis.js';
 import { pickMatrix, ercLookup, barrierContext, BARRIER_LEVELS } from './erc.js';
 
@@ -211,7 +212,8 @@ function drawErc(host, m, L, api) {
 
 export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
   const L = S[lang] || S.th;
-  const msg = (s) => localizeMsg(s, lang);
+  const codes = bowtieCodes(m);
+  const msg = (s) => localizeMsg(s, lang, codes);
   const api = { mutate };
   const top = host.scrollTop;
   host.textContent = '';
@@ -287,7 +289,7 @@ export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
   if (!gaps.length) host.appendChild(el('p', 'muted', L.noGaps));
   else {
     const ul = el('ul', 'sim-list');
-    gaps.slice(0, 12).forEach((x) => ul.appendChild(el('li', null, `${x.critical ? '★ ' : ''}${short(x.text, 60)} — ${x.gaps.join('; ')}`)));
+    gaps.slice(0, 12).forEach((x) => ul.appendChild(el('li', null, `${x.critical ? '★ ' : ''}${short(x.text, 60)} — ${x.gaps.map(msg).join('; ')}`)));
     host.appendChild(ul);
   }
   drawSwissLink(host, m, lang, openSwiss);
