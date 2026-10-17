@@ -109,9 +109,12 @@ export function validateSwiss(m) {
   for (const l of m.layers) for (const h of l.holes) {
     if (h.hfacsLevel != null && !HFACS_LEVELS.includes(h.hfacsLevel)) errs.push('hole ' + h.id + ': bad hfacsLevel');
   }
-  if (m.evidence || m.assumptions) {
-    const holders = [m.hazard, m.loss, ...m.layers, ...m.layers.flatMap((l) => l.holes)];
-    errs.push(...checkEvidence(m, holders).errors);
+  const holders = [m.hazard, m.loss, ...m.layers, ...m.layers.flatMap((l) => l.holes)];
+  // evidenceIds/assumptionIds must be arrays when present; a reference is checked even if the file has no evidence list (then it is missing)
+  const badRef = (h) => ['evidenceIds', 'assumptionIds'].some((k) => h[k] != null && !Array.isArray(h[k]));
+  for (const h of holders) for (const k of ['evidenceIds', 'assumptionIds']) if (h[k] != null && !Array.isArray(h[k])) errs.push('V-07 ' + h.id + ': ' + k + ' must be an array');
+  if (m.evidence || m.assumptions || holders.some((h) => Array.isArray(h.evidenceIds) || Array.isArray(h.assumptionIds))) {
+    errs.push(...checkEvidence(m, holders.filter((h) => !badRef(h))).errors);
   }
   const used = new Set();
   for (const hid of m.trajectory) {

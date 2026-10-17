@@ -128,3 +128,31 @@ STR.en.stm = {
   actionText: 'Text', from: 'From', to: 'To', addControl: '+ Control action', addFeedback: '+ Feedback', ucas: 'Unsafe control actions (UCAs)', noActions: 'Add a control action first, then analyse its UCAs',
   addUca: '+ Add UCA', ucaType: 'UCA type', context: 'Context: the condition that makes giving / not giving it unsafe', ucaConstraint: 'Controller constraint', scenario: 'Causal scenario: why could this UCA happen', addScenario: '+ Add scenario',
 };
+
+// FRAM, Accident Pyramid and Connections strings
+Object.assign(STR.th, { confirmDeleteLinks: 'มีลิงก์ข้ามโมเดล {n} รายการที่อ้างถึงสิ่งที่กำลังจะลบ (รวมรายการที่ถูกลบตามไปด้วย)\nลิงก์จะไม่ถูกลบ แต่จะแสดงเป็น "ลิงก์เสีย" ในแท็บ "เชื่อมโยง" และคุณลบเองได้ภายหลัง\n\nลบต่อหรือไม่?', navMissing: 'ปลายทางของลิงก์นี้ไม่มีอยู่แล้ว จึงไปที่ไม่ได้', navNoDiagram: 'ไปที่โมเดลนี้แล้ว แต่รายการนี้ (เช่น หลักฐานหรือสมมติฐาน) ไม่ได้อยู่บนแผนภาพ ดูได้ในส่วนแหล่งข้อมูลของโมเดล', saveShort: 'บันทึก', fileMenu: 'ไฟล์', settingsMenu: 'ตั้งค่า', panel: 'รายละเอียด', panelClose: 'ปิดแผงรายละเอียด', fsLegend: 'ขนาดตัวอักษรของหน้าจอ', fs90: 'เล็ก 90%', fs100: 'มาตรฐาน 100%', fs110: 'ใหญ่ 110%', fs120: 'ใหญ่มาก 120%', fsReset: 'คืนค่ามาตรฐาน (100%)', viewMenu: 'มุมมอง', mFram: 'FRAM', mPyramid: 'Accident Pyramid', eventsLabel: 'วิเคราะห์เหตุการณ์:', rLinks: 'เชื่อมโยง' });
+Object.assign(STR.en, { confirmDeleteLinks: '{n} cross-model link(s) point at what you are about to delete (including items removed along with it).\nThe links are not deleted. They will show as "broken" in the Connections tab and you can remove them yourself later.\n\nDelete anyway?', navMissing: 'This end of the link no longer exists, so there is nowhere to go.', navNoDiagram: 'Opened the model, but this item (for example evidence or an assumption) is not on the diagram; see the model’s sources section.', saveShort: 'Save', fileMenu: 'File', settingsMenu: 'Settings', panel: 'Details', panelClose: 'Close details panel', fsLegend: 'Interface text size', fs90: 'Small 90%', fs100: 'Standard 100%', fs110: 'Large 110%', fs120: 'Extra large 120%', fsReset: 'Restore Standard (100%)', viewMenu: 'View', mFram: 'FRAM', mPyramid: 'Accident Pyramid', eventsLabel: 'Event analysis:', rLinks: 'Connections' });
+Object.assign(STR.th.kind, { framActivity: 'กิจกรรมที่สร้างโมเดล', framFunction: 'ฟังก์ชัน', framCoupling: 'Coupling', framAspect: 'Aspect', framVariability: 'ความแปรปรวน', pyDataset: 'ชุดข้อมูล', pyTier: 'ระดับ', pyCount: 'จำนวน', pyRecord: 'Record เหตุการณ์' });
+Object.assign(STR.en.kind, { framActivity: 'Activity modelled', framFunction: 'Function', framCoupling: 'Coupling', framAspect: 'Aspect', framVariability: 'Variability', pyDataset: 'Dataset', pyTier: 'Tier', pyCount: 'Count', pyRecord: 'Event record' });
+
+// Safe open (replacing a model that has content)
+Object.assign(STR.th, { confirmOpen: 'การเปิดครั้งนี้จะแทนที่โมเดลปัจจุบันที่มีข้อมูลอยู่\nระบบจะเก็บโมเดลเดิมไว้ในคลังงานก่อน แล้วจึงเปิดโมเดลใหม่ ดำเนินการต่อหรือไม่?', openBackupFail: 'เก็บโมเดลเดิมลงคลังงานไม่ได้ (คลังเต็มหรือเบราว์เซอร์ไม่ให้เขียน) จึงไม่ได้เปิดไฟล์ โมเดลปัจจุบันไม่ถูกเปลี่ยน ลบงานในคลังหรือกด "บันทึก JSON" เก็บไว้ก่อน แล้วลองใหม่', openBackedUp: 'เก็บโมเดลเดิมไว้ในคลังงานแล้ว' });
+Object.assign(STR.en, { confirmOpen: 'This will replace the current model, which has content.\nThe current model is first kept in the gallery, then the new one is opened. Continue?', openBackupFail: 'The current model could not be kept in the gallery (it is full, or the browser refused to write), so nothing was opened and the current model is unchanged. Delete a gallery work or use "Save JSON" first, then try again.', openBackedUp: 'The previous model was kept in the gallery.' });
+
+// First visit (pilot): what this is, four steps, and where to give feedback
+Object.assign(STR.th, {
+  welcomeTitle: 'ยินดีต้อนรับสู่ Safetytool (เวอร์ชันทดลองใช้)',
+  welcomeBody: 'เครื่องมือฟรีสำหรับสร้างโมเดลความปลอดภัยการบิน (Bowtie, Swiss cheese, SHELL, HFACS, STAMP, FRAM, Accident Pyramid) ข้อมูลอยู่ในเบราว์เซอร์ของคุณเท่านั้น ไม่มีบัญชี ไม่ส่งข้อมูลออกไป ตอนนี้เปิดตัวอย่างประกอบ (ข้อมูลสมมติ) ไว้ให้ดูก่อน',
+  welcomeSteps: '1) เลือกชนิดโมเดลที่แถบด้านบน  2) เมนู "ไฟล์ → ใหม่" เพื่อเริ่มงานของคุณ หรือแก้ตัวอย่างเพื่อลองใช้  3) กด "บันทึก JSON" เก็บงานเป็นไฟล์ (เบราว์เซอร์นี้เก็บให้อัตโนมัติอีกชั้นหนึ่ง)  4) "ไฟล์ → พิมพ์ / PDF" เพื่อนำไปใช้ในที่ประชุม',
+  welcomeNote: 'เครื่องมือช่วยคิดและสื่อสาร ไม่ใช่คำแนะนำด้านความปลอดภัยที่รับรองแล้ว',
+  welcomeGuide: 'ดูคู่มือทีละขั้น', welcomeNew: 'เริ่มโมเดลว่าง', welcomeFeedback: 'ส่งความเห็น (2 นาที)', welcomeClose: 'เข้าใจแล้ว ปิด',
+  notJson: 'ไฟล์นี้ไม่ใช่ไฟล์ JSON ที่อ่านได้ (อาจไม่ใช่ไฟล์ที่บันทึกจาก Safetytool หรือไฟล์เสียหาย) โมเดลปัจจุบันไม่ถูกเปลี่ยน',
+});
+Object.assign(STR.en, {
+  welcomeTitle: 'Welcome to Safetytool (pilot version)',
+  welcomeBody: 'A free tool for building aviation-safety models (Bowtie, Swiss cheese, SHELL, HFACS, STAMP, FRAM, Accident Pyramid). Your data stays in this browser: no account, nothing is sent anywhere. An illustrative example (made-up data) is open for you to look at first.',
+  welcomeSteps: '1) Pick a model type in the top bar  2) File → New to start your own, or edit the example to try things  3) "Save JSON" keeps your work as a file (this browser also autosaves)  4) File → Print / PDF for your meeting',
+  welcomeNote: 'A thinking and communication aid, not certified safety advice.',
+  welcomeGuide: 'Step-by-step guide', welcomeNew: 'Start a blank model', welcomeFeedback: 'Give feedback (2 min)', welcomeClose: 'Got it, close',
+  notJson: 'This file is not readable JSON (it may not be a file saved from Safetytool, or it is damaged). The current model was not changed.',
+});

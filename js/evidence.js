@@ -6,10 +6,13 @@ import { uid } from './model.js';
 
 export const EVIDENCE_KINDS = ['OBSERVED', 'ASSESSED', 'HYPOTHESISED'];
 export const CONFIDENCE = ['low', 'medium', 'high'];
+/** What sort of record the evidence is (optional). `kind` above says how much weight the analyst gives it; this says what it is. */
+export const EVIDENCE_TYPES = ['inspection', 'audit', 'test', 'measurement', 'report', 'document', 'interview', 'other'];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** `recordedAt` is the time this record was created in the tool; `date` is when the thing was observed. They are different facts. */
 export function addEvidence(m, kind, source = '') {
-  const e = { id: uid('ev'), kind, source, date: '', reference: '', limitation: '', confidence: null };
+  const e = { id: uid('ev'), kind, source, date: '', reference: '', limitation: '', confidence: null, recordedAt: new Date().toISOString() };
   (m.evidence = m.evidence || []).push(e);
   return e;
 }
@@ -44,6 +47,7 @@ export function checkEvidence(m, holders) {
     if (!EVIDENCE_KINDS.includes(e.kind)) errors.push('V-10 evidence ' + e.id + ': kind must be one of ' + EVIDENCE_KINDS.join('/'));
     if (e.date && !isIsoDate(e.date)) errors.push('V-10 evidence ' + e.id + ': date must be YYYY-MM-DD');
     if (e.confidence != null && !CONFIDENCE.includes(e.confidence)) errors.push('V-10 evidence ' + e.id + ': bad confidence');
+    if (e.evidenceType != null && e.evidenceType !== '' && !EVIDENCE_TYPES.includes(e.evidenceType)) errors.push('V-10 evidence ' + e.id + ': evidenceType must be one of ' + EVIDENCE_TYPES.join('/'));
     if (e.kind === 'OBSERVED' && !(e.source || '').trim()) warnings.push('E-01 OBSERVED evidence ' + e.id + ' has no source; an observation needs a traceable source');
     if (e.kind === 'OBSERVED' && !(e.reference || '').trim() && !(e.date || '').trim()) warnings.push('E-02 OBSERVED evidence ' + e.id + ' has neither a reference nor a date');
   }

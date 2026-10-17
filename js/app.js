@@ -8,6 +8,13 @@ import { buildSwissForm, buildShellForm, buildHfacsForm, buildStampForm } from '
 import * as HF from './hfacs.js';
 import * as ST from './stamp.js';
 import * as NT from './newtabs.js';
+import * as FR from './fram.js';
+import * as PY from './pyramid.js';
+import * as IC from './interchange.js';
+import * as SO from './safeopen.js';
+import * as FP from './fptabs.js';
+import { buildFramForm, buildPyramidForm, buildSourcesEditor, evidenceChoices } from './forms-fp.js';
+import { drawConnections } from './linkspanel.js';
 import { STR } from './i18n.js';
 import { drawAssurance } from './assurancepanel.js';
 import { drawSwissAnalysis } from './swisstab.js';
@@ -28,6 +35,8 @@ const TYPES = {
   shell: { schema: SH.SCHEMA, empty: SH.emptyShell, validate: SH.validateShell, normalize: SH.normalizeShell, lint: SH.lintShell, find: SH.findShell, example: 'data/example-shell.json', tabs: ['form', 'diagram', 'table', 'meta'] },
   hfacs: { schema: HF.SCHEMA, empty: HF.emptyHfacs, validate: HF.validateHfacs, normalize: HF.normalizeHfacs, lint: HF.lintHfacs, find: HF.findHfacs, example: 'data/example-hfacs.json', tabs: ['form', 'diagram', 'analysis', 'table', 'meta'] },
   stamp: { schema: ST.SCHEMA, empty: ST.emptyStamp, validate: ST.validateStamp, normalize: ST.normalizeStamp, lint: ST.lintStamp, find: ST.findStamp, example: 'data/example-stamp.json', tabs: ['form', 'diagram', 'analysis', 'table', 'meta'] },
+  fram: { schema: FR.SCHEMA, empty: FR.emptyFram, validate: FR.validateFram, normalize: FR.normalizeFram, lint: FR.lintFram, find: FR.findFram, example: 'data/example-fram.json', tabs: ['form', 'diagram', 'analysis', 'table', 'meta'] },
+  pyramid: { schema: PY.SCHEMA, empty: PY.emptyPyramid, validate: PY.validatePyramid, normalize: PY.normalizePyramid, lint: PY.lintPyramid, find: PY.findPyramid, example: 'data/example-pyramid.json', tabs: ['form', 'diagram', 'analysis', 'table', 'meta'] },
 };
 const TYPE_IDS = Object.keys(TYPES);
 
@@ -36,11 +45,14 @@ const state = {
   swissSource: null,
   type: 'bowtie',
   models: {},
-  undo: { bowtie: [], swiss: [], shell: [], hfacs: [], stamp: [] },
-  redo: { bowtie: [], swiss: [], shell: [], hfacs: [], stamp: [] },
+  undo: { bowtie: [], swiss: [], shell: [], hfacs: [], stamp: [], fram: [], pyramid: [] },
+  links: [],
+  redo: { bowtie: [], swiss: [], shell: [], hfacs: [], stamp: [], fram: [], pyramid: [] },
   selectedId: null,
   selectedKind: null,
   showEsc: true,
+  fs: 1,            // interface text scale (a UI preference, never part of a model)
+  panelOpen: true,  // the details panel (inspector, quality, help ...); a bottom sheet on narrow screens
   help: false,
   lang: 'th',
   dark: false,
@@ -63,7 +75,31 @@ const SRC_KEY = 'safetytool.swissSource';
 function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch { /* ignore */ } }
 const save = () => lsSet(keyOf(state.type), JSON.stringify(cur()));
-const savePrefs = () => lsSet(PREF, JSON.stringify({ lang: state.lang, dark: state.dark, showEsc: state.showEsc, help: state.help, type: state.type }));
+const savePrefs = () => lsSet(PREF, JSON.stringify({ lang: state.lang, dark: state.dark, showEsc: state.showEsc, help: state.help, type: state.type, fs: state.fs }));
+
+// ---------- interface text size (a local UI preference; the diagram and exports are not scaled by it) ----------
+const FONT_SCALES = [0.9, 1, 1.1, 1.2];
+function applyFontScale() {
+  document.documentElement.style.setProperty('--fs', String(state.fs));
+  document.querySelectorAll('input[name=fs]').forEach((r) => { r.checked = Number(r.value) === state.fs; });
+}
+function setFontScale(v) {
+  const n = Number(v);
+  state.fs = FONT_SCALES.includes(n) ? n : 1;
+  applyFontScale(); savePrefs();
+  if (state.tab === 'diagram') drawDiagram({ fit: true });   // the stage may have changed size (header wraps differently)
+}
+
+// ---------- details panel: a side column on wide screens, a bottom sheet on narrow ones ----------
+const narrowMQ = window.matchMedia('(max-width: 900px)');
+function setPanel(open, { focus = false } = {}) {
+  state.panelOpen = open;
+  document.body.dataset.panel = open ? 'open' : 'closed';
+  const b = document.querySelector('#b-panel');
+  [b, document.querySelector('#b-panel-fab')].forEach((x) => { if (x) x.setAttribute('aria-expanded', String(open)); });
+  if (focus) { if (open) { const t0 = document.querySelector('#side [role=tab][aria-selected=true]'); if (t0) t0.focus(); } else { const f = document.querySelector('#b-panel-fab'); (f && getComputedStyle(f).display !== 'none' ? f : b).focus(); } }
+  if (state.tab === 'diagram' && state.last) drawDiagram({ fit: true });
+}
 
 // ---------- mutations with undo ----------
 function snapshot() {
@@ -97,7 +133,8 @@ function detectType(m) {
 function loadModel(m, { fit = true } = {}) {
   const type = detectType(m);
   if (!type) { alert(t('badFile') + 'unsupported schema: ' + String(m && m.schema)); return false; }
-  const errs = TYPES[type].validate(m);
+  // an opened file is checked as strictly as a package member (adds evidence, assurance and corrective-action rules for bowties)
+  const errs = (IC.adapterOf(m) || TYPES[type]).validate(m);
   if (errs.length) { alert(t('badFile') + errs.slice(0, 5).join('; ')); return false; }
   const switched = type !== state.type;
   state.type = type;
@@ -148,6 +185,7 @@ function onSelect(id, kind) {
   if (state.help) state.rtab = 'help';
   else if (state.type === 'bowtie') state.rtab = 'inspector';
   refresh({ inspector: true });
+  if (id && narrowMQ.matches && !state.panelOpen) setPanel(true); // on a phone the details open as a sheet when something is chosen
 }
 
 function drawDiagram({ fit = false } = {}) {
@@ -240,6 +278,8 @@ function tableRows() {
   const add = (kind, ref, detail = '', indent = 0, textOverride) => rows.push({ id: ref.id, kind, text: textOverride ?? ref.text, detail, indent });
   if (state.type === 'hfacs') return NT.hfacsRows(m, add, rows, state.lang);
   if (state.type === 'stamp') return NT.stampRows(m, add, rows, state.lang);
+  if (state.type === 'fram') return FP.framRows(m, add, rows, state.lang);
+  if (state.type === 'pyramid') return FP.pyramidRows(m, add, rows, state.lang);
   if (state.type === 'bowtie') {
     const ctlDetail = (c) => {
       const bits = [];
@@ -422,7 +462,7 @@ function drawInspector() {
   host.appendChild(h);
   if (state.help) { const c = callout(kind); if (c) host.appendChild(c); }
   SPECS[kind].forEach(([k, ty]) => host.appendChild(fieldEl(ref, k, ty)));
-  if (kind === 'control') { drawSharing(host, cur(), ref); drawAssurance(host, cur(), ref, { lang: state.lang, mutate }); }
+  if (kind === 'control') { drawSharing(host, cur(), ref); drawAssurance(host, cur(), ref, { lang: state.lang, mutate, flash, confirmDelete }); }
   const row = document.createElement('div');
   row.className = 'btnrow';
   const pick = (id, kd) => { state.selectedId = id; state.selectedKind = kd; refresh({ inspector: true }); };
@@ -436,7 +476,7 @@ function drawInspector() {
   if (kind === 'escalation') row.appendChild(btn(t('addEscControl'), () => { let id; mutate((m) => { id = M.addEscalationControl(m, ref.id).id; }); pick(id, 'escalationControl'); }));
   if (!['hazard', 'topEvent'].includes(kind)) {
     row.appendChild(btn(t('delete'), () => {
-      if (!confirm(t('confirmDelete'))) return;
+      if (!confirmDelete((x) => M.removeNode(x, ref.id))) return;
       mutate((m) => { M.removeNode(m, ref.id); });
       state.selectedId = null;
       refresh({ inspector: true });
@@ -457,7 +497,7 @@ function guideCtx() {
     saveGallery: () => !!saveToGallery(false),
   };
 }
-function startGuide() { state.guide = { on: true, step: 0 }; setRightTab('help'); }
+function startGuide() { state.guide = { on: true, step: 0 }; setRightTab('help'); if (narrowMQ.matches) setPanel(true); }
 
 function drawHelp() {
   const host = $('#help');
@@ -511,12 +551,13 @@ function setHelp(on) {
   syncHelpButton();
   setRightTab(state.rtab);
   refresh({ inspector: true });
+  if (on && narrowMQ.matches) setPanel(true);   // help lives in the details panel, which is closed by default on a phone
 }
 function syncHelpButton() { $('#b-help').setAttribute('aria-pressed', String(state.help)); }
 
 function setRightTab(name) {
   state.rtab = name;
-  ['inspector', 'quality', 'help', 'gallery'].forEach((n) => {
+  ['inspector', 'quality', 'help', 'gallery', 'links'].forEach((n) => {
     $('#rp-' + n).hidden = n !== name;
     const b = $('#r-' + n);
     b.setAttribute('aria-selected', String(n === name));
@@ -524,6 +565,7 @@ function setRightTab(name) {
   });
   if (name === 'help') drawHelp();
   if (name === 'gallery') drawGalleryPane();
+  if (name === 'links') drawLinks();
 }
 
 // ---------- meta tab ----------
@@ -542,12 +584,14 @@ function drawMeta() {
 // ---------- form tab ----------
 function drawForm() {
   const host = $('#form');
-  const api = { t, mutate, lang: state.lang };
+  const api = { t, mutate, lang: state.lang, confirmDelete };
   const top = host.scrollTop;
-  if (state.type === 'swiss') buildSwissForm(host, cur(), api);
+  if (state.type === 'swiss') { buildSwissForm(host, cur(), { ...api, evidenceFor: (holder) => evidenceChoices(cur(), holder, api) }); buildSourcesEditor(host, cur(), api); }
   else if (state.type === 'shell') buildShellForm(host, cur(), api);
   else if (state.type === 'hfacs') buildHfacsForm(host, cur(), api);
   else if (state.type === 'stamp') buildStampForm(host, cur(), api);
+  else if (state.type === 'fram') buildFramForm(host, cur(), api);
+  else if (state.type === 'pyramid') buildPyramidForm(host, cur(), api);
   else host.textContent = '';
   host.scrollTop = top;
 }
@@ -579,34 +623,79 @@ function thumbSvg(type, model) {
   return exportSvgString(type, m, { showEsc: false, kindTags: false });
 }
 function saveToGallery(asNew) {
-  const id = !asNew && state.galleryId ? state.galleryId : newId();
-  const works = upsertWork(readWorks(), { id, type: state.type, model: cur() });
-  if (!writeWorks(works)) return null;
-  state.galleryId = id;
-  return id;
+  // modelId stays unique across gallery works; "save as new" stores a copy with a fresh modelId and leaves the original alone (js/safeopen.js)
+  IC.ensureIdentity(cur());   // the open model needs its id before a copy is made, or the copy and the original would disagree
+  const r = SO.saveWorkPlan(readWorks(), { id: state.galleryId, type: state.type, model: cur(), asNew, newWorkId: newId(), newModelId: () => IC.rid('md') });
+  if (!r.ok || !writeWorks(r.works)) return null;
+  state.galleryId = r.id;
+  return r.id;
+}
+/**
+ * Opening a model replaces the open model of its type. When that would destroy a model that has content, ask first (saying how many
+ * cross-model links lose their end), keep the old model in the gallery, and replace nothing if the backup cannot be written.
+ */
+function openGuarded(m, opts) {
+  const type = detectType(m);
+  const bad = type ? (IC.adapterOf(m) || TYPES[type]).validate(m) : ['x'];
+  if (!type || bad.length) return loadModel(m, opts);   // loadModel shows its own error
+  const r = SO.guardedOpen({
+    type, current: loadSlot(type), incoming: m, links: state.links, read: readWorks, write: writeWorks, newWorkId: newId(), newModelId: () => IC.rid('md'),
+    ask: (plan) => confirm(t('confirmOpen') + (plan.affectedLinks ? '\n\n' + t('confirmDeleteLinks').replace('{n}', String(plan.affectedLinks)) : '')),
+  });
+  if (!r.proceed) { if (r.reason === 'backup-failed') alert(t('openBackupFail')); return false; }
+  if (r.backedUp) flash(t('openBackedUp'));
+  return loadModel(m, opts);
 }
 function drawGalleryPane() {
   drawGallery($('#gallery'), {
     lang: state.lang, currentType: state.type, currentId: state.galleryId, thumbSvg,
-    openModel: (m, workId) => { if (loadModel(m)) { state.galleryId = workId; drawGalleryPane(); } },
+    openModel: (m, workId) => { if (openGuarded(m)) { state.galleryId = workId; drawGalleryPane(); } },
     saveCurrent: saveToGallery,
     onChange: drawGalleryPane,
   });
 }
 
 // ---------- labels / layout ----------
+const WELCOME_KEY = 'safetytool.welcomed';
+const FEEDBACK_URL = 'https://github.com/dukperado-hue/Safetytool/issues/new?template=pilot-feedback.yml';
+/** First visit only: what this is, four steps, a way to give feedback. Dismissing is remembered in this browser. */
+function drawWelcome() {
+  const w = $('#welcome');
+  if (!w) return;
+  if (lsGet(WELCOME_KEY)) { w.hidden = true; return; }
+  w.textContent = '';
+  const el = (tag, text, attrs = {}) => { const e = document.createElement(tag); if (text != null) e.textContent = text; Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); return e; };
+  w.appendChild(el('h2', t('welcomeTitle')));
+  w.appendChild(el('p', t('welcomeBody')));
+  t('welcomeSteps').split(/\s{2,}/).forEach((s) => w.appendChild(el('p', s)));   // one line per step
+  w.appendChild(el('p', t('welcomeNote'), { class: 'muted' }));
+  const row = el('div', null, { class: 'wl-actions' });
+  const guide = el('button', t('welcomeGuide'), { type: 'button' });
+  guide.addEventListener('click', () => { if (!state.help) setHelp(true); else setRightTab('help'); });
+  const blank = el('button', t('welcomeNew'), { type: 'button' });
+  blank.addEventListener('click', () => $('#b-new').click());
+  const fb = el('a', t('welcomeFeedback'), { href: FEEDBACK_URL, target: '_blank', rel: 'noopener noreferrer' });
+  const close = el('button', t('welcomeClose'), { type: 'button' });
+  close.addEventListener('click', () => { lsSet(WELCOME_KEY, '1'); w.hidden = true; });
+  row.append(guide, blank, fb, close);
+  w.appendChild(row);
+  w.hidden = false;
+}
 function labels() {
+  drawWelcome();
   document.documentElement.lang = state.lang;
   document.title = `${t('app')} — ${t('m' + state.type[0].toUpperCase() + state.type.slice(1))}`;
-  $('#tagline').textContent = t('tagline');
   const map = {
+    '#b-save .lbs': 'saveShort', '#b-file': 'fileMenu', '#b-view': 'viewMenu', '#b-settings': 'settingsMenu', '#b-panel': 'panel', '#b-panel-fab': 'panel', '#b-panel-close': 'panelClose',
+    '#fs-legend': 'fsLegend', '#fs-l90': 'fs90', '#fs-l100': 'fs100', '#fs-l110': 'fs110', '#fs-l120': 'fs120', '#fs-reset': 'fsReset',
     '#b-example': 'example', '#b-new': 'new', '#b-open': 'open', '#b-save': 'save', '#b-svg': 'svg', '#b-png': 'png', '#b-csv': 'csv', '#b-print': 'print',
     '#b-undo': 'undo', '#b-redo': 'redo', '#b-fit': 'fit', '#b-lang': 'lang', '#b-theme': 'theme', '#b-help': 'help',
     '#tab-diagram': 'tabDiagram', '#tab-simulate': 'tabSimulate', '#tab-compare': 'tabCompare', '#tab-report': 'tabReport', '#tab-analysis': 'tabAnalysis', '#tab-table': 'tabTable', '#tab-meta': 'tabMeta', '#tab-form': 'tabForm',
-    '#r-inspector': 'rInspector', '#r-help': 'rHelp', '#r-gallery': 'rGallery',
-    '#m-bowtie': 'mBowtie', '#m-swiss': 'mSwiss', '#m-shell': 'mShell', '#m-hfacs': 'mHfacs', '#m-stamp': 'mStamp',
+    '#r-inspector': 'rInspector', '#r-help': 'rHelp', '#r-gallery': 'rGallery', '#r-links': 'rLinks',
+    '#m-bowtie': 'mBowtie', '#m-swiss': 'mSwiss', '#m-shell': 'mShell', '#m-hfacs': 'mHfacs', '#m-stamp': 'mStamp', '#m-fram': 'mFram', '#m-pyramid': 'mPyramid', '#events-label': 'eventsLabel',
   };
-  Object.entries(map).forEach(([sel, key]) => { $(sel).textContent = t(key); });
+  // a button that also carries an icon keeps it: only its .lb part is text (and the full label becomes its tooltip)
+  Object.entries(map).forEach(([sel, key]) => { const e = $(sel); const lb = e.querySelector('.lb'); (lb || e).textContent = t(key); if (lb) e.title = t(key); });
   $('#lbl-esc').textContent = t('esc');
   $('#footer').textContent = t('disclaimer');
   netStatus();
@@ -631,10 +720,17 @@ function labels() {
 function reportSvg() { return exportSvgString('bowtie', cur(), { showEsc: state.showEsc, kindTags: false }); }
 /** Deep-dive: one Swiss layer per control on the chosen route. Keeps the bowtie as source for the uncontrolled-hole list. */
 function openSwissFromBowtie(threatId, consequenceId) {
-  const sw = state.models.swiss;
-  if (sw && sw.layers && sw.layers.length && !confirm(t('replaceSwiss'))) return;
   const src = JSON.parse(JSON.stringify(cur()));
   const made = SW.swissFromBowtie(src, { threatId, consequenceId: consequenceId || null });
+  const sw = loadSlot('swiss');
+  // same Safe Open contract as any other open: one confirmation (only when a Swiss model with layers would be replaced; it also names
+  // the links that lose an end), the old model is kept in the gallery first, and nothing is replaced if that backup cannot be written
+  const r = SO.guardedOpen({
+    type: 'swiss', current: sw, incoming: made, links: state.links, read: readWorks, write: writeWorks, newWorkId: newId(), newModelId: () => IC.rid('md'),
+    ask: (plan) => !(sw && sw.layers && sw.layers.length) || confirm(t('replaceSwiss') + (plan.affectedLinks ? '\n\n' + t('confirmDeleteLinks').replace('{n}', String(plan.affectedLinks)) : '')),
+  });
+  if (!r.proceed) { if (r.reason === 'backup-failed') alert(t('openBackupFail')); return; }
+  if (r.backedUp) flash(t('openBackedUp'));
   state.type = 'bowtie';
   if (loadModel(made)) { setSwissSource(src); setTab('analysis'); }
 }
@@ -670,6 +766,8 @@ function refresh({ inspector = false, fit = false, form = false } = {}) {
   if (state.tab === 'analysis') {
     if (state.type === 'hfacs') NT.drawHfacsAnalysis($('#analysis'), cur(), { lang: state.lang });
     else if (state.type === 'stamp') NT.drawStampAnalysis($('#analysis'), cur(), { lang: state.lang });
+    else if (state.type === 'fram') FP.drawFramAnalysis($('#analysis'), cur(), { lang: state.lang });
+    else if (state.type === 'pyramid') FP.drawPyramidAnalysis($('#analysis'), cur(), { lang: state.lang, works: readWorks() });
     else drawSwissAnalysis($('#analysis'), cur(), { lang: state.lang, bowtie: state.swissSource });
   }
   if (state.tab === 'report') drawReport($('#report'), cur(), { lang: state.lang, baseline: state.baseline, svg: reportSvg, download, fileBase });
@@ -679,6 +777,8 @@ function refresh({ inspector = false, fit = false, form = false } = {}) {
   if (state.tab === 'form' && form) drawForm();
   if (inspector) drawInspector();
   if (state.rtab === 'help') drawHelp();
+  if (!cur().meta.modelId) { IC.ensureIdentity(cur()); save(); }
+  if (state.rtab === 'links') drawLinks();
   $('#b-undo').disabled = !state.undo[state.type].length;
   $('#b-redo').disabled = !state.redo[state.type].length;
 }
@@ -703,9 +803,9 @@ function applyType({ fit = true } = {}) {
   TYPE_IDS.forEach((id) => {
     const b = $('#m-' + id);
     b.setAttribute('aria-pressed', String(id === state.type));
+    if (id === state.type && b.scrollIntoView) b.scrollIntoView({ inline: 'nearest', block: 'nearest' }); // the strip scrolls sideways on a phone
   });
-  $('#chk-esc').closest('label').hidden = state.type !== 'bowtie';
-  labels();
+  $('#chk-esc').closest('label').hidden = state.type !== 'bowtie';  labels();
   const first = spec().tabs[0] === 'form' ? 'form' : 'diagram';
   setTab(state.tab && spec().tabs.includes(state.tab) && fit === false ? state.tab : first);
   drawInspector();
@@ -740,11 +840,12 @@ function download(name, blob) {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
-const fileBase = () => (cur().meta.title || state.type).replace(/[^\p{L}\p{N}_-]+/gu, '_').slice(0, 60) || state.type;
+const fileBase = () => (cur().meta.title || state.type).replace(/[^\p{L}\p{M}\p{N}_-]+/gu, '_').slice(0, 60) || state.type;
 const csvQ = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
 
 function toCsv() {
   if (state.type === 'hfacs' || state.type === 'stamp') return NT.toCsv(state.type, cur());
+  if (state.type === 'fram' || state.type === 'pyramid') return FP.toCsv(state.type, cur());
   const m = cur();
   const rows = [];
   if (state.type === 'bowtie') {
@@ -778,7 +879,7 @@ async function loadExample() {
   try {
     const r = await fetch(spec().example, { cache: 'no-cache' });
     if (!r.ok) throw new Error(String(r.status));
-    loadModel(await r.json());
+    openGuarded(await r.json());
   } catch (e) {
     alert(t('badFile') + e.message);
   }
@@ -804,13 +905,149 @@ function printDiagram() {
   window.print();
 }
 
+// ---------- connections: identity, links, derived models, packages ----------
+const LINKS_KEY = 'safetytool.links';
+function loadLinks() { try { const a = JSON.parse(lsGet(LINKS_KEY) || '[]'); state.links = Array.isArray(a) ? a : []; } catch { state.links = []; } }
+function setLinks(l) { state.links = l; lsSet(LINKS_KEY, JSON.stringify(l)); }
+
+// ---------- deleting something that other models link to ----------
+const modelsById = () => new Map(workspace().map((w) => [w.model.meta.modelId, w.model]));
+/**
+ * Ask before an edit that removes entities. `apply(copy)` is the same edit the caller will run, tried on a copy to see what it would remove
+ * (a cascade counts too). With no link affected this is exactly the confirmation the caller always had (`ask` = it had one);
+ * with links it says how many, and that they stay (shown as broken, removable by hand). Links are never deleted or rewritten here.
+ */
+function confirmDelete(apply, { ask = true } = {}) {
+  const m = cur();
+  IC.ensureIdentity(m);
+  const { links } = IC.deleteImpact(state.links, m, apply);
+  if (!links.length) return ask ? confirm(t('confirmDelete')) : true;
+  return confirm(t('confirmDeleteLinks').replace('{n}', String(links.length)));
+}
+
+// ---------- go to the entity a link points at ----------
+function centerOn(id) {
+  const lay = state.last && state.last.layout;   // renderModel returns { width, height, layout }; a bowtie layout calls its boxes `nodes`, the others `items`
+  const items = lay && (lay.items || lay.nodes);
+  const it = items && items.find((x) => x.id === id || x.realId === id);
+  if (!it || ![it.x, it.y, it.w, it.h].every(Number.isFinite)) return;
+  const { w, h } = stageSize();
+  const k = Math.max(state.view.k, 0.8);
+  const cy = narrowMQ.matches && state.panelOpen ? h * 0.22 : h / 2;   // on a phone the details sheet covers the lower part
+  state.view = { k, x: w / 2 - (it.x + it.w / 2) * k, y: cy - (it.y + it.h / 2) * k };
+  applyView();
+}
+/** ref = { modelId, entityId } of one end of a link. Only an end that resolves in the workspace can be visited; nothing is changed in any model. */
+async function goToEntity(ref) {
+  const nav = IC.navigationTarget(modelsById(), ref);
+  if (!nav.ok) { flash(t('navMissing')); return false; }
+  const stayOnLinks = state.rtab === 'links';
+  if (nav.modelType !== state.type) await switchType(nav.modelType);   // the existing model switch (the open model of each type is kept as it is)
+  setTab('diagram');
+  const hit = spec().find(cur(), nav.baseId);
+  if (!hit) { flash(t('navNoDiagram')); if (stayOnLinks) setRightTab('links'); return true; }   // evidence, assumptions, interfaces: no node to select
+  onSelect(nav.baseId, hit.kind);
+  centerOn(nav.baseId);
+  if (stayOnLinks) setRightTab('links');
+  return true;
+}
+function loadSlot(type) {
+  if (state.models[type]) return state.models[type];
+  const saved = lsGet(keyOf(type));
+  if (saved) { try { const m = JSON.parse(saved); if (!TYPES[type].validate(m).length) state.models[type] = TYPES[type].normalize(m); } catch { /* ignore a damaged slot */ } }
+  return state.models[type] || null;
+}
+function workspace() { TYPE_IDS.forEach(loadSlot); return TYPE_IDS.filter((id) => state.models[id]).map((id) => ({ type: id, model: state.models[id] })); }
+function persistAll() { TYPE_IDS.forEach((id) => { if (state.models[id]) lsSet(keyOf(id), JSON.stringify(state.models[id])); }); }
+function ensureIdentities() { workspace().forEach((w) => IC.ensureIdentity(w.model)); persistAll(); }
+/** Keep the model now in a slot in the gallery before `model` replaces it (also when the modelId is the same but the content differs). -> { ok, backedUp }; ok=false means: replace nothing. */
+function backupSlot(type, model) {
+  return SO.backupBeforeReplace({ type, current: state.models[type] || loadSlot(type), incoming: model, read: readWorks, write: writeWorks, newWorkId: newId(), newModelId: () => IC.rid('md') });
+}
+/**
+ * Put a model into its slot. The previous model is saved to the gallery first; if that cannot be done (gallery full, storage refused)
+ * nothing is replaced and { ok:false } is returned. Undo/redo of that slot are cleared on success, as before.
+ */
+function setSlot(type, model, { backedUp = false } = {}) {
+  const b = backedUp ? { ok: true, backedUp: false } : backupSlot(type, model);
+  if (!b.ok) return b;
+  state.models[type] = TYPES[type].normalize(model);
+  IC.ensureIdentity(state.models[type]);
+  state.undo[type] = []; state.redo[type] = [];
+  lsSet(keyOf(type), JSON.stringify(state.models[type]));
+  return b;
+}
+/** Add links. An identical link is skipped; a link whose id exists with different content gets a new id (nothing is overwritten). */
+function mergeLinks(links) {
+  const byId = new Map(state.links.map((x) => [x.id, JSON.stringify(x)]));
+  const add = [];
+  links.forEach((l) => { const had = byId.get(l.id); if (had === JSON.stringify(l)) return; add.push(had ? { ...l, id: IC.rid('lk') } : l); });
+  setLinks([...state.links, ...add]);
+}
+function applyDerived(result, destType) {
+  if (!setSlot(destType, result.model).ok) { alert(t('openBackupFail')); return false; }
+  mergeLinks(result.links);
+  state.type = destType; state.selectedId = null; state.selectedKind = null; state.galleryId = null;
+  applyType({ fit: true });
+  return true;
+}
+function applyImport(plan) {
+  let saved = 0;
+  // all-or-nothing: every slot that would be replaced is backed up first; if any backup fails nothing is replaced and no link is merged
+  const backups = [];
+  if (!plan.actions.every((a) => { const b = backupSlot(a.type, a.model); backups.push(b); return b.ok; })) { alert(t('openBackupFail')); return false; }
+  saved = backups.filter((b) => b.backedUp).length;
+  plan.actions.forEach((a) => setSlot(a.type, a.model, { backedUp: true }));
+  mergeLinks(plan.links);
+  if (plan.actions.length && !plan.actions.some((a) => a.type === state.type)) state.type = plan.actions[0].type;
+  state.selectedId = null; state.selectedKind = null; state.galleryId = null;
+  applyType({ fit: true });
+  if (saved) flash((state.lang === 'th' ? 'บันทึกโมเดลเดิมลงคลังงานก่อนแทนที่: ' : 'Previous models saved to the gallery before being replaced: ') + saved);
+  return true;
+}
+function drawLinks() {
+  drawConnections($('#links'), {
+    lang: state.lang, current: { type: state.type, model: cur() }, selectedId: state.selectedId,
+    mutate: (fn, o) => { mutate(fn, o); if (o && o.rebuild) drawLinks(); },
+    workspace, getLinks: () => state.links, setLinks, ensureIdentities, persistAll, applyDerived, applyImport, download, flash, refresh: drawLinks, goTo: goToEntity, confirmDelete,
+  });
+}
+
 // ---------- wiring ----------
 function bind() {
+  // Header menus (<details class="more">): close after a command, on a click elsewhere, when focus leaves, and on Escape (focus returns to the menu button).
+  // A switch inside a menu (the Escalation checkbox) does not close it. The commands themselves are bound by id below.
+  document.querySelectorAll('details.more').forEach((menu) => {
+    const btn = menu.querySelector('summary');
+    menu.addEventListener('click', (ev) => { if (ev.target.closest('.menu button')) { menu.open = false; btn.focus(); } });
+    menu.addEventListener('focusout', (ev) => { if (menu.open && ev.relatedTarget && !menu.contains(ev.relatedTarget)) menu.open = false; });
+    menu.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && menu.open) { ev.stopPropagation(); menu.open = false; btn.focus(); } });
+    // keep an opened menu inside the viewport (a menu near the right edge of a narrow screen would otherwise be cut off)
+    menu.addEventListener('toggle', () => {
+      const m = menu.querySelector('.menu');
+      if (!m) return;
+      m.style.transform = '';
+      if (!menu.open) return;
+      const r = m.getBoundingClientRect(); const vw = document.documentElement.clientWidth;
+      if (r.right > vw - 6) m.style.transform = 'translateX(' + Math.round(vw - 6 - r.right) + 'px)';
+      else if (r.left < 6) m.style.transform = 'translateX(' + Math.round(6 - r.left) + 'px)';
+    });
+  });
+  document.addEventListener('click', (ev) => {
+    document.querySelectorAll('details.more[open]').forEach((menu) => { if (!menu.contains(ev.target)) menu.open = false; });
+  });
   $('#b-example').addEventListener('click', loadExample);
   $('#b-new').addEventListener('click', () => {
-    if (!confirm(t('confirmNew'))) return;
+    // "New" replaces the whole model, so every link that touches it will point at something that is gone: say so first
+    const affected = IC.linksTouching(state.links, cur().meta.modelId, IC.entityIdsOf(cur())).length;
+    if (!confirm(t('confirmNew') + (affected ? '\n\n' + t('confirmDeleteLinks').replace('{n}', String(affected)) : ''))) return;
+    // keep the model being replaced in the gallery first (undo does not survive a reload); nothing is replaced if that cannot be done
+    const fresh = spec().empty();
+    const kept = backupSlot(state.type, fresh);
+    if (!kept.ok) { alert(t('openBackupFail')); return; }
+    if (kept.backedUp) flash(t('openBackedUp'));
     snapshot();
-    state.models[state.type] = spec().empty();
+    state.models[state.type] = fresh;
     state.selectedId = null; state.selectedKind = null;
     state.galleryId = null;
     save();
@@ -822,7 +1059,7 @@ function bind() {
     const f = ev.target.files[0];
     ev.target.value = '';
     if (!f) return;
-    try { loadModel(JSON.parse(await f.text())); } catch (e) { alert(t('badFile') + e.message); }
+    try { openGuarded(JSON.parse(await f.text())); } catch (e) { alert(e instanceof SyntaxError ? t('notJson') : t('badFile') + e.message); }
   });
   $('#b-save').addEventListener('click', () => download(fileBase() + '.' + state.type + '.json', new Blob([JSON.stringify(cur(), null, 2)], { type: 'application/json' })));
   $('#b-svg').addEventListener('click', () => download(fileBase() + '.svg', new Blob([exportSvgString(state.type, cur(), { showEsc: state.showEsc, kindTags: state.help, lang: state.lang })], { type: 'image/svg+xml' })));
@@ -836,10 +1073,19 @@ function bind() {
   $('#b-theme').addEventListener('click', () => { state.dark = !state.dark; applyTheme(); savePrefs(); refresh(); });
   $('#b-help').addEventListener('click', () => setHelp(!state.help));
   $('#chk-esc').addEventListener('change', (ev) => { state.showEsc = ev.target.checked; savePrefs(); drawDiagram({ fit: true }); });
+  document.querySelectorAll('input[name=fs]').forEach((r) => r.addEventListener('change', () => { if (r.checked) setFontScale(r.value); }));
+  $('#fs-reset').addEventListener('click', () => setFontScale(1));
+  $('#b-panel').addEventListener('click', () => setPanel(!state.panelOpen, { focus: true }));
+  $('#b-panel-fab').addEventListener('click', () => setPanel(true, { focus: true }));
+  $('#b-panel-close').addEventListener('click', () => setPanel(false, { focus: true }));
+  document.addEventListener('keydown', (ev) => {   // Escape closes the details sheet on a narrow screen (an open menu takes Escape first)
+    if (ev.key === 'Escape' && narrowMQ.matches && state.panelOpen && !document.querySelector('details.more[open]') && ev.target.closest && $('#side').contains(ev.target)) setPanel(false, { focus: true });
+  });
+  narrowMQ.addEventListener('change', () => setPanel(!narrowMQ.matches));   // each width class starts from its own default
   $('#b-addthreat').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addThreat(m).id; }); state.selectedId = id; state.selectedKind = 'threat'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
   $('#b-addcons').addEventListener('click', () => { if (state.type !== 'bowtie') return; let id; mutate((m) => { id = M.addConsequence(m).id; }); state.selectedId = id; state.selectedKind = 'consequence'; state.rtab = 'inspector'; setRightTab('inspector'); setTab('diagram'); drawInspector(); });
   ['form', 'diagram', 'simulate', 'compare', 'report', 'analysis', 'table', 'meta'].forEach((n) => $('#tab-' + n).addEventListener('click', () => setTab(n)));
-  ['inspector', 'quality', 'help', 'gallery'].forEach((n) => $('#r-' + n).addEventListener('click', () => setRightTab(n)));
+  ['inspector', 'quality', 'help', 'gallery', 'links'].forEach((n) => $('#r-' + n).addEventListener('click', () => setRightTab(n)));
   TYPE_IDS.forEach((id) => $('#m-' + id).addEventListener('click', () => { switchType(id); }));
 
   const stage = $('#stage');
@@ -907,14 +1153,18 @@ async function init() {
     if (p.lang) state.lang = p.lang;
     state.dark = typeof p.dark === 'boolean' ? p.dark : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
     if (typeof p.showEsc === 'boolean') state.showEsc = p.showEsc;
+    if (FONT_SCALES.includes(p.fs)) state.fs = p.fs;
     if (typeof p.help === 'boolean') state.help = p.help;
     if (TYPE_IDS.includes(p.type)) state.type = p.type;
   } catch { /* ignore */ }
   $('#chk-esc').checked = state.showEsc;
   loadBaseline();
+  loadLinks();
   applyTheme();
+  applyFontScale();
   syncHelpButton();
   bind();
+  setPanel(!narrowMQ.matches);
   if (state.help) state.rtab = 'help';
   let loaded = false;
   const saved = lsGet(keyOf(state.type));

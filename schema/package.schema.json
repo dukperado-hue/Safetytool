@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dukperado-hue.github.io/Safetytool/schema/package.schema.json",
+  "title": "Safetytool linked-model package (safetytool.package, format version 1)",
+  "type": "object",
+  "description": "A portable JSON file holding models, cross-model links, shared provenance and transformation history. See docs/INTEROP.md.",
+  "required": [
+    "format",
+    "formatVersion",
+    "members"
+  ],
+  "properties": {
+    "format": {
+      "const": "safetytool.package"
+    },
+    "formatVersion": {
+      "const": 1
+    },
+    "exportedAt": {
+      "type": "string",
+      "description": "Not part of the semantic content or the package hash."
+    },
+    "engine": {
+      "type": "object"
+    },
+    "packageHash": {
+      "type": "string"
+    },
+    "members": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "kind",
+          "schema",
+          "modelId",
+          "content"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^models/[A-Za-z0-9_-][A-Za-z0-9._-]*\\.json$"
+          },
+          "kind": {
+            "const": "model"
+          },
+          "schema": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "modelId": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "contentHash": {
+            "type": "string"
+          },
+          "content": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "from",
+          "to",
+          "relation",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "relation": {
+            "enum": [
+              "related_to",
+              "supports",
+              "derived_from",
+              "candidate_mapping",
+              "references"
+            ]
+          },
+          "status": {
+            "enum": [
+              "proposed",
+              "confirmed",
+              "rejected"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "by": {
+            "type": "string"
+          },
+          "via": {
+            "type": "string"
+          },
+          "from": {
+            "type": "object",
+            "required": [
+              "modelId",
+              "entityId"
+            ],
+            "properties": {
+              "modelId": {
+                "type": "string"
+              },
+              "entityId": {
+                "type": "string"
+              }
+            }
+          },
+          "to": {
+            "type": "object",
+            "required": [
+              "modelId",
+              "entityId"
+            ],
+            "properties": {
+              "modelId": {
+                "type": "string"
+              },
+              "entityId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "history": {
+      "type": "array"
+    },
+    "validation": {
+      "type": "object"
+    },
+    "unsupportedMembers": {
+      "type": "array"
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Unknown top-level fields are kept here so a round trip does not lose them."
+    }
+  }
+}

@@ -41,6 +41,26 @@
         },
         "updatedAt": {
           "type": "string"
+        },
+        "modelId": {
+          "type": "string",
+          "description": "Stable model identity (interchange layer). Never changes once assigned."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Counts exports whose semantic content differed from the previous export."
+        },
+        "lastExportHash": {
+          "type": "string",
+          "description": "SHA-256 of the canonical content at the last export (timestamps excluded)."
+        },
+        "transformations": {
+          "type": "array",
+          "description": "History of guided transformations or imports that produced this model.",
+          "items": {
+            "type": "object"
+          }
         }
       }
     },
@@ -90,6 +110,12 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/assumption"
+      }
+    },
+    "correctiveActions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/correctiveAction"
       }
     },
     "adrep": {
@@ -321,6 +347,74 @@
             "nextReview": {
               "type": "string",
               "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "assessedBy": {
+              "type": "string",
+              "description": "Who made the current assessment (a name or a role)."
+            },
+            "assessedOn": {
+              "type": "string",
+              "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "assessmentNotes": {
+              "type": "string"
+            },
+            "history": {
+              "type": "array",
+              "description": "Append-only record of assessments. Entries are copies of the state at the time and are never edited.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "status"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "recordedAt": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "enum": [
+                      "effective",
+                      "degraded",
+                      "failed",
+                      "unknown"
+                    ]
+                  },
+                  "degradedLogic": {
+                    "enum": [
+                      "blocks",
+                      "fails",
+                      null
+                    ]
+                  },
+                  "assessedBy": {
+                    "type": "string"
+                  },
+                  "assessedOn": {
+                    "type": "string",
+                    "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "lastVerified": {
+                    "type": "string"
+                  },
+                  "performanceStandard": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  },
+                  "evidenceIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
             }
           }
         },
@@ -429,6 +523,107 @@
             "high",
             null
           ]
+        },
+        "evidenceType": {
+          "enum": [
+            "inspection",
+            "audit",
+            "test",
+            "measurement",
+            "report",
+            "document",
+            "interview",
+            "other",
+            "",
+            null
+          ],
+          "description": "What sort of record this is. Optional. It says nothing about what the record proves."
+        },
+        "description": {
+          "type": "string"
+        },
+        "recordedAt": {
+          "type": "string",
+          "description": "When this record was created in the tool. Not the observation date (see `date`)."
+        },
+        "recordedBy": {
+          "type": "string"
+        }
+      }
+    },
+    "correctiveAction": {
+      "type": "object",
+      "required": [
+        "id",
+        "status"
+      ],
+      "description": "Work to fix a barrier deficiency. Its status is separate from the barrier's assurance state: closing an action never changes the barrier.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "controlId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The barrier (control) this action is about. null if the barrier was deleted (see formerControl)."
+        },
+        "formerControl": {
+          "type": "object"
+        },
+        "finding": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "ownerRole": {
+          "type": "string"
+        },
+        "dueDate": {
+          "type": "string",
+          "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "in_progress",
+            "implemented",
+            "verified",
+            "closed",
+            "cancelled"
+          ]
+        },
+        "completionEvidenceIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verification": {
+          "type": "object",
+          "properties": {
+            "by": {
+              "type": "string"
+            },
+            "at": {
+              "type": "string",
+              "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        },
+        "closedAt": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
         }
       }
     },

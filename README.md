@@ -10,7 +10,7 @@ A free, browser-based workbench for aviation-safety models (bowtie first). No se
 
 ## สถานะ (v0.2.0)
 
-- **5 โมเดล:** Bowtie · **Swiss cheese** (ชั้นป้องกัน, active failure / latent condition, เส้นทางอุบัติเหตุ) · **SHELL** (ปัจจัยมนุษย์: Liveware ตรงกลาง + Software/Hardware/Environment/Liveware อื่น และ interface L–S, L–H, L–E, L–L) · **HFACS** (จัดหมวดปัจจัยมนุษย์ของเหตุการณ์ 4 ระดับ 17 หมวด ตามรายงาน FAA ปี 2000) · **STAMP / STPA** (โครงสร้างการควบคุม, unsafe control action 4 ชนิด, causal scenario) — Fault tree ยังไม่ได้ทำ
+- **7 โมเดล:** Bowtie · **Swiss cheese** (ชั้นป้องกัน, active failure / latent condition, เส้นทางอุบัติเหตุ) · **SHELL** (ปัจจัยมนุษย์: Liveware ตรงกลาง + Software/Hardware/Environment/Liveware อื่น และ interface L–S, L–H, L–E, L–L) · **HFACS** (จัดหมวดปัจจัยมนุษย์ของเหตุการณ์ 4 ระดับ 17 หมวด ตามรายงาน FAA ปี 2000) · **STAMP / STPA** (โครงสร้างการควบคุม, unsafe control action 4 ชนิด, causal scenario) · **FRAM** (ฟังก์ชัน 6 aspect และ coupling — บรรยายเท่านั้น ไม่คำนวณ resonance) · **Accident Pyramid** (ชุดข้อมูลเหตุการณ์ตามระดับ ไม่มีสัดส่วนสำเร็จรูป) · แผง **เชื่อมโยง** (ลิงก์ข้ามโมเดล การสร้างโมเดลต่อยอดพร้อมตัวอย่างก่อนเสมอ และแพ็กเกจที่ย้ายข้ามเครื่องได้ — ดู docs/INTEROP.md, docs/TRANSFORMS.md) — Fault tree ยังไม่ได้ทำ
 - **โหมดช่วยเหลือ** (แท็บ "ช่วยเหลือ" ด้านขวา เปิด-ปิดได้): ป้ายชนิดบนทุกกล่อง, คำอธิบายเมื่อชี้/เลือกกล่อง, อภิธานศัพท์ว่าแต่ละกล่องคืออะไร เขียนอย่างไร ตัวอย่าง และสิ่งที่ควรหลีกเลี่ยง
 - **การตัดคำภาษาไทย:** ใช้ `Intl.Segmenter` + กติกาการขึ้นบรรทัด (ไม่ทิ้ง "(" ท้ายบรรทัด, ไม่ขึ้นบรรทัดด้วยสระ/วรรณยุกต์/ๆ) + ตัวสำรองเมื่อเบราว์เซอร์ไม่มี Segmenter + วัดความกว้างด้วย canvas จริง
 - พิมพ์/บันทึก PDF แบบ vector (ปุ่ม "พิมพ์ / PDF") และ PNG ความละเอียด 3 เท่า

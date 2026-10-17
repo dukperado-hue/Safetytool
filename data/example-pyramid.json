@@ -1,0 +1,93 @@
+{
+  "schema": "safetytool.pyramid/1",
+  "meta": {
+    "title": "SYNTHETIC demonstration — not real occurrence data",
+    "scope": "Synthetic numbers made up to show how the module works. They are not aviation occurrence data and do not follow Heinrich’s or any other ratio. See docs/ACCIDENT-PYRAMID.md.",
+    "author": "",
+    "illustrative": true,
+    "createdAt": "2026-10-15T00:00:00.000Z",
+    "updatedAt": "2026-10-15T00:00:00.000Z",
+    "modelId": "md_example_pyramid",
+    "revision": 1
+  },
+  "dataset": {
+    "id": "ds_f0s6iq",
+    "name": "Synthetic dataset A",
+    "description": "Invented counts of events at a fictitious operator group, ordered from most to least severe.",
+    "periodStart": "2025-01-01",
+    "periodEnd": "2025-12-31",
+    "observationNote": "Synthetic.",
+    "inclusion": "Synthetic: all events reported through the fictitious reporting system.",
+    "exclusion": "Synthetic: none.",
+    "duplicateHandling": "Synthetic: duplicates removed before counting.",
+    "reportingLimitations": "Synthetic data; reporting culture and completeness are not modelled."
+  },
+  "exposure": {
+    "value": 480000,
+    "unit": "flight hours",
+    "definition": "Synthetic: total flight hours of the fictitious operator group in the period",
+    "rateScale": 100000
+  },
+  "categories": [
+    {
+      "id": "ct_ncqvzr",
+      "label": "Fatal or serious-injury accident",
+      "definition": "Synthetic definition: an event with a fatality or serious injury.",
+      "level": 1
+    },
+    {
+      "id": "ct_90tzyt",
+      "label": "Accident with minor injury or damage",
+      "definition": "Synthetic definition: minor injury or damage, no serious injury.",
+      "level": 2
+    },
+    {
+      "id": "ct_l3jzxv",
+      "label": "Incident without injury or damage",
+      "definition": "Synthetic definition: an event reported as an incident.",
+      "level": 3
+    },
+    {
+      "id": "ct_54bfsx",
+      "label": "Hazard or near-miss report",
+      "definition": "Synthetic definition: a reported hazard or near miss.",
+      "level": 4
+    }
+  ],
+  "counts": [
+    {
+      "id": "cn_abol7s",
+      "categoryId": "ct_ncqvzr",
+      "count": 2,
+      "note": "",
+      "evidenceIds": []
+    },
+    {
+      "id": "cn_i80qfu",
+      "categoryId": "ct_90tzyt",
+      "count": 9,
+      "note": "",
+      "evidenceIds": []
+    },
+    {
+      "id": "cn_dnym7w",
+      "categoryId": "ct_l3jzxv",
+      "count": 41,
+      "note": "",
+      "evidenceIds": []
+    },
+    {
+      "id": "cn_5bh0ky",
+      "categoryId": "ct_54bfsx",
+      "count": 163,
+      "note": "",
+      "evidenceIds": []
+    }
+  ],
+  "records": [],
+  "evidence": [],
+  "assumptions": [],
+  "view": {
+    "mode": "triangle"
+  }
+}

@@ -1,0 +1,45 @@
+name: Pilot feedback / ความเห็นจากการทดลองใช้
+description: Two minutes. Tell us what worked and what did not. / ใช้เวลาประมาณ 2 นาที
+title: "[Pilot feedback] "
+labels: ["pilot-feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste real occurrence data, names, or confidential safety information. Describe what you tried in general terms.
+        โปรดอย่าใส่ข้อมูลเหตุการณ์จริง ชื่อบุคคล หรือข้อมูลความปลอดภัยที่เป็นความลับ
+  - type: textarea
+    id: goal
+    attributes:
+      label: 1. What were you trying to accomplish? / คุณพยายามจะทำอะไร
+    validations:
+      required: true
+  - type: dropdown
+    id: done
+    attributes:
+      label: 2. Were you able to complete it? / ทำสำเร็จหรือไม่
+      options:
+        - Yes / สำเร็จ
+        - Partly / สำเร็จบางส่วน
+        - No / ไม่สำเร็จ
+    validations:
+      required: true
+  - type: textarea
+    id: confusing
+    attributes:
+      label: 3. What was confusing or difficult? / อะไรที่สับสนหรือทำได้ยาก
+  - type: textarea
+    id: useful
+    attributes:
+      label: 4. What did you find most useful? / อะไรที่เป็นประโยชน์ที่สุด
+  - type: textarea
+    id: wish
+    attributes:
+      label: 5. The one improvement you would most like to see / สิ่งเดียวที่อยากให้ปรับปรุงมากที่สุด
+    validations:
+      required: true
+  - type: input
+    id: role
+    attributes:
+      label: Role or experience level (optional) / บทบาทหรือระดับประสบการณ์ (ไม่บังคับ)
+      description: For example "airport safety officer, 5 years" or "student". No names or employers needed.

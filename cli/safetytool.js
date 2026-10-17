@@ -4,18 +4,37 @@
 //   node cli/safetytool.js validate <file.json>      structural check (exit 1 on errors)
 //   node cli/safetytool.js lint <file.json> [--json]  quality checks (exit 1 if any error-level finding)
 //   node cli/safetytool.js outline <file.json>        plain-text outline (good for reading/quoting)
-//   node cli/safetytool.js new <bowtie|swiss|shell|hfacs|stamp|scenario> [title]   print an empty model to stdout
+//   node cli/safetytool.js new <bowtie|swiss|shell|hfacs|stamp|fram|pyramid|scenario> [title]   print an empty model to stdout
 //   node cli/safetytool.js simulate <file.json> [--set id=status[:blocks|fails] ...] [--json]   bowtie or scenario
 //   node cli/safetytool.js impact <bowtie.json>       which single control failures leave paths un-cut
 //   node cli/safetytool.js register <bowtie.json> [--as-of YYYY-MM-DD]   barrier assurance register (gaps only)
 //   node cli/safetytool.js diff <a.json> <b.json> [--json]   Path Count Difference (two bowties or two scenarios)
 //   node cli/safetytool.js swiss-from-bowtie <bowtie.json> <threatId> [consequenceId]   Swiss view of one route
-import { readFileSync } from 'node:fs';
+//   node cli/safetytool.js pyramid-summary <pyramid.json> [--compare other.json] [--json]   counts, rates (only with a valid denominator), comparability
+//   node cli/safetytool.js assign-id <model.json>     write a stable meta.modelId into the file (explicit; other commands never modify inputs)
+//   node cli/safetytool.js inspect <model.json|package.json>   provenance and dependency summary
+//   node cli/safetytool.js transforms                 list transformations and whether they are supported
+//   node cli/safetytool.js transform-preview <id> <model.json> [--decision k=v ...] [--json]   preview only; nothing is written
+//   node cli/safetytool.js transform-run <id> <model.json> --out <file> [--decision k=v ...] [--confirm all|id,id] [--links-out <file>]
+//   node cli/safetytool.js package-build <out.json> <model.json ...> [--links links.json]   linked-model package
+//   node cli/safetytool.js package-validate <package.json> [--json]
+//   node cli/safetytool.js package-diff <a.json> <b.json> [--json]
+//   node cli/safetytool.js links-validate <links.json> <model.json ...> [--json]
+// Machine-readable output (--json) carries "outputVersion": 1.
+// pyramid-summary is not in any commit yet (never released), so its first shape is version 1; bump outputVersion for any change after it ships.
+import { readFileSync as readRaw, existsSync } from 'node:fs';
+// JSON files saved by some Windows tools start with a byte-order mark; accept them
+const readFileSync = (f, enc) => { const t = readRaw(f, enc); return typeof t === 'string' ? t.replace(/^﻿/, '') : t; };
 import * as M from '../js/model.js';
 import * as SW from '../js/swiss.js';
 import * as SH from '../js/shell.js';
 import * as HF from '../js/hfacs.js';
 import * as ST from '../js/stamp.js';
+import * as FR from '../js/fram.js';
+import * as PY from '../js/pyramid.js';
+import * as IC from '../js/interchange.js';
+import * as TR from '../js/transform.js';
+import { writeFileSync } from 'node:fs';
 import * as SC from '../js/scenario.js';
 import * as BA from '../js/bowtie-analysis.js';
 import { lint as lintBowtie, summarize } from '../js/lint.js';
@@ -34,6 +53,8 @@ const TYPES = {
   [SW.SCHEMA]: { id: 'swiss', validate: SW.validateSwiss, normalize: SW.normalizeSwiss, lint: SW.lintSwiss, empty: SW.emptySwiss, outline: SW.outlineSwiss },
   [SH.SCHEMA]: { id: 'shell', validate: SH.validateShell, normalize: SH.normalizeShell, lint: SH.lintShell, empty: SH.emptyShell, outline: SH.outlineShell },
   [HF.SCHEMA]: { id: 'hfacs', validate: HF.validateHfacs, normalize: HF.normalizeHfacs, lint: HF.lintHfacs, empty: HF.emptyHfacs, outline: HF.outlineHfacs },
+  [FR.SCHEMA]: { id: 'fram', validate: FR.validateFram, normalize: FR.normalizeFram, lint: FR.lintFram, empty: FR.emptyFram, outline: FR.outlineFram },
+  [PY.SCHEMA]: { id: 'pyramid', validate: PY.validatePyramid, normalize: PY.normalizePyramid, lint: PY.lintPyramid, empty: PY.emptyPyramid, outline: PY.outlinePyramid },
   [ST.SCHEMA]: { id: 'stamp', validate: ST.validateStamp, normalize: ST.normalizeStamp, lint: ST.lintStamp, empty: ST.emptyStamp, outline: ST.outlineStamp },
 };
 const BY_ID = Object.fromEntries(Object.values(TYPES).map((t) => [t.id, t]));
@@ -110,7 +131,7 @@ if (cmd === 'validate') {
   console.log(type.id === 'bowtie' ? outlineBowtie(m) : type.outline(m));
 } else if (cmd === 'new') {
   const type = BY_ID[arg];
-  if (!type) { console.error('usage: new <bowtie|swiss|shell|hfacs|stamp|scenario> [title]'); process.exit(2); }
+  if (!type) { console.error('usage: new <bowtie|swiss|shell|hfacs|stamp|fram|pyramid|scenario> [title]'); process.exit(2); }
   const m = type.empty();
   m.meta.title = rest.filter((x) => x !== '--json').join(' ');
   console.log(JSON.stringify(m, null, 2));
@@ -195,12 +216,90 @@ if (cmd === 'validate') {
     d.onlyAlternative.forEach((k) => console.log('only in alternative: ' + k));
     d.notes.forEach((n) => console.log('NOTE: ' + n));
   }
+} else if (cmd === 'pyramid-summary') {
+  const { m, type } = load(arg);
+  if (type.id !== 'pyramid') { console.error('pyramid-summary works on pyramid files'); process.exit(2); }
+  const t = PY.tally(m); const ck = PY.exposureCheck(m);
+  const out = { outputVersion: 1, basis: t.basis, total: t.total, rows: t.rows.map((r) => ({ label: r.label, level: r.level, count: r.unknown ? null : r.count, rate: PY.rateOf(m, r.count).valid ? PY.rateOf(m, r.count).text : null })), duplicates: t.duplicates, excluded: t.excluded, uncategorised: t.uncategorised, basisNote: t.basisNote, window: t.window, records: { total: t.records, countedInWindow: t.included, outsideBefore: t.outsideBefore, outsideAfter: t.outsideAfter, noValidDate: t.incompleteDates, crossCheck: t.recordsCheck }, ratesAvailable: ck.valid, ratesUnavailableBecause: ck.valid ? [] : ck.missing };
+  const ci = rest.indexOf('--compare');
+  if (ci >= 0) { const o = load(rest[ci + 1]); if (o.type.id !== 'pyramid') { console.error('--compare needs a pyramid file'); process.exit(2); } out.comparison = PY.comparePyramids(m, o.m); }
+  if (asJson) console.log(JSON.stringify(out, null, 2));
+  else {
+    console.log('This describes the supplied dataset under its stated definitions; it is not a prediction, and counts are not rates or risk.');
+    out.rows.forEach((r) => console.log(`TIER ${r.level} ${r.label}: ${r.count == null ? 'unknown' : r.count}${r.rate ? '  (' + r.rate + ')' : ''}`));
+    if (!ck.valid) console.log('COUNTS ONLY: ' + ck.missing.join('; '));
+    if (t.records) console.log(`RECORDS: ${t.records} total; counted in window ${t.included}; outside window ${t.outsideWindow} (before ${t.outsideBefore}, after ${t.outsideAfter}); no valid date ${t.incompleteDates}${t.windowApplied ? '' : ' (no valid window: not filtered)'}`);
+    if (t.basisNote === 'aggregate-records-unused') console.log('NOTE: records are NOT counted; aggregate counts are used and never added to records.' + (t.recordsCheck.differs ? ' They DIFFER from the records in the window.' : ''));
+    if (out.comparison) { console.log('COMPARISON: ' + out.comparison.level); out.comparison.warnings.forEach((w) => console.log('  warning: ' + w)); }
+  }
+} else if (cmd === 'assign-id') {
+  const { m } = load(arg);
+  if (m.meta.modelId) { console.log('already has modelId ' + m.meta.modelId); process.exit(0); }
+  const raw = JSON.parse(readFileSync(arg, 'utf8')); IC.ensureIdentity(raw); writeFileSync(arg, JSON.stringify(raw, null, 2) + '\n'); console.log('wrote modelId ' + raw.meta.modelId + ' to ' + arg);
+} else if (cmd === 'inspect') {
+  const raw = JSON.parse(readFileSync(arg, 'utf8'));
+  if (raw && raw.format === IC.FORMAT) { const rows = (raw.members || []).map((x) => IC.inspectModel(x.content, raw.links || [])); console.log(JSON.stringify({ outputVersion: 1, package: { formatVersion: raw.formatVersion, packageHash: raw.packageHash, members: rows.length, links: (raw.links || []).length }, models: rows }, null, 2)); }
+  else { const { m } = load(arg); console.log(JSON.stringify({ outputVersion: 1, ...IC.inspectModel(m) }, null, 2)); }
+} else if (cmd === 'transforms') {
+  const rows = TR.TRANSFORMS.map((t) => ({ id: t.id, version: t.version, from: t.from, to: t.to, supported: t.supported, title: t.title.en }));
+  if (asJson) console.log(JSON.stringify({ outputVersion: 1, transforms: rows }, null, 2)); else rows.forEach((r) => console.log(`${r.id}@${r.version}  ${r.from} -> ${r.to}  ${r.supported ? 'supported' : 'UNSUPPORTED'}  ${r.title}`));
+} else if (cmd === 'transform-preview' || cmd === 'transform-run') {
+  const { m } = load(rest[0]);
+  const decisions = {}; rest.forEach((x, i) => { if (x === '--decision') { const [k, v] = String(rest[i + 1] || '').split('='); decisions[k] = v; } });
+  IC.ensureIdentity(m);
+  const p = TR.previewTransform(arg, m, decisions);
+  const brief = { outputVersion: 1, transformId: p.transformId, version: p.version, supported: p.supported, ok: p.ok, source: p.source, destType: p.destType, mappings: p.mappings.length, omitted: p.omitted.map((o) => o.what.en), warnings: p.warnings.map((w) => w.en), decisionErrors: p.decisionErrors.map((e) => e.en), validationErrors: p.validation.errors, needsConfirmation: p.needsConfirmation.map((c) => ({ id: c.id, text: c.text.en })), unsupportedReason: p.unsupportedReason ? p.unsupportedReason.en : null };
+  if (cmd === 'transform-preview') {
+    if (asJson) console.log(JSON.stringify(brief, null, 2));
+    else { console.log(`${p.transformId}@${p.version}: ${p.ok ? 'preview OK' : 'CANNOT RUN'}`); if (brief.unsupportedReason) console.log('unsupported: ' + brief.unsupportedReason); brief.decisionErrors.forEach((e) => console.log('decision needed: ' + e)); brief.validationErrors.forEach((e) => console.log('invalid: ' + e)); console.log(`mappings: ${brief.mappings}`); brief.omitted.forEach((o) => console.log('not transferred: ' + o)); brief.warnings.forEach((w) => console.log('warning: ' + w)); brief.needsConfirmation.forEach((c) => console.log(`needs confirmation [${c.id}]: ${c.text}`)); }
+    process.exit(p.ok ? 0 : 1);
+  }
+  const oi = rest.indexOf('--out');
+  if (oi < 0) { console.error('transform-run needs --out <file> (an existing file is never overwritten silently)'); process.exit(2); }
+  const outFile = rest[oi + 1];
+  if (existsSync(outFile)) { console.error('refusing to overwrite existing file ' + outFile); process.exit(2); }
+  const ci = rest.indexOf('--confirm'); const conf = ci < 0 ? [] : (rest[ci + 1] === 'all' ? p.needsConfirmation.map((c) => c.id) : String(rest[ci + 1] || '').split(','));
+  const r = await TR.applyTransform(p, conf, { decisions, sourceHash: await IC.contentHash(m) });
+  if (!r.ok) { console.error('NOT CREATED:\n- ' + r.errors.join('\n- ')); process.exit(1); }
+  writeFileSync(outFile, JSON.stringify(r.model, null, 2) + '\n');
+  const li = rest.indexOf('--links-out'); if (li >= 0) writeFileSync(rest[li + 1], JSON.stringify(r.links, null, 2) + '\n');
+  console.log('created ' + outFile + ' (' + p.destType + '), ' + r.links.length + ' proposed/derived link(s)' + (li >= 0 ? ' written to ' + rest[li + 1] : ' (not saved: use --links-out)'));
+} else if (cmd === 'package-build') {
+  const oi = rest.indexOf('--links'); const files = rest.filter((x, i) => x !== '--links' && (oi < 0 || i !== oi + 1));
+  const models = [arg === undefined ? null : null].filter(Boolean);
+  const inputs = files;
+  const loaded = inputs.map((f) => load(f).m);
+  const missing = loaded.map((m, i) => (m.meta.modelId ? null : inputs[i])).filter(Boolean);
+  if (missing.length) { console.error('no meta.modelId in: ' + missing.join(', ') + '\nrun: node cli/safetytool.js assign-id <file>'); process.exit(1); }
+  const links = oi >= 0 ? JSON.parse(readFileSync(rest[oi + 1], 'utf8')) : [];
+  const pkg = await IC.buildPackage(loaded.map((model) => ({ model })), { links });
+  void models;
+  if (existsSync(arg)) { console.error('refusing to overwrite existing file ' + arg); process.exit(2); }
+  writeFileSync(arg, JSON.stringify(pkg, null, 2) + '\n');
+  console.log(`wrote ${arg}: ${pkg.members.length} model(s), ${pkg.links.length} link(s), validation ${pkg.validation.ok ? 'OK' : 'PROBLEMS'}`);
+  process.exit(pkg.validation.ok ? 0 : 1);
+} else if (cmd === 'package-validate') {
+  const pkg = JSON.parse(readFileSync(arg, 'utf8'));
+  const r = await IC.validatePackage(pkg, []);
+  const out = { outputVersion: 1, ok: r.ok, errors: r.errors, warnings: r.warnings, members: r.members.map((x) => ({ path: x.path, type: x.type, status: x.status, issues: x.issues })), links: { usable: r.links.filter((x) => x.usable).length, unusable: r.links.filter((x) => !x.usable).length }, unsupported: r.unsupported.length };
+  if (asJson) console.log(JSON.stringify(out, null, 2)); else { console.log(r.ok ? 'PACKAGE OK' : 'PACKAGE INVALID'); r.errors.forEach((e) => console.log('error: ' + e)); r.warnings.forEach((e) => console.log('warning: ' + e)); out.members.forEach((x) => console.log(`  ${x.status.padEnd(11)} ${x.type || '?'} ${x.path}`)); }
+  process.exit(r.ok ? 0 : 1);
+} else if (cmd === 'package-diff') {
+  const d = IC.diffPackages(JSON.parse(readFileSync(arg, 'utf8')), JSON.parse(readFileSync(rest[0], 'utf8')));
+  if (asJson) console.log(JSON.stringify({ outputVersion: 1, ...d }, null, 2)); else { console.log(d.identicalContent ? 'identical semantic content' : 'content differs'); Object.entries(d).filter(([k, v]) => Array.isArray(v) && v.length).forEach(([k, v]) => console.log(k + ': ' + v.join(', '))); }
+  process.exit(d.identicalContent ? 0 : 1);
+} else if (cmd === 'links-validate') {
+  const links = JSON.parse(readFileSync(arg, 'utf8'));
+  const models = new Map(rest.filter((x) => x !== '--json').map((f) => load(f).m).map((m) => [m.meta.modelId, m]));
+  const issues = IC.checkLinks(links, models);
+  if (asJson) console.log(JSON.stringify({ outputVersion: 1, ok: !issues.some((i) => i.severity === 'error'), issues }, null, 2)); else { issues.forEach((i) => console.log(`${i.severity.toUpperCase()} ${i.code} ${i.linkId}: ${i.message}`)); console.log(issues.length ? '' : 'links OK'); }
+  process.exit(issues.some((i) => i.severity === 'error') ? 1 : 0);
 } else if (cmd === 'swiss-from-bowtie') {
   const { m, type } = load(arg);
   if (type.id !== 'bowtie' || !rest[0]) { console.error('usage: swiss-from-bowtie <bowtie.json> <threatId> [consequenceId]'); process.exit(2); }
   if (!m.threats.some((t) => t.id === rest[0])) { console.error('unknown threat ' + rest[0]); process.exit(2); }
   console.log(JSON.stringify(SW.swissFromBowtie(m, { threatId: rest[0], consequenceId: rest[1] || null }), null, 2));
 } else {
-  console.error('usage: node cli/safetytool.js <validate|lint|outline|new|simulate|impact|register|diff|swiss-from-bowtie> <file.json|type> [--json]');
+  console.error('usage: node cli/safetytool.js <validate|lint|outline|new|simulate|impact|register|diff|swiss-from-bowtie|pyramid-summary|assign-id|inspect|transforms|transform-preview|transform-run|package-build|package-validate|package-diff|links-validate> <file.json|type> [--json]');
   process.exit(2);
 }

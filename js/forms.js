@@ -6,38 +6,38 @@ import * as SH from './shell.js';
 import * as HF from './hfacs.js';
 import * as ST from './stamp.js';
 
-const mk = (tag, attrs = {}, text) => {
+export const mk = (tag, attrs = {}, text) => {
   const e = document.createElement(tag);
   Object.entries(attrs).forEach(([k, v]) => { if (v != null && v !== false) e.setAttribute(k, v === true ? '' : String(v)); });
   if (text != null) e.textContent = text;
   return e;
 };
 
-function field(label, input, id) {
+export function field(label, input, id) {
   const l = mk('label', { class: 'fld', 'data-id': id });
   l.appendChild(mk('span', {}, label));
   l.appendChild(input);
   return l;
 }
-function textInput(value, onChange, area, rows = 2) {
+export function textInput(value, onChange, area, rows = 2) {
   const i = area ? mk('textarea', { rows }) : mk('input', { type: 'text' });
   i.value = value || '';
   i.addEventListener('change', () => onChange(i.value));
   return i;
 }
-function select(value, options, onChange) {
+export function select(value, options, onChange) {
   const s = mk('select');
   options.forEach(([v, l]) => { const o = mk('option', { value: v }, l); s.appendChild(o); });
   s.value = value == null ? '' : String(value);
   s.addEventListener('change', () => onChange(s.value));
   return s;
 }
-function button(label, fn, cls) {
+export function button(label, fn, cls) {
   const b = mk('button', { type: 'button', class: cls }, label);
   b.addEventListener('click', fn);
   return b;
 }
-function section(title, id) {
+export function section(title, id) {
   const s = mk('section', { class: 'fsec', 'data-id': id });
   s.appendChild(mk('h3', {}, title));
   return s;
@@ -45,7 +45,7 @@ function section(title, id) {
 
 // ------------------------------------------------------------------ Swiss cheese
 export function buildSwissForm(host, m, api) {
-  const { t, mutate } = api;
+  const { t, mutate, confirmDelete } = api;
   host.textContent = '';
   const top = section(t('kind.hazard') + ' / ' + t('kind.loss'));
   top.appendChild(field(t('sw.hazard'), textInput(m.hazard.text, (v) => mutate(() => { m.hazard.text = v; }), true), m.hazard.id));
@@ -60,11 +60,12 @@ export function buildSwissForm(host, m, api) {
     head.appendChild(mk('strong', {}, `${i + 1}.`));
     head.appendChild(button('↑', () => mutate(() => SW.moveLayer(m, l.id, -1), { rebuild: true }), 'mini'));
     head.appendChild(button('↓', () => mutate(() => SW.moveLayer(m, l.id, 1), { rebuild: true }), 'mini'));
-    head.appendChild(button(t('delete'), () => { if (confirm(t('confirmDelete'))) mutate(() => SW.removeLayer(m, l.id), { rebuild: true }); }, 'mini danger'));
+    head.appendChild(button(t('delete'), () => { if (confirmDelete((x) => SW.removeLayer(x, l.id))) mutate(() => SW.removeLayer(m, l.id), { rebuild: true }); }, 'mini danger'));
     card.appendChild(head);
     card.appendChild(field(t('sw.layerName'), textInput(l.name, (v) => mutate(() => { l.name = v; })), l.id));
     card.appendChild(field(t('sw.category'), select(l.category, [['', t('none')], ...SW.LAYER_CATEGORIES.map((c) => [c, t('sw.cat.' + c)])], (v) => mutate(() => { l.category = v || null; }))));
     card.appendChild(field(t('sw.defence'), textInput(l.defence, (v) => mutate(() => { l.defence = v; }), true)));
+    const lev = api.evidenceFor && api.evidenceFor(l); if (lev) card.appendChild(lev);   // evidence attached to the layer (supplied by the caller; absent in older callers)
     l.holes.forEach((h) => {
       const row = mk('div', { class: 'frow', 'data-id': h.id });
       row.appendChild(field(t('kind.holeActive') + ' / ' + t('kind.holeLatent'), textInput(h.text, (v) => mutate(() => { h.text = v; }), true), h.id));
@@ -77,8 +78,9 @@ export function buildSwissForm(host, m, api) {
       cl.appendChild(chk);
       cl.appendChild(mk('span', {}, t('sw.aligned')));
       side.appendChild(cl);
-      side.appendChild(button(t('delete'), () => mutate(() => SW.removeHole(m, h.id), { rebuild: true }), 'mini danger'));
+      side.appendChild(button(t('delete'), () => { if (confirmDelete((x) => SW.removeHole(x, h.id), { ask: false })) mutate(() => SW.removeHole(m, h.id), { rebuild: true }); }, 'mini danger'));
       row.appendChild(side);
+      const hev = api.evidenceFor && api.evidenceFor(h); if (hev) row.appendChild(hev);
       card.appendChild(row);
     });
     card.appendChild(button(t('sw.addHole'), () => mutate(() => SW.addHole(m, l.id), { rebuild: true })));
@@ -90,7 +92,7 @@ export function buildSwissForm(host, m, api) {
 
 // ------------------------------------------------------------------ SHELL
 export function buildShellForm(host, m, api) {
-  const { t, mutate } = api;
+  const { t, mutate, confirmDelete } = api;
   host.textContent = '';
   const top = section(t('kind.subject'));
   top.appendChild(field(t('sh.subject'), textInput(m.subject.text, (v) => mutate(() => { m.subject.text = v; }), true), m.subject.id));
@@ -102,7 +104,7 @@ export function buildShellForm(host, m, api) {
     m.components[c].forEach((it) => {
       const row = mk('div', { class: 'frow', 'data-id': it.id });
       row.appendChild(field(t('kind.item'), textInput(it.text, (v) => mutate(() => { it.text = v; }), false), it.id));
-      row.appendChild(button(t('delete'), () => mutate(() => SH.removeShellNode(m, it.id), { rebuild: true }), 'mini danger'));
+      row.appendChild(button(t('delete'), () => { if (confirmDelete((y) => SH.removeShellNode(y, it.id), { ask: false })) mutate(() => SH.removeShellNode(m, it.id), { rebuild: true }); }, 'mini danger'));
       sec.appendChild(row);
     });
     sec.appendChild(button(t('sh.addItem'), () => mutate(() => SH.addItem(m, c), { rebuild: true })));
@@ -119,7 +121,7 @@ export function buildShellForm(host, m, api) {
       card.appendChild(field(t('sh.severity'), select(x.severity, [['', t('none')], ...[1, 2, 3, 4, 5].map((n) => [String(n), String(n)])], (v) => mutate(() => { x.severity = v ? Number(v) : null; }))));
       card.appendChild(field(t('sh.action'), textInput(x.action, (v) => mutate(() => { x.action = v; }), true)));
       card.appendChild(field(t('sh.owner'), textInput(x.owner, (v) => mutate(() => { x.owner = v; }), false)));
-      card.appendChild(button(t('delete'), () => mutate(() => SH.removeShellNode(m, x.id), { rebuild: true }), 'mini danger'));
+      card.appendChild(button(t('delete'), () => { if (confirmDelete((y) => SH.removeShellNode(y, x.id), { ask: false })) mutate(() => SH.removeShellNode(m, x.id), { rebuild: true }); }, 'mini danger'));
       sec.appendChild(card);
     });
     sec.appendChild(button(t('sh.addFinding'), () => mutate(() => SH.addFinding(m, i), { rebuild: true })));
@@ -128,10 +130,10 @@ export function buildShellForm(host, m, api) {
 }
 
 // ------------------------------------------------------------------ HFACS
-const short = (s, n = 46) => { const x = (s || '').trim(); return x ? (x.length > n ? x.slice(0, n) + '…' : x) : '—'; };
+export const short = (s, n = 46) => { const x = (s || '').trim(); return x ? (x.length > n ? x.slice(0, n) + '…' : x) : '—'; };
 
 /** A group of checkboxes (e.g. which losses a hazard leads to). */
-function choices(legend, rows, isOn, onToggle) {
+export function choices(legend, rows, isOn, onToggle) {
   const box = mk('fieldset', { class: 'fchoices' });
   box.appendChild(mk('legend', {}, legend));
   rows.forEach(([id, label]) => {
@@ -147,7 +149,7 @@ function choices(legend, rows, isOn, onToggle) {
 }
 
 export function buildHfacsForm(host, m, api) {
-  const { t, mutate, lang } = api;
+  const { t, mutate, lang, confirmDelete } = api;
   host.textContent = '';
   const codes = HF.factorCodes(m);
   const top = section(t('kind.hfEvent'));
@@ -158,7 +160,7 @@ export function buildHfacsForm(host, m, api) {
     const card = mk('div', { class: 'fcard', 'data-id': f.id });
     const head = mk('div', { class: 'fhead' });
     head.appendChild(mk('strong', {}, codes[f.id]));
-    head.appendChild(button(t('delete'), () => { if (confirm(t('confirmDelete'))) mutate(() => HF.removeFactor(m, f.id), { rebuild: true }); }, 'mini danger'));
+    head.appendChild(button(t('delete'), () => { if (confirmDelete((x) => HF.removeFactor(x, f.id))) mutate(() => HF.removeFactor(m, f.id), { rebuild: true }); }, 'mini danger'));
     card.appendChild(head);
     card.appendChild(field(t('hf.factor'), textInput(f.text, (v) => mutate(() => { f.text = v; }), true), f.id));
     card.appendChild(field(t('hf.category'), select(f.category, [['', t('hf.unclassified')], ...HF.CATEGORIES.map((c) => [c.id, `${HF.LEVEL_INFO[c.level].n} · ${c[lang]}`])], (v) => mutate(() => { f.category = v || null; HF.pruneInfluences(m); }, { rebuild: true }))));
@@ -189,11 +191,11 @@ export function buildHfacsForm(host, m, api) {
 
 // ------------------------------------------------------------------ STAMP / STPA
 export function buildStampForm(host, m, api) {
-  const { t, mutate, lang } = api;
+  const { t, mutate, lang, confirmDelete } = api;
   host.textContent = '';
   const codes = ST.stampCodes(m);
   const nodeOpts = () => [['', t('none')], ...m.nodes.map((n) => [n.id, `${codes[n.id]} ${short(n.text, 30)}`])];
-  const del = (id) => button(t('delete'), () => { if (confirm(t('confirmDelete'))) mutate(() => ST.removeStampNode(m, id), { rebuild: true }); }, 'mini danger');
+  const del = (id) => button(t('delete'), () => { if (confirmDelete((x) => ST.removeStampNode(x, id))) mutate(() => ST.removeStampNode(m, id), { rebuild: true }); }, 'mini danger');
   const head = (label, id) => { const h = mk('div', { class: 'fhead' }); h.appendChild(mk('strong', {}, label)); h.appendChild(del(id)); return h; };
 
   const sys = section(t('kind.stSystem'));

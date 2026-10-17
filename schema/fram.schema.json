@@ -1,0 +1,712 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dukperado-hue.github.io/Safetytool/schema/fram.schema.json",
+  "title": "Safetytool FRAM functional model (safetytool.fram/1)",
+  "type": "object",
+  "description": "FRAM after Hollnagel (2012): functions with six aspects, couplings from an Output to another aspect, variability DESCRIPTIONS. No scores, probabilities or resonance values.",
+  "required": [
+    "schema",
+    "meta",
+    "activity",
+    "functions",
+    "couplings"
+  ],
+  "properties": {
+    "schema": {
+      "const": "safetytool.fram/1"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "illustrative": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "modelId": {
+          "type": "string",
+          "description": "Stable model identity (interchange layer). Never changes once assigned."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Counts exports whose semantic content differed from the previous export."
+        },
+        "lastExportHash": {
+          "type": "string",
+          "description": "SHA-256 of the canonical content at the last export (timestamps excluded)."
+        },
+        "transformations": {
+          "type": "array",
+          "description": "History of guided transformations or imports that produced this model.",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "activity": {
+      "type": "object",
+      "required": [
+        "id",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "limitations": {
+      "type": "string"
+    },
+    "functions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "aspects"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assumptionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "aspects": {
+            "type": "object",
+            "required": [
+              "input",
+              "output",
+              "precondition",
+              "resource",
+              "control",
+              "time"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "input": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "items"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "unknown",
+                      "described",
+                      "none"
+                    ]
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "prov": {
+                          "type": "object",
+                          "description": "Origin of an element: analyst, a cited report, or a Safetytool transformation (a suggestion until reviewed).",
+                          "properties": {
+                            "origin": {
+                              "enum": [
+                                "analyst",
+                                "reported",
+                                "generated"
+                              ]
+                            },
+                            "reviewed": {
+                              "type": "boolean"
+                            },
+                            "via": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "object",
+                              "properties": {
+                                "modelId": {
+                                  "type": "string"
+                                },
+                                "entityId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "output": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "items"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "unknown",
+                      "described",
+                      "none"
+                    ]
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "prov": {
+                          "type": "object",
+                          "description": "Origin of an element: analyst, a cited report, or a Safetytool transformation (a suggestion until reviewed).",
+                          "properties": {
+                            "origin": {
+                              "enum": [
+                                "analyst",
+                                "reported",
+                                "generated"
+                              ]
+                            },
+                            "reviewed": {
+                              "type": "boolean"
+                            },
+                            "via": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "object",
+                              "properties": {
+                                "modelId": {
+                                  "type": "string"
+                                },
+                                "entityId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "precondition": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "items"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "unknown",
+                      "described",
+                      "none"
+                    ]
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "prov": {
+                          "type": "object",
+                          "description": "Origin of an element: analyst, a cited report, or a Safetytool transformation (a suggestion until reviewed).",
+                          "properties": {
+                            "origin": {
+                              "enum": [
+                                "analyst",
+                                "reported",
+                                "generated"
+                              ]
+                            },
+                            "reviewed": {
+                              "type": "boolean"
+                            },
+                            "via": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "object",
+                              "properties": {
+                                "modelId": {
+                                  "type": "string"
+                                },
+                                "entityId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "resource": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "items"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "unknown",
+                      "described",
+                      "none"
+                    ]
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "prov": {
+                          "type": "object",
+                          "description": "Origin of an element: analyst, a cited report, or a Safetytool transformation (a suggestion until reviewed).",
+                          "properties": {
+                            "origin": {
+                              "enum": [
+                                "analyst",
+                                "reported",
+                                "generated"
+                              ]
+                            },
+                            "reviewed": {
+                              "type": "boolean"
+                            },
+                            "via": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "object",
+                              "properties": {
+                                "modelId": {
+                                  "type": "string"
+                                },
+                                "entityId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "control": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "items"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "unknown",
+                      "described",
+                      "none"
+                    ]
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "prov": {
+                          "type": "object",
+                          "description": "Origin of an element: analyst, a cited report, or a Safetytool transformation (a suggestion until reviewed).",
+                          "properties": {
+                            "origin": {
+                              "enum": [
+                                "analyst",
+                                "reported",
+                                "generated"
+                              ]
+                            },
+                            "reviewed": {
+                              "type": "boolean"
+                            },
+                            "via": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "object",
+                              "properties": {
+                                "modelId": {
+                                  "type": "string"
+                                },
+                                "entityId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "time": {
+                "type": "object",
+                "required": [
+                  "status",
+                  "items"
+                ],
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "unknown",
+                      "described",
+                      "none"
+                    ]
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "prov": {
+                          "type": "object",
+                          "description": "Origin of an element: analyst, a cited report, or a Safetytool transformation (a suggestion until reviewed).",
+                          "properties": {
+                            "origin": {
+                              "enum": [
+                                "analyst",
+                                "reported",
+                                "generated"
+                              ]
+                            },
+                            "reviewed": {
+                              "type": "boolean"
+                            },
+                            "via": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "object",
+                              "properties": {
+                                "modelId": {
+                                  "type": "string"
+                                },
+                                "entityId": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "variability": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "text",
+                "state"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "state": {
+                  "enum": [
+                    "observed",
+                    "anticipated",
+                    "unknown"
+                  ]
+                },
+                "aspect": {
+                  "enum": [
+                    null,
+                    "input",
+                    "output",
+                    "precondition",
+                    "resource",
+                    "control",
+                    "time"
+                  ]
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "assumptionIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "prov": {
+                  "type": "object",
+                  "description": "Origin of an element: analyst, a cited report, or a Safetytool transformation (a suggestion until reviewed).",
+                  "properties": {
+                    "origin": {
+                      "enum": [
+                        "analyst",
+                        "reported",
+                        "generated"
+                      ]
+                    },
+                    "reviewed": {
+                      "type": "boolean"
+                    },
+                    "via": {
+                      "type": "string"
+                    },
+                    "from": {
+                      "type": "object",
+                      "properties": {
+                        "modelId": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "couplings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assumptionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prov": {
+            "type": "object",
+            "description": "Origin of an element: analyst, a cited report, or a Safetytool transformation (a suggestion until reviewed).",
+            "properties": {
+              "origin": {
+                "enum": [
+                  "analyst",
+                  "reported",
+                  "generated"
+                ]
+              },
+              "reviewed": {
+                "type": "boolean"
+              },
+              "via": {
+                "type": "string"
+              },
+              "from": {
+                "type": "object",
+                "properties": {
+                  "modelId": {
+                    "type": "string"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "from": {
+            "type": "object",
+            "required": [
+              "functionId",
+              "aspect"
+            ],
+            "properties": {
+              "functionId": {
+                "type": "string"
+              },
+              "aspect": {
+                "const": "output"
+              }
+            }
+          },
+          "to": {
+            "type": "object",
+            "required": [
+              "functionId",
+              "aspect"
+            ],
+            "properties": {
+              "functionId": {
+                "type": "string"
+              },
+              "aspect": {
+                "enum": [
+                  "input",
+                  "precondition",
+                  "resource",
+                  "control",
+                  "time"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

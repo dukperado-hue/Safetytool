@@ -16,6 +16,13 @@ const RULES = [
   [/^E-02 OBSERVED evidence (.+) has neither a reference nor a date$/, (m) => `E-02 หลักฐาน OBSERVED ${m[1]} ไม่มีทั้งเอกสารอ้างอิงและวันที่`],
   [/^E-03 hypothesis (.+) has no way to verify it$/, (m) => `E-03 สมมติฐาน ${m[1]} ยังไม่มีวิธีตรวจสอบ`],
   [/^E-04 assumption (.+) has no owner \(who proposed it\)$/, (m) => `E-04 สมมติฐาน ${m[1]} ยังไม่ระบุผู้เสนอ`],
+  // barrier assurance and corrective actions (actions.js)
+  [/^V-A10 control (.+) is marked effective but no OBSERVED evidence is linked; an effective state should rest on evidence$/, (m) => `V-A10 Control ${m[1]} ถูกตั้งเป็น effective แต่ยังไม่มีหลักฐาน OBSERVED ผูกอยู่ สถานะ effective ควรมีหลักฐานรองรับ`],
+  [/^V-A11 control (.+): the review date (.+) has passed; the state may be stale$/, (m) => `V-A11 Control ${m[1]}: เลยกำหนดทบทวน ${m[2]} แล้ว สถานะอาจล้าสมัย`],
+  [/^V-A24 action (.+) is not linked to a barrier(?: \(its barrier "(.*)" was deleted\))?$/, (m) => `V-A24 มาตรการ ${m[1]} ไม่ได้ผูกกับ Barrier ใด${m[2] !== undefined ? ` (Barrier "${m[2]}" ถูกลบไปแล้ว)` : ''}`],
+  [/^V-A28 action (.+) is overdue \(due (.+)\)$/, (m) => `V-A28 มาตรการ ${m[1]} เลยกำหนด (กำหนด ${m[2]})`],
+  [/^V-A29 action (.+) has no responsible role$/, (m) => `V-A29 มาตรการ ${m[1]} ยังไม่ระบุผู้รับผิดชอบ`],
+  [/^V-A30 control (.+) is (degraded|failed) and has no corrective action recorded$/, (m) => `V-A30 Control ${m[1]} เป็น ${m[2]} และยังไม่มีมาตรการแก้ไขบันทึกไว้`],
   // comparison notes (scenario.js compareRuns)
   [/^The graph structure differs between the two scenarios; path counts are not like-for-like and must not be read as a change in risk\.$/, () => 'โครงสร้างกราฟของสองโมเดลต่างกัน จำนวนเส้นทางจึงเทียบกันตรง ๆ ไม่ได้ และห้ามอ่านเป็นการเปลี่ยนแปลงของความเสี่ยง'],
   [/^V-08 the runs used different model versions \((.+) vs (.+)\)\.$/, (m) => `V-08 สองการรันใช้เวอร์ชันโมเดลต่างกัน (${m[1]} กับ ${m[2]})`],

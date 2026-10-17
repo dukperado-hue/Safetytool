@@ -7,6 +7,8 @@ import * as SW from './swiss.js';
 import * as SH from './shell.js';
 import * as HF from './hfacs.js';
 import * as ST from './stamp.js';
+import * as FR from './fram.js';
+import * as PY from './pyramid.js';
 import { helpFor } from './help.js';
 
 const T = {
@@ -379,3 +381,21 @@ export function drawGuide(host, ctx) {
 }
 
 export const GUIDE_STRINGS = T;
+
+STEPS.fram = [
+  { id: 'overview', title: { th: 'ภาพรวม: FRAM', en: 'Overview: FRAM' }, body: { th: 'FRAM อธิบายงานเป็นเครือข่ายของฟังก์ชัน แต่ละฟังก์ชันมี 6 aspect เราจะสร้าง: กิจกรรม → ฟังก์ชัน → aspect → coupling โมเดลนี้ไม่คำนวณคะแนนใด ๆ', en: 'FRAM describes work as a network of functions, each with six aspects. We build: activity → functions → aspects → couplings. This model calculates no scores.' }, done: () => true },
+  { id: 'activity', kind: 'framActivity', field: ['activity', 'text'], done: (m) => !!m.activity.text.trim() },
+  { id: 'functions', kind: 'framFunction', list: { key: 'functions', add: (m) => FR.addFunction(m), label: 'name' }, done: (m) => m.functions.some((f) => f.name.trim()) },
+  { id: 'aspects', kind: 'framAspect', done: (m) => m.functions.some((f) => FR.ASPECTS.some((a) => f.aspects[a].status === 'described')), body: { th: 'อธิบาย aspect ของแต่ละฟังก์ชันในแท็บ "ฟอร์มกรอกข้อมูล" เริ่มจาก Input และ Output ส่วนที่ยังไม่รู้ให้ปล่อยเป็น unknown', en: 'Describe each function’s aspects in the "Data entry form" tab, starting with Input and Output. Leave what is not known as unknown.' } },
+  { id: 'couplings', kind: 'framCoupling', optional: true, done: (m) => m.couplings.length > 0, body: { th: 'เพิ่ม coupling ในแท็บ "ฟอร์มกรอกข้อมูล": เลือกฟังก์ชันต้นทาง (Output) ฟังก์ชันปลายทางและ aspect ที่รับ', en: 'Add couplings in the "Data entry form" tab: choose the source function (Output), the target function and the receiving aspect.' } },
+  { id: 'save', done: () => true, action: 'gallery', body: { th: 'บันทึกงานลงคลังผลงานและกด "บันทึก" เพื่อเก็บเป็นไฟล์', en: 'Save to the gallery and use "Save" to download a file.' } },
+];
+STEPS.pyramid = [
+  { id: 'overview', title: { th: 'ภาพรวม: Accident Pyramid', en: 'Overview: Accident Pyramid' }, body: { th: 'เริ่มจากนิยามของชุดข้อมูล แล้วระดับความรุนแรง จำนวน (หรือ record) และตัวหาร ภาพนี้อธิบายข้อมูลที่ป้อนเท่านั้น ไม่ใช่การพยากรณ์', en: 'Start with the dataset definitions, then severity tiers, counts (or records) and a denominator. The picture describes the supplied data only; it is not a prediction.' }, done: () => true },
+  { id: 'dataset', kind: 'pyDataset', field: ['dataset', 'description'], done: (m) => !!m.dataset.description.trim() },
+  { id: 'window', done: (m) => PY.windowDays(m) != null, body: { th: 'กรอกช่วงเวลาสังเกต (วันเริ่ม–วันสิ้นสุด) เกณฑ์การรวม/ตัดออก และวิธีจัดการข้อมูลซ้ำ ในแท็บ "ฟอร์มกรอกข้อมูล"', en: 'Fill in the observation window (start and end dates), inclusion/exclusion criteria and duplicate handling in the "Data entry form" tab.' } },
+  { id: 'tiers', kind: 'pyTier', list: { key: 'categories', add: (m) => PY.addCategory(m), label: 'label' }, done: (m) => m.categories.some((c) => c.label.trim()) },
+  { id: 'counts', kind: 'pyRecord', done: (m) => PY.tally(m).rows.some((r) => !r.unknown), body: { th: 'กรอกจำนวนของแต่ละระดับ (เว้นว่าง = ไม่ทราบ) หรือนำเข้า/เพิ่ม record ในแท็บ "ฟอร์มกรอกข้อมูล"', en: 'Enter a count for each tier (empty = unknown), or import / add records, in the "Data entry form" tab.' } },
+  { id: 'denominator', optional: true, done: (m) => PY.exposureCheck(m).valid, body: { th: 'ใส่ตัวหาร (ค่า หน่วย นิยาม) เฉพาะเมื่อนิยามชัดเจน ถ้าไม่มี ระบบจะแสดงเฉพาะจำนวน ไม่แสดงอัตรา', en: 'Add a denominator (value, unit, definition) only if it is clearly defined. Without one the tool shows counts only, no rates.' } },
+  { id: 'save', done: () => true, action: 'gallery', body: { th: 'บันทึกงานลงคลังผลงานและกด "บันทึก" เพื่อเก็บเป็นไฟล์', en: 'Save to the gallery and use "Save" to download a file.' } },
+];

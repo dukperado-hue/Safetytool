@@ -1,0 +1,327 @@
+{
+  "schema": "safetytool.fram/1",
+  "meta": {
+    "title": "Illustrative FRAM: preparing an aircraft for departure (invented)",
+    "scope": "Invented teaching example, not a real operation or procedure. FRAM after Hollnagel (2012); see docs/FRAM.md. Several aspects are left \"unknown\" on purpose to show how missing information is reported.",
+    "author": "",
+    "illustrative": true,
+    "createdAt": "2026-10-15T00:00:00.000Z",
+    "updatedAt": "2026-10-15T00:00:00.000Z",
+    "modelId": "md_example_fram",
+    "revision": 1
+  },
+  "activity": {
+    "id": "ac_lpuz01",
+    "text": "Preparing an aircraft for departure from the stand (invented example)"
+  },
+  "limitations": "Invented example with a handful of functions. It describes how work is imagined in this illustration; it contains no observed data and no variability scores.",
+  "functions": [
+    {
+      "id": "fn_58irt2",
+      "name": "Plan fuel",
+      "description": "Decide how much fuel to uplift.",
+      "context": "",
+      "aspects": {
+        "input": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_1dkxf6",
+              "text": "Flight plan and weather information"
+            }
+          ]
+        },
+        "output": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_zrbxm7",
+              "text": "Required fuel figure"
+            }
+          ]
+        },
+        "precondition": {
+          "status": "unknown",
+          "items": []
+        },
+        "resource": {
+          "status": "unknown",
+          "items": []
+        },
+        "control": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_zumjy8",
+              "text": "Fuel policy"
+            }
+          ]
+        },
+        "time": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_mz1h89",
+              "text": "Before the refuelling request"
+            }
+          ]
+        }
+      },
+      "variability": [],
+      "evidenceIds": [],
+      "assumptionIds": [
+        "as_ex_1"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "fn_3fklr3",
+      "name": "Brief the crew",
+      "description": "",
+      "context": "",
+      "aspects": {
+        "input": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_ztk2ia",
+              "text": "Required fuel figure"
+            }
+          ]
+        },
+        "output": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_ejzcdb",
+              "text": "Crew aware of the plan"
+            }
+          ]
+        },
+        "precondition": {
+          "status": "unknown",
+          "items": []
+        },
+        "resource": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_4ue12c",
+              "text": "Briefing time"
+            }
+          ]
+        },
+        "control": {
+          "status": "unknown",
+          "items": []
+        },
+        "time": {
+          "status": "unknown",
+          "items": []
+        }
+      },
+      "variability": [],
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "fn_9ryfr4",
+      "name": "Refuel the aircraft",
+      "description": "",
+      "context": "",
+      "aspects": {
+        "input": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_omb9xd",
+              "text": "Refuelling request"
+            }
+          ]
+        },
+        "output": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_21ak8e",
+              "text": "Fuel uplifted"
+            }
+          ]
+        },
+        "precondition": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_27brzg",
+              "text": "Aircraft stationary with chocks in place"
+            }
+          ]
+        },
+        "resource": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_68y5xf",
+              "text": "Fuel truck and operator"
+            }
+          ]
+        },
+        "control": {
+          "status": "unknown",
+          "items": []
+        },
+        "time": {
+          "status": "none",
+          "items": []
+        }
+      },
+      "variability": [
+        {
+          "id": "vr_wye37l",
+          "text": "Start of refuelling may vary with truck availability (illustration).",
+          "state": "anticipated",
+          "aspect": "time",
+          "evidenceIds": [],
+          "assumptionIds": [],
+          "notes": ""
+        }
+      ],
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "fn_i9yb45",
+      "name": "Check fuel quantity before departure",
+      "description": "",
+      "context": "",
+      "aspects": {
+        "input": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_zp1ukh",
+              "text": "Fuel uplifted"
+            }
+          ]
+        },
+        "output": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_whcu3i",
+              "text": "Fuel quantity confirmed"
+            }
+          ]
+        },
+        "precondition": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_531gsj",
+              "text": "Crew aware of the plan"
+            }
+          ]
+        },
+        "resource": {
+          "status": "unknown",
+          "items": []
+        },
+        "control": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_v5o1sk",
+              "text": "Pre-departure checklist"
+            }
+          ]
+        },
+        "time": {
+          "status": "unknown",
+          "items": []
+        }
+      },
+      "variability": [],
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    }
+  ],
+  "couplings": [
+    {
+      "id": "cp_uyrpvm",
+      "from": {
+        "functionId": "fn_58irt2",
+        "aspect": "output"
+      },
+      "to": {
+        "functionId": "fn_9ryfr4",
+        "aspect": "input"
+      },
+      "text": "Fuel figure for the request",
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "cp_gp2vvn",
+      "from": {
+        "functionId": "fn_58irt2",
+        "aspect": "output"
+      },
+      "to": {
+        "functionId": "fn_3fklr3",
+        "aspect": "input"
+      },
+      "text": "",
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "cp_mtqd5o",
+      "from": {
+        "functionId": "fn_3fklr3",
+        "aspect": "output"
+      },
+      "to": {
+        "functionId": "fn_i9yb45",
+        "aspect": "precondition"
+      },
+      "text": "",
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "cp_p4h4kp",
+      "from": {
+        "functionId": "fn_9ryfr4",
+        "aspect": "output"
+      },
+      "to": {
+        "functionId": "fn_i9yb45",
+        "aspect": "input"
+      },
+      "text": "Fuel quantity on board",
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    }
+  ],
+  "evidence": [],
+  "assumptions": [
+    {
+      "id": "as_ex_1",
+      "statement": "Fuel policy is applied the same way on every flight (illustration; not reviewed).",
+      "kind": "HYPOTHESISED",
+      "owner": "",
+      "reason": "",
+      "howToVerify": "Compare with how the policy is actually applied.",
+      "impactIfFalse": "",
+      "confidence": null,
+      "reviewed": false
+    }
+  ]
+}

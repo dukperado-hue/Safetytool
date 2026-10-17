@@ -189,3 +189,50 @@ MODEL_INTRO.stamp = {
   th: 'STAMP มองความปลอดภัยเป็นปัญหาการควบคุม: อุบัติเหตุเกิดจากการควบคุมที่ไม่เพียงพอ (สั่งผิด ไม่สั่ง หรือ process model ผิด) ไม่ใช่แค่ชิ้นส่วนเสีย STPA คือวิธีวิเคราะห์: Loss → Hazard → โครงสร้างการควบคุม → Unsafe control action → Causal scenario (อ้างอิง Leveson 2012 และเอกสาร MIT 16.63J) โมเดลนี้ไม่มีความน่าจะเป็นหรือคะแนน',
   en: 'STAMP sees safety as a control problem: accidents come from inadequate control (wrong, missing or mistimed commands, or a wrong process model), not only from broken parts. STPA is the analysis: losses → hazards → control structure → unsafe control actions → causal scenarios (after Leveson 2012 and MIT 16.63J notes). This model has no probabilities or scores.',
 };
+
+HELP.fram = {
+  framActivity: {
+    th: { name: 'กิจกรรมที่สร้างโมเดล', what: 'งานหรือสถานการณ์ที่ FRAM นี้อธิบาย ฟังก์ชันทั้งหมดต้องเป็นส่วนของกิจกรรมนี้', how: 'เขียนสั้น ๆ ว่าทำอะไร ที่ไหน ในบริบทใด', eg: 'การเตรียมอากาศยานก่อนออกเดินทาง (ตัวอย่างสมมติ)', avoid: 'อย่ากว้างเกินไป เช่น "การปฏิบัติการบิน"' },
+    en: { name: 'Activity modelled', what: 'The work or situation this FRAM describes. Every function belongs to it.', how: 'Say briefly what is done, where and in what context.', eg: 'Preparing an aircraft for departure (invented example)', avoid: 'Do not make it too broad, e.g. "flight operations".' },
+  },
+  framFunction: {
+    th: { name: 'ฟังก์ชัน (รูปหกเหลี่ยม)', what: 'สิ่งที่ต้องทำให้เกิดขึ้นในงานนี้ อธิบายด้วย 6 aspect: Input, Output, Precondition, Resource, Control, Time วงกลมทึบ = อธิบายแล้ว ประ = ยังไม่ได้ประเมิน', how: 'ตั้งชื่อด้วยคำกริยา แล้วอธิบายแต่ละ aspect เท่าที่รู้ ที่ยังไม่รู้ให้ปล่อยเป็น unknown', eg: 'เติมน้ำมันอากาศยาน', avoid: 'unknown ไม่ได้แปลว่าไม่มี และไม่ได้แปลว่าปลอดภัย' },
+    en: { name: 'Function (hexagon)', what: 'Something that has to happen in this work, described by six aspects: Input, Output, Precondition, Resource, Control, Time. Filled circle = described; dashed = not assessed.', how: 'Name it with a verb, then describe each aspect as far as it is known. Leave the rest as unknown.', eg: 'Refuel the aircraft', avoid: 'Unknown does not mean none, and it does not mean safe.' },
+  },
+  framCoupling: {
+    th: { name: 'Coupling', what: 'เส้นที่ต่อ Output ของฟังก์ชันหนึ่งเข้ากับ aspect อื่น (Input, Precondition, Resource, Control หรือ Time) ของอีกฟังก์ชัน', how: 'ระบุสิ่งที่ส่งต่อ และผูกหลักฐานถ้ามี', eg: 'ตัวเลขน้ำมัน → Input ของ "เติมน้ำมัน"', avoid: 'coupling ไม่ได้บอกว่าอะไรเป็นสาเหตุของอะไร และไม่มีคะแนน resonance' },
+    en: { name: 'Coupling', what: 'A line from the Output of one function to another aspect (Input, Precondition, Resource, Control or Time) of another function.', how: 'Say what is passed on, and link evidence if you have it.', eg: 'Fuel figure → Input of "Refuel"', avoid: 'A coupling does not say what causes what, and there is no resonance score.' },
+  },
+  framAspect: {
+    th: { name: 'Aspect', what: 'หนึ่งใน 6 ด้านของฟังก์ชัน', how: 'ตั้งสถานะ unknown / described / none แล้วเพิ่มรายการ', eg: '', avoid: '' },
+    en: { name: 'Aspect', what: 'One of the six sides of a function.', how: 'Set the status unknown / described / none, then add items.', eg: '', avoid: '' },
+  },
+  framVariability: {
+    th: { name: 'ความแปรปรวน', what: 'คำอธิบายว่าการทำฟังก์ชันอาจต่างจากที่คิดไว้อย่างไร (สังเกตเห็น หรือคาดการณ์) ไม่มีตัวเลข', how: 'ระบุสถานะ ผูกหลักฐานถ้าเป็น observed', eg: 'เวลาเริ่มเติมน้ำมันเปลี่ยนไปตามรถเติม', avoid: 'อย่าใส่คะแนนหรือความน่าจะเป็น' },
+    en: { name: 'Variability', what: 'A description of how carrying out the function may differ from what was imagined (observed or anticipated). No numbers.', how: 'Set the state and link evidence if it is observed.', eg: 'Start of refuelling varies with truck availability', avoid: 'Do not add scores or probabilities.' },
+  },
+};
+HELP.pyramid = {
+  pyDataset: {
+    th: { name: 'ชุดข้อมูล', what: 'ข้อมูลเหตุการณ์ที่นำมาดู พร้อมนิยาม ช่วงเวลา เกณฑ์รวม/ตัดออก วิธีจัดการข้อมูลซ้ำ และข้อจำกัดการรายงาน', how: 'เขียนนิยามให้ครบก่อนอ่านตัวเลข เพราะตัวเลขมีความหมายตามนิยามเหล่านี้เท่านั้น', eg: 'รายงานเหตุการณ์ของผู้ให้บริการหนึ่ง ปี 2568 (ตัวอย่างสมมติ)', avoid: 'อย่าเปรียบเทียบชุดข้อมูลที่นิยามหรือช่วงเวลาต่างกันโดยไม่มีคำเตือน' },
+    en: { name: 'Dataset', what: 'The event data being looked at, with its definitions, period, inclusion/exclusion criteria, duplicate handling and reporting limitations.', how: 'Write the definitions before reading the numbers, because the numbers only mean what these say.', eg: 'Occurrence reports of one operator, 2025 (invented example)', avoid: 'Do not compare datasets with different definitions or windows without a warning.' },
+  },
+  pyTier: {
+    th: { name: 'ระดับ (tier)', what: 'กลุ่มของเหตุการณ์ตามความรุนแรงที่ผู้ใช้นิยามเอง ระดับบนสุดคือรุนแรงที่สุด ขนาดของชั้นในภาพไม่เป็นสัดส่วนกับจำนวน', how: 'ตั้งชื่อและเขียนนิยามของแต่ละระดับ จำนวนที่ไม่ทราบให้เว้นว่าง (ไม่ใช่ศูนย์)', eg: 'อุบัติเหตุที่มีผู้บาดเจ็บสาหัส (ตัวอย่างสมมติ)', avoid: 'ระบบนี้ไม่มีสัดส่วนสำเร็จรูป (เช่น 1:29:300) ไม่ใช่ความน่าจะเป็นของอุบัติเหตุ' },
+    en: { name: 'Tier', what: 'A group of events by severity, defined by the user. The top tier is the most severe. Tier size in the picture is not proportional to counts.', how: 'Name and define each tier. Leave an unknown count empty (not zero).', eg: 'Accident with serious injury (invented example)', avoid: 'No ready-made ratio (such as 1:29:300) is built in, and none is a probability of an accident.' },
+  },
+  pyRecord: {
+    th: { name: 'Record เหตุการณ์', what: 'เหตุการณ์หนึ่งรายการ (วันที่ ระดับ เลขอ้างอิง) ถ้ามี record ระบบจะนับจาก record', how: 'ทำเครื่องหมายข้อมูลซ้ำหรือที่ตัดออก แทนการลบ เพื่อให้เห็นว่านับอะไรไปบ้าง', eg: '', avoid: 'ระบบแจ้ง "อาจซ้ำ" เท่านั้น ไม่ลบให้เอง' },
+    en: { name: 'Event record', what: 'One event (date, tier, reference). When records exist, counts come from the records.', how: 'Mark duplicates or exclusions instead of deleting, so it stays visible what was counted.', eg: '', avoid: 'The tool only flags "possible duplicates"; it never removes anything.' },
+  },
+};
+GLOSSARY_ORDER.fram = ['framActivity', 'framFunction', 'framAspect', 'framCoupling', 'framVariability'];
+GLOSSARY_ORDER.pyramid = ['pyDataset', 'pyTier', 'pyRecord'];
+MODEL_INTRO.fram = {
+  th: 'FRAM (Hollnagel) อธิบายงานเป็นเครือข่ายของ "ฟังก์ชัน" แต่ละฟังก์ชันมี 6 aspect (Input, Output, Precondition, Resource, Control, Time) และฟังก์ชันเชื่อมกันเมื่อ Output ของอันหนึ่งเป็น aspect ของอีกอัน โมเดลนี้บันทึกและแสดงโครงสร้างเท่านั้น ไม่คำนวณความแปรปรวนหรือ resonance ข้อมูลที่ยังไม่รู้คือ unknown ไม่ใช่ปลอดภัย',
+  en: 'FRAM (Hollnagel) describes work as a network of functions. Each function has six aspects (Input, Output, Precondition, Resource, Control, Time); functions are coupled when the Output of one is an aspect of another. This model records and shows the structure only; it does not calculate variability or resonance. What is not known is unknown, not safe.',
+};
+MODEL_INTRO.pyramid = {
+  th: 'Accident Pyramid ในที่นี้คือภาพของชุดข้อมูลเหตุการณ์ที่ผู้ใช้ป้อน แยกตามระดับความรุนแรงที่ผู้ใช้นิยาม แสดงจำนวน และแสดงอัตราเฉพาะเมื่อมีตัวหารและช่วงเวลาที่นิยามครบ ไม่ใช่การพยากรณ์ ไม่มีสัดส่วนสำเร็จรูป และไม่ถือว่าเหตุการณ์ระดับล่างจะนำไปสู่ระดับบนในสัดส่วนคงที่ (ดู docs/ACCIDENT-PYRAMID.md)',
+  en: 'The Accident Pyramid here is a picture of an event dataset the user supplies, split into severity tiers the user defines. It shows counts, and rates only when a denominator and an observation window are fully defined. It is not a prediction, has no built-in ratio, and does not assume lower tiers lead to higher ones in a fixed proportion (see docs/ACCIDENT-PYRAMID.md).',
+};

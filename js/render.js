@@ -8,6 +8,8 @@ import { layoutSwiss } from './swiss.js';
 import { layoutShell } from './shell.js';
 import { layoutHfacs } from './hfacs.js';
 import { layoutStamp } from './stamp.js';
+import { layoutFram } from './fram.js';
+import { layoutPyramid } from './pyramid.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const FONT = 'system-ui,-apple-system,"Segoe UI","Noto Sans Thai","Leelawadee UI",sans-serif';
@@ -123,6 +125,19 @@ export const SVG_CSS = `
 .k-stAction rect.box,.k-stFeedback rect.box{fill:var(--bg);fill-opacity:.9;stroke:none;rx:4}
 .k-stFeedback .lab{font-style:italic;fill:var(--muted)}
 .st-node:hover .lab{text-decoration:underline}
+.pr.fhex{fill:var(--bg);stroke:var(--thr-b);stroke-width:1.8}
+.k-framFunction rect.box{fill:none;stroke:none}
+.k-framFunction.sel rect.box{stroke:var(--sel);stroke-width:2;stroke-dasharray:4 3}
+.pr.fv{stroke-width:1.5;fill:var(--bg)}.pr.fv-ok{fill:var(--thr-b);stroke:var(--thr-b)}.pr.fv-unknown{stroke:var(--unk);stroke-dasharray:3 2}.pr.fv-none{stroke:var(--line)}
+.st-node .fvl{font-size:10px;font-weight:700;fill:var(--muted)}.st-node .fvl-ok{fill:#fff}
+.st-node .asp{font-size:11px;fill:var(--ink)}.st-node .asp.faint{fill:var(--muted);font-style:italic}
+.k-framCoupling rect.box{fill:var(--bg);fill-opacity:.85;stroke:none}
+.st-link.cpl{stroke:var(--thr-b);stroke-width:1.8;marker-end:url(#st-arr)}.st-link.cpl.proposed{stroke-dasharray:6 4}
+.pr.pyt{stroke:var(--line);stroke-width:1}.pr.pyt-0{fill:var(--act)}.pr.pyt-1{fill:var(--con)}.pr.pyt-2{fill:var(--haz)}.pr.pyt-3{fill:var(--thr)}.pr.pyt-4{fill:var(--cheese)}
+.k-pyTier rect.box{fill:none;stroke:none}
+.st-node .pyn{font:700 14px ui-monospace,"IBM Plex Mono",Consolas,monospace;fill:var(--ink)}
+.pr-line.pyl{stroke:var(--line);stroke-dasharray:2 3;stroke-width:1}
+.st-node .warnTx{fill:var(--weak);font-weight:700}
 `;
 
 const KIND_LABEL = {
@@ -132,6 +147,7 @@ const KIND_LABEL = {
   subject: 'LIVEWARE', compS: 'SOFTWARE', compH: 'HARDWARE', compE: 'ENVIRONMENT', compL: 'OTHER LIVEWARE', iface: 'INTERFACE',
   hfEvent: 'OCCURRENCE', hfFactor: 'FACTOR', hfViolation: 'FACTOR (VIOLATION)', hfLevel: 'HFACS LEVEL', hfCell: 'HFACS CATEGORY',
   stController: 'CONTROLLER', stProcess: 'CONTROLLED PROCESS', stAction: 'CONTROL ACTION', stFeedback: 'FEEDBACK', stRow: 'LEVEL',
+  framFunction: 'FUNCTION', framCoupling: 'COUPLING', pyTier: 'TIER',
 };
 
 // control state chip text [th, en]; glyph + word so state never depends on colour alone
@@ -258,7 +274,9 @@ export function renderBowtie(svg, model, opts = {}) {
 /** Draw the positioned primitives a layout attached to an item (text / rect / line / chip). */
 function drawPrims(parent, it) {
   it.prims.forEach((p) => {
-    if (p.t === 'rect') el('rect', { class: 'pr ' + (p.cls || ''), x: it.x + p.x, y: it.y + p.y, width: p.w, height: p.h, rx: p.rx || 0 }, parent);
+    if (p.t === 'poly') el('polygon', { class: 'pr ' + (p.cls || ''), points: p.pts.map(([x, y]) => (it.x + x) + ',' + (it.y + y)).join(' ') }, parent);
+    else if (p.t === 'circle') el('circle', { class: 'pr ' + (p.cls || ''), cx: it.x + p.cx, cy: it.y + p.cy, r: p.r }, parent);
+    else if (p.t === 'rect') el('rect', { class: 'pr ' + (p.cls || ''), x: it.x + p.x, y: it.y + p.y, width: p.w, height: p.h, rx: p.rx || 0 }, parent);
     else if (p.t === 'line') el('line', { class: 'pr-line ' + (p.cls || ''), x1: it.x + p.x1, y1: it.y + p.y1, x2: it.x + p.x2, y2: it.y + p.y2 }, parent);
     else if (p.t === 'text') el('text', { class: p.cls || null, x: it.x + p.x, y: it.y + p.y, 'text-anchor': p.anchor || null }, parent).textContent = p.s;
     else if (p.t === 'chip') {
@@ -315,6 +333,8 @@ export function renderSwiss(svg, model, opts = {}) { return renderGeometry(svg, 
 export function renderShell(svg, model, opts = {}) { return renderGeometry(svg, model, layoutShell(model), opts); }
 export function renderHfacs(svg, model, opts = {}) { return renderGeometry(svg, model, layoutHfacs(model, { lang: opts.lang }), opts); }
 export function renderStamp(svg, model, opts = {}) { return renderGeometry(svg, model, layoutStamp(model, { lang: opts.lang }), opts); }
+export function renderFram(svg, model, opts = {}) { return renderGeometry(svg, model, layoutFram(model, { lang: opts.lang }), opts); }
+export function renderPyramid(svg, model, opts = {}) { return renderGeometry(svg, model, layoutPyramid(model, { lang: opts.lang }), opts); }
 
 /** type: 'bowtie' | 'swiss' | 'shell' | 'hfacs' | 'stamp' */
 export function renderModel(svg, type, model, opts = {}) {
@@ -322,6 +342,8 @@ export function renderModel(svg, type, model, opts = {}) {
   if (type === 'shell') return renderShell(svg, model, opts);
   if (type === 'hfacs') return renderHfacs(svg, model, opts);
   if (type === 'stamp') return renderStamp(svg, model, opts);
+  if (type === 'fram') return renderFram(svg, model, opts);
+  if (type === 'pyramid') return renderPyramid(svg, model, opts);
   return renderBowtie(svg, model, opts);
 }
 

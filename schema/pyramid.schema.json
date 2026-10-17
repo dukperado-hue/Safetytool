@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dukperado-hue.github.io/Safetytool/schema/pyramid.schema.json",
+  "title": "Safetytool Accident Pyramid dataset (safetytool.pyramid/1)",
+  "type": "object",
+  "description": "An event dataset with user-defined severity tiers. It stores definitions, window, optional denominator, aggregate counts (null = unknown, not zero) and/or event records. It contains no built-in ratio and no prediction.",
+  "required": [
+    "schema",
+    "meta",
+    "dataset",
+    "categories",
+    "counts",
+    "records"
+  ],
+  "properties": {
+    "schema": {
+      "const": "safetytool.pyramid/1"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "illustrative": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "modelId": {
+          "type": "string",
+          "description": "Stable model identity (interchange layer). Never changes once assigned."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Counts exports whose semantic content differed from the previous export."
+        },
+        "lastExportHash": {
+          "type": "string",
+          "description": "SHA-256 of the canonical content at the last export (timestamps excluded)."
+        },
+        "transformations": {
+          "type": "array",
+          "description": "History of guided transformations or imports that produced this model.",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "periodStart": {
+          "type": "string",
+          "description": "YYYY-MM-DD or empty"
+        },
+        "periodEnd": {
+          "type": "string",
+          "description": "YYYY-MM-DD or empty"
+        },
+        "observationNote": {
+          "type": "string"
+        },
+        "inclusion": {
+          "type": "string"
+        },
+        "exclusion": {
+          "type": "string"
+        },
+        "duplicateHandling": {
+          "type": "string"
+        },
+        "reportingLimitations": {
+          "type": "string"
+        }
+      }
+    },
+    "exposure": {
+      "type": "object",
+      "description": "A rate is only computed when value > 0, unit, definition, rateScale and a valid observation window are all present.",
+      "properties": {
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "unit": {
+          "type": "string"
+        },
+        "definition": {
+          "type": "string"
+        },
+        "rateScale": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "level"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1 = top tier (most severe)"
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "categoryId",
+          "count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "note": {
+            "type": "string"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "date": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "duplicateOf": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "importId": {
+            "type": "string"
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "view": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "triangle"
+          ]
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

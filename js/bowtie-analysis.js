@@ -6,6 +6,7 @@
 import { controlsOf } from './model.js';
 import { checkEvidence, isIsoDate } from './evidence.js';
 import { validateErc } from './erc.js';
+import { validateAssurance, actionSummary } from './actions.js';
 import { seriesResult, runSimulation, compareRuns, fingerprint, MODEL_VERSION, LIMITATIONS, RESULT, BARRIER_STATUS, DEGRADED_LOGIC } from './scenario.js';
 
 /** Treat a control as a barrier. A control with no `status` is `unknown` — we never assume it works. */
@@ -29,7 +30,8 @@ export function validateBowtieExt(m) {
   errors.push(...validateErc(m.erc, null));
   const holders = [m.hazard, m.topEvent, ...m.threats, ...m.consequences, ...m.controls, ...m.escalations, ...m.escalationControls];
   const e = checkEvidence(m, holders);
-  return { errors: errors.concat(e.errors), warnings: warnings.concat(e.warnings) };
+  const a = validateAssurance(m);
+  return { errors: errors.concat(e.errors, a.errors), warnings: warnings.concat(e.warnings, a.warnings) };
 }
 
 // ---------- escalation analysis ----------
@@ -146,7 +148,10 @@ export function assuranceRegister(m, asOf = new Date().toISOString().slice(0, 10
     if (!a.nextReview) gaps.push('no review date');
     else if (a.nextReview < asOf) gaps.push('review overdue (' + a.nextReview + ')');
     if (!(c.evidenceIds || []).some((id) => evIds.has(id))) gaps.push('no evidence linked');
+    const act = actionSummary(m, c);
+    if (act.reassessmentDue) gaps.push('a corrective action was closed after the last recorded assessment: reassess (the state is not changed automatically)');
     return {
+      actions: act,
       controlId: c.id, side: c.side, text: c.text, critical: !!c.critical, status: c.status || 'unknown', owner: c.owner || '',
       performanceStandard: a.performanceStandard || '', verification: a.verification || '', lastVerified: a.lastVerified || '', nextReview: a.nextReview || '',
       evidenceCount: (c.evidenceIds || []).length, gaps,

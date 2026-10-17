@@ -37,6 +37,26 @@
         },
         "updatedAt": {
           "type": "string"
+        },
+        "modelId": {
+          "type": "string",
+          "description": "Stable model identity (interchange layer). Never changes once assigned."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Counts exports whose semantic content differed from the previous export."
+        },
+        "lastExportHash": {
+          "type": "string",
+          "description": "SHA-256 of the canonical content at the last export (timestamps excluded)."
+        },
+        "transformations": {
+          "type": "array",
+          "description": "History of guided transformations or imports that produced this model.",
+          "items": {
+            "type": "object"
+          }
         }
       }
     },

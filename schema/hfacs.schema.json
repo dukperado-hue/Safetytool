@@ -4,42 +4,137 @@
   "title": "Safetytool HFACS classification (safetytool.hfacs/1)",
   "description": "Human factors of one occurrence classified into the four HFACS levels (Shappell & Wiegmann, DOT/FAA/AM-00/7, 2000). Not a barrier model; no probabilities.",
   "type": "object",
-  "required": ["schema", "meta", "event", "factors"],
+  "required": [
+    "schema",
+    "meta",
+    "event",
+    "factors"
+  ],
   "properties": {
-    "schema": { "const": "safetytool.hfacs/1" },
+    "schema": {
+      "const": "safetytool.hfacs/1"
+    },
     "meta": {
       "type": "object",
       "properties": {
-        "title": { "type": "string" }, "scope": { "type": "string" }, "author": { "type": "string" },
-        "illustrative": { "type": "boolean" }, "createdAt": { "type": "string" }, "updatedAt": { "type": "string" }
+        "title": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "illustrative": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "modelId": {
+          "type": "string",
+          "description": "Stable model identity (interchange layer). Never changes once assigned."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Counts exports whose semantic content differed from the previous export."
+        },
+        "lastExportHash": {
+          "type": "string",
+          "description": "SHA-256 of the canonical content at the last export (timestamps excluded)."
+        },
+        "transformations": {
+          "type": "array",
+          "description": "History of guided transformations or imports that produced this model.",
+          "items": {
+            "type": "object"
+          }
+        }
       }
     },
     "event": {
       "type": "object",
-      "required": ["id", "text"],
-      "properties": { "id": { "type": "string" }, "text": { "type": "string" } }
+      "required": [
+        "id",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
     },
     "factors": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "text"],
+        "required": [
+          "id",
+          "text"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "text": { "type": "string" },
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
           "category": {
             "enum": [
               null,
-              "resource-management", "organisational-climate", "operational-process",
-              "inadequate-supervision", "planned-inappropriate-operations", "failed-to-correct-known-problem", "supervisory-violations",
-              "adverse-mental-states", "adverse-physiological-states", "physical-mental-limitations", "crew-resource-mismanagement", "personal-readiness",
-              "skill-based-errors", "decision-errors", "perceptual-errors", "routine-violations", "exceptional-violations"
+              "resource-management",
+              "organisational-climate",
+              "operational-process",
+              "inadequate-supervision",
+              "planned-inappropriate-operations",
+              "failed-to-correct-known-problem",
+              "supervisory-violations",
+              "adverse-mental-states",
+              "adverse-physiological-states",
+              "physical-mental-limitations",
+              "crew-resource-mismanagement",
+              "personal-readiness",
+              "skill-based-errors",
+              "decision-errors",
+              "perceptual-errors",
+              "routine-violations",
+              "exceptional-violations"
             ]
           },
-          "evidence": { "type": "string" },
-          "influences": { "type": "array", "items": { "type": "string" }, "description": "ids of factors at a LOWER level that this factor contributed to" },
-          "notes": { "type": "string" }
+          "evidence": {
+            "type": "string"
+          },
+          "influences": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "ids of factors at a LOWER level that this factor contributed to"
+          },
+          "notes": {
+            "type": "string"
+          }
         }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object"
       }
     }
   }

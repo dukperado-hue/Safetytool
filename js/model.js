@@ -174,6 +174,10 @@ export function removeNode(m, id) {
   m.controls = m.controls.filter((c) => !controlIds.has(c.id));
   m.escalations = m.escalations.filter((e) => !escIds.has(e.id));
   m.escalationControls = m.escalationControls.filter((x) => x.id !== id && !escIds.has(x.escalationId));
+  // A corrective action outlives the barrier it was about: it keeps its record, loses the link, and remembers what it was linked to.
+  (m.correctiveActions || []).forEach((a) => {
+    if (a.controlId && controlIds.has(a.controlId)) { a.formerControl = { id: a.controlId, text: (touched.find((c) => c.id === a.controlId) || {}).text || '' }; a.controlId = null; }
+  });
   touched.forEach((c) => renumber(m, c.side, c.side === 'prevent' ? c.threatId : c.consequenceId));
   const after = m.threats.length + m.consequences.length + m.controls.length + m.escalations.length + m.escalationControls.length;
   return before - after;
