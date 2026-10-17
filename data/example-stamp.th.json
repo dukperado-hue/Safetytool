@@ -1,0 +1,169 @@
+{
+  "schema": "safetytool.stamp/1",
+  "meta": {
+    "title": "ตัวอย่างประกอบ STPA: การชะลอความเร็วขณะลงจอด (สมมติ)",
+    "scope": "ตัวอย่างสมมติเพื่อการสอน ไม่ใช่อากาศยานหรือระบบจริง โครงสร้างตาม STPA (Leveson, Engineering a Safer World, 2012; เอกสาร MIT 16.63J) ช่อง UCA ที่ว่างหมายถึงยังไม่ได้วิเคราะห์ ไม่ได้แปลว่าปลอดภัย",
+    "author": "",
+    "illustrative": true,
+    "createdAt": "2026-10-15T00:00:00.000Z",
+    "updatedAt": "2026-10-15T00:00:00.000Z"
+  },
+  "system": {
+    "id": "sy_tekhja",
+    "text": "การชะลอความเร็วของอากาศยานบนทางวิ่งหลังแตะพื้น (ตัวอย่างสมมติ)"
+  },
+  "losses": [
+    {
+      "id": "ls_y4y3rb",
+      "text": "ผู้อยู่บนเครื่องได้รับบาดเจ็บ",
+      "notes": ""
+    },
+    {
+      "id": "ls_kzdfoc",
+      "text": "อากาศยานเสียหาย",
+      "notes": ""
+    }
+  ],
+  "hazards": [
+    {
+      "id": "hz_4489rd",
+      "text": "อากาศยานชะลอความเร็วไม่พอที่จะหยุดภายในทางวิ่ง",
+      "lossIds": [
+        "ls_y4y3rb",
+        "ls_kzdfoc"
+      ],
+      "constraint": "อากาศยานต้องชะลอความเร็วจนหยุดภายในความยาวทางวิ่ง",
+      "notes": ""
+    },
+    {
+      "id": "hz_oq8yje",
+      "text": "อากาศยานออกนอกทางวิ่งด้วยความเร็วสูง",
+      "lossIds": [
+        "ls_y4y3rb",
+        "ls_kzdfoc"
+      ],
+      "constraint": "อากาศยานต้องอยู่บนพื้นผิวทางวิ่งจนกว่าจะหยุดหรือเหลือความเร็วระดับแท็กซี่",
+      "notes": ""
+    }
+  ],
+  "nodes": [
+    {
+      "id": "nd_zeihnf",
+      "role": "controller",
+      "text": "ลูกเรือ (Flight crew)",
+      "level": 0,
+      "processModel": "เชื่อว่าทางวิ่งแห้งและการเบรกจะได้ผลดี",
+      "notes": ""
+    },
+    {
+      "id": "nd_1z85dg",
+      "role": "controller",
+      "text": "ตัวควบคุมเบรกอัตโนมัติและระบบกันลื่น (ซอฟต์แวร์)",
+      "level": 1,
+      "processModel": "เชื่อว่าอากาศยานอยู่บนพื้นและล้อกำลังหมุน",
+      "notes": ""
+    },
+    {
+      "id": "nd_za4bzh",
+      "role": "process",
+      "text": "อากาศยานบนทางวิ่ง (ล้อ เบรก สปอยเลอร์)",
+      "level": 2,
+      "processModel": "",
+      "notes": ""
+    }
+  ],
+  "actions": [
+    {
+      "id": "ac_bc2c0i",
+      "kind": "control",
+      "from": "nd_zeihnf",
+      "to": "nd_1z85dg",
+      "text": "เปิดใช้เบรกอัตโนมัติและเลือกระดับการเบรก",
+      "notes": ""
+    },
+    {
+      "id": "ac_c8tsyj",
+      "kind": "control",
+      "from": "nd_zeihnf",
+      "to": "nd_za4bzh",
+      "text": "เบรกด้วยมือโดยใช้แป้นเหยียบ",
+      "notes": ""
+    },
+    {
+      "id": "ac_2yyqdk",
+      "kind": "control",
+      "from": "nd_1z85dg",
+      "to": "nd_za4bzh",
+      "text": "สั่งเบรกที่ล้อ",
+      "notes": ""
+    },
+    {
+      "id": "ac_xo0nkl",
+      "kind": "feedback",
+      "from": "nd_za4bzh",
+      "to": "nd_1z85dg",
+      "text": "ความเร็วล้อและสัญญาณสัมผัสพื้น",
+      "notes": ""
+    },
+    {
+      "id": "ac_ssemsm",
+      "kind": "feedback",
+      "from": "nd_1z85dg",
+      "to": "nd_zeihnf",
+      "text": "ไฟแสดงสถานะเบรกอัตโนมัติ",
+      "notes": ""
+    },
+    {
+      "id": "ac_exi3cn",
+      "kind": "feedback",
+      "from": "nd_za4bzh",
+      "to": "nd_zeihnf",
+      "text": "ภาพทางวิ่งที่มองเห็นและความรู้สึกถึงการชะลอ",
+      "notes": ""
+    }
+  ],
+  "ucas": [
+    {
+      "id": "uc_mcboqo",
+      "actionId": "ac_2yyqdk",
+      "type": "not-provided",
+      "context": "หลังแตะพื้น เมื่อเปิดเบรกอัตโนมัติไว้และทางวิ่งเปียก",
+      "hazardIds": [
+        "hz_4489rd"
+      ],
+      "constraint": "ตัวควบคุมต้องสั่งเบรกหลังแตะพื้นทุกครั้งที่เปิดเบรกอัตโนมัติไว้",
+      "notes": ""
+    },
+    {
+      "id": "uc_4y0rrq",
+      "actionId": "ac_bc2c0i",
+      "type": "wrong-timing",
+      "context": "เปิดเบรกอัตโนมัติหลังแตะพื้นแทนที่จะเปิดก่อนลงจอด",
+      "hazardIds": [
+        "hz_4489rd"
+      ],
+      "constraint": "ต้องเปิดเบรกอัตโนมัติก่อนลงจอด",
+      "notes": ""
+    },
+    {
+      "id": "uc_vsyker",
+      "actionId": "ac_c8tsyj",
+      "type": "wrong-duration",
+      "context": "ปล่อยเบรกด้วยมือขณะที่ความเร็วภาคพื้นยังสูง",
+      "hazardIds": [
+        "hz_4489rd",
+        "hz_oq8yje"
+      ],
+      "constraint": "",
+      "notes": ""
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "sc_388x3p",
+      "ucaId": "uc_mcboqo",
+      "text": "ไม่ได้รับสัญญาณสัมผัสพื้น ตัวควบคุมจึงเชื่อว่าอากาศยานยังอยู่ในอากาศ (process model ผิด)",
+      "notes": ""
+    }
+  ]
+}

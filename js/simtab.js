@@ -6,7 +6,7 @@ import { controlsOf } from './model.js';
 import { localizeMsg } from './msgs.js';
 import { bowtieCodes } from './layout.js';
 import { simulateBowtie, assuranceRegister } from './bowtie-analysis.js';
-import { pickMatrix, ercLookup, barrierContext, BARRIER_LEVELS } from './erc.js';
+import { pickMatrix, ercLookup, ercText, ercSourceStatus, barrierContext, BARRIER_LEVELS } from './erc.js';
 
 const S = {
   th: {
@@ -23,9 +23,10 @@ const S = {
     setAll: 'ตั้งทุก Barrier เป็น', resetAll: 'รีเซ็ตเป็น "ไม่ทราบ"', col: { threat: 'Threat', cons: 'Consequence', res: 'ผล', why: 'เหตุผล' },
     erc: { title: 'ERC (Event Risk Classification)', note: 'ผู้วิเคราะห์เป็นผู้เลือกคำตอบทั้งสองข้อเอง โปรแกรมไม่ได้คำนวณจากผล Simulate และตารางนี้ต้องตรวจกับตารางทางการขององค์กรก่อนใช้ตัดสินใจ',
       pick: '— ยังไม่เลือก —', q1: 'คำถามที่ 1', q2: 'คำถามที่ 2', ctx: 'สถานะ control ในโมเดลนี้ (ข้อมูลประกอบ ไม่ใช่คำตอบ)', score: 'คะแนน ERC', rationale: 'เหตุผลของผู้วิเคราะห์ (หลักฐาน/สมมติฐานที่ใช้)',
-      lvl: { effective: 'Effective', limited: 'Limited', minimal: 'Minimal', notEffective: 'Not effective' },
+      lvl: { effective: 'ได้ผลดี (Effective)', limited: 'จำกัด (Limited)', minimal: 'น้อยมาก (Minimal)', notEffective: 'ไม่ได้ผล (Not effective)' },
+      sourceStatus: { unverified: 'ยังไม่ยืนยันแหล่งที่มา ห้ามใช้คะแนนนี้ตัดสินใจก่อนตรวจกับตารางทางการขององค์กร', 'reference-only': 'ใช้อ้างอิงเท่านั้น ไม่ใช่ตารางขององค์กรใด' },
       hint: { effective: 'มี barrier ที่ดีเหลืออยู่หลายชั้น', limited: 'สถานการณ์ผิดปกติและจัดการยากขึ้น แต่ยังมีขอบเขตความปลอดภัยพอสมควร', minimal: 'ยังมี barrier เหลืออยู่บ้าง', notEffective: 'ไม่สามารถหลีกเลี่ยงอุบัติเหตุได้ หรือรอดเพราะโชค' },
-      hintSrc: 'ความหมายประกอบจากสไลด์ ATSB 2013 ไม่ใช่นิยามขององค์กร', band: { red: 'แดง', yellow: 'เหลือง', green: 'เขียว' }, none: 'ยังไม่ได้เลือกครบทั้งสองข้อ' },
+      hintSrc: 'ความหมายประกอบจากสไลด์ ATSB 2013 ไม่ใช่นิยามขององค์กร', band: { red: 'แดง', yellow: 'เหลือง', green: 'เขียว', veryHigh: 'สูงมาก', high: 'สูง', medium: 'ปานกลาง', low: 'ต่ำ', noAccidentOutcome: 'ไม่มีผลลัพธ์อุบัติเหตุ' }, none: 'ยังไม่ได้เลือกครบทั้งสองข้อ' },
     empty: 'ต้องมีอย่างน้อย 1 Threat และ 1 Consequence จึงจะจำลองได้', err: 'จำลองไม่ได้: ', gaps: 'ช่องว่างของ Barrier (ตามข้อมูลที่กรอก)', noGaps: 'ไม่มีช่องว่างที่บันทึก',
   },
   en: {
@@ -44,7 +45,8 @@ const S = {
       pick: '— not selected —', q1: 'Question 1', q2: 'Question 2', ctx: 'Control states in this model (context only, not an answer)', score: 'ERC score', rationale: 'Analyst rationale (evidence / assumptions used)',
       lvl: { effective: 'Effective', limited: 'Limited', minimal: 'Minimal', notEffective: 'Not effective' },
       hint: { effective: 'Several good barriers remaining', limited: 'Abnormal and more demanding to manage, but still a considerable safety margin', minimal: 'Some barrier(s) still in place', notEffective: 'An accident was not avoided, or was avoided by luck' },
-      hintSrc: 'Meaning taken from the ATSB 2013 slides, not an organisational definition', band: { red: 'red', yellow: 'yellow', green: 'green' }, none: 'Both answers are needed' },
+      sourceStatus: { unverified: 'Source not verified: do not use this score for a decision until checked against your organisation\'s official table', 'reference-only': 'Reference only, not any organisation\'s table' },
+      hintSrc: 'Meaning taken from the ATSB 2013 slides, not an organisational definition', band: { red: 'red', yellow: 'yellow', green: 'green', veryHigh: 'very high', high: 'high', medium: 'medium', low: 'low', noAccidentOutcome: 'no accident outcome' }, none: 'Both answers are needed' },
     empty: 'Add at least one threat and one consequence to simulate', err: 'Cannot simulate: ', gaps: 'Barrier assurance gaps (from entered data only)', noGaps: 'No gaps recorded',
   },
 };
@@ -143,7 +145,7 @@ function drawSwissLink(host, m, lang, openSwiss) {
   host.appendChild(sec);
 }
 
-function drawErc(host, m, L, api) {
+function drawErc(host, m, L, api, lang) {
   const E = L.erc;
   const sec = el('section', 'erc');
   sec.appendChild(el('h3', null, E.title));
@@ -152,6 +154,9 @@ function drawErc(host, m, L, api) {
   loadErc().then((file) => {
     const mx = pickMatrix(file, (m.erc && m.erc.matrix) || null);
     if (!mx) return;
+    // the status of the table's source is shown with the table itself, before anything can be read from it
+    const st = ercSourceStatus(mx);
+    if (st) { const w = el('p', 'warn-note erc-status', '▲ ' + E.sourceStatus[st] + ' — ' + ercText(mx, 'name', lang)); w.setAttribute('role', 'note'); sec.appendChild(w); }
     const cur = m.erc || { outcome: null, barriers: null, rationale: '' };
     const set = (patch) => api.mutate((x) => { x.erc = Object.assign({ matrix: mx.id, outcome: null, barriers: null, rationale: '' }, x.erc || {}, patch); });
 
@@ -168,13 +173,13 @@ function drawErc(host, m, L, api) {
       wrap.append(lab, s2);
       return wrap;
     };
-    sec.appendChild(sel('erc-q1', E.q1, mx.question1, mx.rows.map((r) => [r.id, r.outcome + ' — ' + r.definition]), cur.outcome, (v) => set({ outcome: v })));
-    sec.appendChild(sel('erc-q2', E.q2, mx.question2, BARRIER_LEVELS.map((b) => [b, E.lvl[b]]), cur.barriers, (v) => set({ barriers: v })));
+    sec.appendChild(sel('erc-q1', E.q1, ercText(mx, 'question1', lang), mx.rows.map((r) => [r.id, ercText(r, 'outcome', lang) + ' — ' + ercText(r, 'definition', lang)]), cur.outcome, (v) => set({ outcome: v })));
+    sec.appendChild(sel('erc-q2', E.q2, ercText(mx, 'question2', lang), BARRIER_LEVELS.map((b) => [b, E.lvl[b]]), cur.barriers, (v) => set({ barriers: v })));
     if (cur.barriers) sec.appendChild(el('p', 'muted', E.hint[cur.barriers] + ' (' + E.hintSrc + ')'));
     const c = barrierContext(m);
     sec.appendChild(el('p', 'muted', `${E.ctx}: ${L.status.effective} ${c.effective} · ${L.status.degraded} ${c.degraded} · ${L.status.failed} ${c.failed} · ${L.status.unknown} ${c.unknown}`));
 
-    const hit = ercLookup(mx, cur.outcome, cur.barriers);
+    const hit = ercLookup(mx, cur.outcome, cur.barriers, lang);
     const res = el('div', 'erc-result');
     if (hit) {
       res.appendChild(el('span', 'erc-chip erc-' + hit.band, `${BAND_ICON[hit.band] || '●'} ${E.score}: ${hit.score} · ${E.band[hit.band] || hit.band}`));
@@ -189,7 +194,7 @@ function drawErc(host, m, L, api) {
     const tb = tbl.createTBody();
     mx.rows.forEach((r) => {
       const tr = tb.insertRow();
-      tr.appendChild(el('th', null, r.outcome));
+      tr.appendChild(el('th', null, ercText(r, 'outcome', lang)));
       r.cells.forEach((cell, ci) => {
         const td = tr.insertCell();
         td.textContent = String(cell.score);
@@ -205,7 +210,7 @@ function drawErc(host, m, L, api) {
     why.id = 'erc-why'; why.rows = 3; why.value = cur.rationale || '';
     why.addEventListener('change', () => { pendingFocus = 'erc-why'; set({ rationale: why.value }); });
     sec.append(rl, why);
-    sec.appendChild(el('p', 'muted', mx.status));
+    sec.appendChild(el('p', 'muted', ercText(mx, 'status', lang)));
     if (pendingFocus) { const fEl = host.querySelector('#' + pendingFocus); if (fEl) fEl.focus(); pendingFocus = null; }
   }).catch(() => { /* matrix unavailable: the rest of the tab still works */ });
 }
@@ -293,7 +298,7 @@ export function drawSimulate(host, m, { lang, mutate, openSwiss }) {
     host.appendChild(ul);
   }
   drawSwissLink(host, m, lang, openSwiss);
-  drawErc(host, m, L, api);
+  drawErc(host, m, L, api, lang);
   host.appendChild(el('h3', null, L.limits));
   const ul = el('ul', 'sim-list muted');
   run.limitations.forEach((x) => ul.appendChild(el('li', null, msg(x))));

@@ -8,18 +8,142 @@
       "status": "Transcribed by hand from a reference image supplied by the user (file Event_risk_classification.png). The publisher of that image is not stated on it. Confirm against the organisation's current official ERC before using any score for a decision.",
       "question1": "If this event had escalated into an accident, what would have been the most probable outcome?",
       "question2": "What was the effectiveness of the remaining barriers between this event and the most probable accident scenario?",
-      "columns": [ { "id": "effective" }, { "id": "limited" }, { "id": "minimal" }, { "id": "notEffective" } ],
-      "rows": [
-        { "id": "catastrophic", "outcome": "Catastrophic accident", "definition": "Loss of aircraft or multiple fatalities (3 or more)", "cells": [
-          { "score": 50, "band": "yellow" }, { "score": 102, "band": "yellow" }, { "score": 502, "band": "red" }, { "score": 2500, "band": "red" } ] },
-        { "id": "major", "outcome": "Major accident", "definition": "1 or 2 fatalities, multiple serious injuries, major damage to the aircraft", "cells": [
-          { "score": 10, "band": "green" }, { "score": 21, "band": "yellow" }, { "score": 101, "band": "yellow" }, { "score": 500, "band": "red" } ] },
-        { "id": "minor", "outcome": "Minor injuries or damage", "definition": "Minor injuries, minor damage to aircraft", "cells": [
-          { "score": 2, "band": "green" }, { "score": 4, "band": "green" }, { "score": 20, "band": "yellow" }, { "score": 100, "band": "yellow" } ] },
-        { "id": "noAccident", "outcome": "No accident outcome", "definition": "No potential damage or injury could occur", "cells": [
-          { "score": 1, "band": "green" }, { "score": 1, "band": "green" }, { "score": 1, "band": "green" }, { "score": 1, "band": "green" } ] }
+      "columns": [
+        {
+          "id": "effective"
+        },
+        {
+          "id": "limited"
+        },
+        {
+          "id": "minimal"
+        },
+        {
+          "id": "notEffective"
+        }
       ],
-      "bands": { "red": null, "yellow": null, "green": null }
+      "rows": [
+        {
+          "id": "catastrophic",
+          "outcome": "Catastrophic accident",
+          "definition": "Loss of aircraft or multiple fatalities (3 or more)",
+          "cells": [
+            {
+              "score": 50,
+              "band": "yellow"
+            },
+            {
+              "score": 102,
+              "band": "yellow"
+            },
+            {
+              "score": 502,
+              "band": "red"
+            },
+            {
+              "score": 2500,
+              "band": "red"
+            }
+          ],
+          "th": {
+            "outcome": "อุบัติเหตุร้ายแรงถึงขีดสุด (Catastrophic)",
+            "definition": "สูญเสียอากาศยาน หรือมีผู้เสียชีวิตหลายราย (3 รายขึ้นไป)"
+          }
+        },
+        {
+          "id": "major",
+          "outcome": "Major accident",
+          "definition": "1 or 2 fatalities, multiple serious injuries, major damage to the aircraft",
+          "cells": [
+            {
+              "score": 10,
+              "band": "green"
+            },
+            {
+              "score": 21,
+              "band": "yellow"
+            },
+            {
+              "score": 101,
+              "band": "yellow"
+            },
+            {
+              "score": 500,
+              "band": "red"
+            }
+          ],
+          "th": {
+            "outcome": "อุบัติเหตุรุนแรง (Major)",
+            "definition": "ผู้เสียชีวิต 1–2 ราย ผู้บาดเจ็บสาหัสหลายราย หรืออากาศยานเสียหายมาก"
+          }
+        },
+        {
+          "id": "minor",
+          "outcome": "Minor injuries or damage",
+          "definition": "Minor injuries, minor damage to aircraft",
+          "cells": [
+            {
+              "score": 2,
+              "band": "green"
+            },
+            {
+              "score": 4,
+              "band": "green"
+            },
+            {
+              "score": 20,
+              "band": "yellow"
+            },
+            {
+              "score": 100,
+              "band": "yellow"
+            }
+          ],
+          "th": {
+            "outcome": "บาดเจ็บหรือเสียหายเล็กน้อย",
+            "definition": "บาดเจ็บเล็กน้อย อากาศยานเสียหายเล็กน้อย"
+          }
+        },
+        {
+          "id": "noAccident",
+          "outcome": "No accident outcome",
+          "definition": "No potential damage or injury could occur",
+          "cells": [
+            {
+              "score": 1,
+              "band": "green"
+            },
+            {
+              "score": 1,
+              "band": "green"
+            },
+            {
+              "score": 1,
+              "band": "green"
+            },
+            {
+              "score": 1,
+              "band": "green"
+            }
+          ],
+          "th": {
+            "outcome": "ไม่มีผลลัพธ์เป็นอุบัติเหตุ",
+            "definition": "ไม่มีโอกาสเกิดความเสียหายหรือการบาดเจ็บ"
+          }
+        }
+      ],
+      "bands": {
+        "red": null,
+        "yellow": null,
+        "green": null
+      },
+      "sourceStatus": "unverified",
+      "th": {
+        "name": "ตาราง ERC (4 ผลลัพธ์ × 4 ระดับ barrier มุมขวาบน 2500)",
+        "status": "ยังไม่ยืนยันแหล่งที่มา: ถอดด้วยมือจากภาพอ้างอิงที่ผู้ใช้ให้มา (ไฟล์ Event_risk_classification.png) ภาพนั้นไม่ระบุผู้เผยแพร่ ต้องตรวจกับตาราง ERC ทางการล่าสุดขององค์กรก่อนใช้คะแนนใด ๆ ประกอบการตัดสินใจ",
+        "question1": "หากเหตุการณ์นี้ลุกลามเป็นอุบัติเหตุ ผลลัพธ์ที่น่าจะเป็นไปได้มากที่สุดคืออะไร?",
+        "question2": "Barrier ที่เหลืออยู่ระหว่างเหตุการณ์นี้กับสถานการณ์อุบัติเหตุที่น่าจะเกิดมากที่สุด มีประสิทธิผลเพียงใด?"
+      }
     },
     {
       "id": "atsb-2013",
@@ -32,18 +156,156 @@
         "url": "https://asasi.org/wp-content/uploads/2021/05/Event-Risk-Classification-by-Russell-Taylor-2013.pdf",
         "accessed": "2026-10-15"
       },
-      "columns": [ { "id": "effective" }, { "id": "limited" }, { "id": "minimal" }, { "id": "notEffective" } ],
+      "columns": [
+        {
+          "id": "effective"
+        },
+        {
+          "id": "limited"
+        },
+        {
+          "id": "minimal"
+        },
+        {
+          "id": "notEffective"
+        }
+      ],
       "rows": [
-        { "id": "highCapacityCatastrophic", "outcome": "High capacity catastrophic accident", "definition": "More than 38 fatalities", "cells": [
-          { "score": 250, "band": "medium" }, { "score": 503, "band": "high" }, { "score": 2503, "band": "veryHigh" }, { "score": 12500, "band": "veryHigh" } ] },
-        { "id": "catastrophic", "outcome": "Catastrophic accident", "definition": "Multiple fatalities (7 to 38)", "cells": [
-          { "score": 50, "band": "medium" }, { "score": 102, "band": "medium" }, { "score": 502, "band": "high" }, { "score": 2500, "band": "veryHigh" } ] },
-        { "id": "major", "outcome": "Major accident", "definition": "1 to 6 fatalities", "cells": [
-          { "score": 10, "band": "low" }, { "score": 21, "band": "medium" }, { "score": 101, "band": "medium" }, { "score": 500, "band": "high" } ] },
-        { "id": "injury", "outcome": "Injury accident", "definition": "1 or more injuries (no fatalities), minor damage to aircraft", "cells": [
-          { "score": 2, "band": "low" }, { "score": 4, "band": "low" }, { "score": 20, "band": "medium" }, { "score": 100, "band": "medium" } ] },
-        { "id": "noAccident", "outcome": "No accident outcome", "definition": "No potential for aircraft damage or injuries", "cells": [
-          { "score": 1, "band": "noAccidentOutcome" }, { "score": 1, "band": "noAccidentOutcome" }, { "score": 1, "band": "noAccidentOutcome" }, { "score": 1, "band": "noAccidentOutcome" } ] }
+        {
+          "id": "highCapacityCatastrophic",
+          "outcome": "High capacity catastrophic accident",
+          "definition": "More than 38 fatalities",
+          "cells": [
+            {
+              "score": 250,
+              "band": "medium"
+            },
+            {
+              "score": 503,
+              "band": "high"
+            },
+            {
+              "score": 2503,
+              "band": "veryHigh"
+            },
+            {
+              "score": 12500,
+              "band": "veryHigh"
+            }
+          ],
+          "th": {
+            "outcome": "อุบัติเหตุร้ายแรงถึงขีดสุดที่มีผู้โดยสารจำนวนมาก",
+            "definition": "ผู้เสียชีวิตมากกว่า 38 ราย"
+          }
+        },
+        {
+          "id": "catastrophic",
+          "outcome": "Catastrophic accident",
+          "definition": "Multiple fatalities (7 to 38)",
+          "cells": [
+            {
+              "score": 50,
+              "band": "medium"
+            },
+            {
+              "score": 102,
+              "band": "medium"
+            },
+            {
+              "score": 502,
+              "band": "high"
+            },
+            {
+              "score": 2500,
+              "band": "veryHigh"
+            }
+          ],
+          "th": {
+            "outcome": "อุบัติเหตุร้ายแรงถึงขีดสุด",
+            "definition": "ผู้เสียชีวิตหลายราย (7 ถึง 38 ราย)"
+          }
+        },
+        {
+          "id": "major",
+          "outcome": "Major accident",
+          "definition": "1 to 6 fatalities",
+          "cells": [
+            {
+              "score": 10,
+              "band": "low"
+            },
+            {
+              "score": 21,
+              "band": "medium"
+            },
+            {
+              "score": 101,
+              "band": "medium"
+            },
+            {
+              "score": 500,
+              "band": "high"
+            }
+          ],
+          "th": {
+            "outcome": "อุบัติเหตุรุนแรง",
+            "definition": "ผู้เสียชีวิต 1 ถึง 6 ราย"
+          }
+        },
+        {
+          "id": "injury",
+          "outcome": "Injury accident",
+          "definition": "1 or more injuries (no fatalities), minor damage to aircraft",
+          "cells": [
+            {
+              "score": 2,
+              "band": "low"
+            },
+            {
+              "score": 4,
+              "band": "low"
+            },
+            {
+              "score": 20,
+              "band": "medium"
+            },
+            {
+              "score": 100,
+              "band": "medium"
+            }
+          ],
+          "th": {
+            "outcome": "อุบัติเหตุที่มีผู้บาดเจ็บ",
+            "definition": "ผู้บาดเจ็บตั้งแต่ 1 รายขึ้นไป (ไม่มีผู้เสียชีวิต) อากาศยานเสียหายเล็กน้อย"
+          }
+        },
+        {
+          "id": "noAccident",
+          "outcome": "No accident outcome",
+          "definition": "No potential for aircraft damage or injuries",
+          "cells": [
+            {
+              "score": 1,
+              "band": "noAccidentOutcome"
+            },
+            {
+              "score": 1,
+              "band": "noAccidentOutcome"
+            },
+            {
+              "score": 1,
+              "band": "noAccidentOutcome"
+            },
+            {
+              "score": 1,
+              "band": "noAccidentOutcome"
+            }
+          ],
+          "th": {
+            "outcome": "ไม่มีผลลัพธ์เป็นอุบัติเหตุ",
+            "definition": "ไม่มีโอกาสที่อากาศยานจะเสียหายหรือมีผู้บาดเจ็บ"
+          }
+        }
       ],
       "bands": {
         "veryHigh": "Investigate and take action immediately",
@@ -51,8 +313,21 @@
         "medium": "Possibly investigate or inform research",
         "low": "Database entry",
         "noAccidentOutcome": "Database entry"
+      },
+      "sourceStatus": "reference-only",
+      "th": {
+        "name": "ตารางจากการนำเสนอของ ATSB ปี 2013 (5 ผลลัพธ์ มุมขวาบน 12,500)",
+        "status": "ใช้อ้างอิงเท่านั้น: ถอดด้วยมือจากสไลด์ 10–12 และ 22 ของแหล่งที่ระบุ ไม่ใช่ตารางขององค์กรใด",
+        "bands": {
+          "veryHigh": "สอบสวนและดำเนินการทันที",
+          "high": "สอบสวน",
+          "medium": "อาจสอบสวนหรือนำไปใช้ประกอบงานวิจัย",
+          "low": "บันทึกลงฐานข้อมูล",
+          "noAccidentOutcome": "บันทึกลงฐานข้อมูล"
+        }
       }
     }
   ],
-  "method": "ERC (from the ARMS working group) is an analyst judgement: Question 1 = most probable accident outcome; Question 2 = effectiveness of remaining barriers; the score is read from the matrix. Safetytool never computes the two answers."
+  "method": "ERC (from the ARMS working group) is an analyst judgement: Question 1 = most probable accident outcome; Question 2 = effectiveness of remaining barriers; the score is read from the matrix. Safetytool never computes the two answers.",
+  "methodTh": "ERC (จากคณะทำงาน ARMS) เป็นดุลยพินิจของผู้วิเคราะห์: คำถามที่ 1 = ผลลัพธ์อุบัติเหตุที่น่าจะเป็นมากที่สุด คำถามที่ 2 = ประสิทธิผลของ barrier ที่เหลือ แล้วอ่านคะแนนจากตาราง Safetytool ไม่คำนวณคำตอบทั้งสองข้อให้"
 }

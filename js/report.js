@@ -3,7 +3,7 @@
 // and never prints signatures, approvals or compliance claims.
 
 import { simulateBowtie, assuranceRegister, compareBowties } from './bowtie-analysis.js';
-import { ercLookup, pickMatrix } from './erc.js';
+import { ercLookup, pickMatrix, ercSourceStatus } from './erc.js';
 import { localizeMsg } from './msgs.js';
 import { bowtieCodes } from './layout.js';
 
@@ -22,6 +22,8 @@ const T = {
     prevent: 'ป้องกัน', recover: 'บรรเทา', yes: 'ใช่', noGaps: 'ไม่มี',
     st: { effective: 'ทำงาน', degraded: 'เสื่อม', failed: 'ล้มเหลว', unknown: 'ไม่ทราบ' },
     ercNone: 'ผู้วิเคราะห์ยังไม่ได้เลือกคำตอบ ERC ครบทั้งสองข้อ', ercOutcome: 'ข้อ 1 ผลที่น่าจะเป็นที่สุด', ercBarrier: 'ข้อ 2 ประสิทธิผลของ Barrier ที่เหลือ', ercScore: 'คะแนน', ercWhy: 'เหตุผลของผู้วิเคราะห์', ercNote: 'ค่าที่เลือกโดยผู้วิเคราะห์ ไม่ได้คำนวณจากผลจำลอง ต้องตรวจกับตารางทางการขององค์กร',
+    ercSource: { unverified: 'ยังไม่ยืนยันแหล่งที่มา ห้ามใช้คะแนนนี้ตัดสินใจก่อนตรวจกับตารางทางการขององค์กร', 'reference-only': 'ใช้อ้างอิงเท่านั้น ไม่ใช่ตารางขององค์กรใด' },
+    ercLvl: { effective: 'ได้ผลดี (Effective)', limited: 'จำกัด (Limited)', minimal: 'น้อยมาก (Minimal)', notEffective: 'ไม่ได้ผล (Not effective)' },
     evid: 'หลักฐาน', refLim: 'อ้างอิง / ข้อจำกัด', assum: 'สมมติฐาน', kind: 'ชนิด', src: 'แหล่งที่มา', none: '(ไม่มี)',
     cmpNote: 'ผลคือ "ความต่างของจำนวนเส้นทาง" ไม่ใช่การลดความเสี่ยง', newlyCut: 'ถูกตัดเพิ่ม', newlyOpen: 'กลับมาไม่ถูกตัด', cmpBase: 'Baseline',
     unctl: 'Escalation Factor ที่ยังไม่มีมาตรการควบคุม',
@@ -39,6 +41,8 @@ const T = {
     prevent: 'preventive', recover: 'recovery', yes: 'yes', noGaps: 'none',
     st: { effective: 'effective', degraded: 'degraded', failed: 'failed', unknown: 'unknown' },
     ercNone: 'The analyst has not chosen both ERC answers', ercOutcome: 'Q1 most probable outcome', ercBarrier: 'Q2 effectiveness of remaining barriers', ercScore: 'Score', ercWhy: 'Analyst rationale', ercNote: 'Chosen by the analyst, not computed from the simulation; check against your organisation\'s official matrix.',
+    ercSource: { unverified: 'Source not verified: do not use this score for a decision until checked against your organisation\'s official table', 'reference-only': 'Reference only, not any organisation\'s table' },
+    ercLvl: { effective: 'Effective', limited: 'Limited', minimal: 'Minimal', notEffective: 'Not effective' },
     evid: 'Evidence', refLim: 'Reference / limitation', assum: 'Assumptions', kind: 'Kind', src: 'Source', none: '(none)',
     cmpNote: 'The result is a path count difference, not a risk reduction.', newlyCut: 'Newly cut', newlyOpen: 'No longer cut', cmpBase: 'Baseline',
     unctl: 'Escalation factors without a control',
@@ -102,11 +106,13 @@ export function buildReport(m, opts = {}) {
   if (want.has('erc')) {
     const e = m.erc || {};
     const mx = opts.ercFile ? pickMatrix(opts.ercFile, e.matrix || null) : null;
-    const hit = mx && e.outcome && e.barriers ? ercLookup(mx, e.outcome, e.barriers) : null;
+    const hit = mx && e.outcome && e.barriers ? ercLookup(mx, e.outcome, e.barriers, opts.lang) : null;
     let html = `<section>${h('erc')}`;
+    const srcStatus = ercSourceStatus(mx);   // the status of the table's source travels with any ERC score in the report
+    if (srcStatus) html += `<p class="rn"><strong>▲ ${esc(L.ercSource[srcStatus])}</strong></p>`;
     if (!e.outcome || !e.barriers) html += `<p>${esc(L.ercNone)}</p>`;
     else {
-      const rows = [[esc(L.ercOutcome), esc(hit ? hit.outcome : e.outcome)], [esc(L.ercBarrier), esc(e.barriers)]];
+      const rows = [[esc(L.ercOutcome), esc(hit ? hit.outcome : e.outcome)], [esc(L.ercBarrier), esc(L.ercLvl[e.barriers] || e.barriers)]];
       if (hit) rows.push([esc(L.ercScore), `<strong>${esc(hit.score)}</strong> (${esc(hit.band)})`]);
       html += table(['', ''], rows).replace('<thead><tr><th></th><th></th></tr></thead>', '');
       if (e.rationale) html += `<p><strong>${esc(L.ercWhy)}:</strong> ${esc(e.rationale)}</p>`;

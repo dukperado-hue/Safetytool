@@ -1,0 +1,327 @@
+{
+  "schema": "safetytool.fram/1",
+  "meta": {
+    "title": "ตัวอย่างประกอบ FRAM: การเตรียมอากาศยานก่อนออกเดินทาง (สมมติ)",
+    "scope": "ตัวอย่างสมมติเพื่อการสอน ไม่ใช่การปฏิบัติงานหรือขั้นตอนจริง FRAM ตาม Hollnagel (2012) ดู docs/FRAM.md บาง aspect ตั้งเป็น \"ไม่ทราบ\" ไว้โดยตั้งใจเพื่อแสดงว่าข้อมูลที่ขาดถูกรายงานอย่างไร",
+    "author": "",
+    "illustrative": true,
+    "createdAt": "2026-10-15T00:00:00.000Z",
+    "updatedAt": "2026-10-15T00:00:00.000Z",
+    "modelId": "md_example_fram",
+    "revision": 1
+  },
+  "activity": {
+    "id": "ac_lpuz01",
+    "text": "การเตรียมอากาศยานก่อนออกจากหลุมจอด (ตัวอย่างสมมติ)"
+  },
+  "limitations": "ตัวอย่างสมมติที่มีเพียงไม่กี่ฟังก์ชัน แสดงงานตามที่จินตนาการไว้ในตัวอย่างนี้ ไม่มีข้อมูลที่สังเกตจริงและไม่มีคะแนนความแปรปรวน",
+  "functions": [
+    {
+      "id": "fn_58irt2",
+      "name": "วางแผนน้ำมันเชื้อเพลิง",
+      "description": "ตัดสินใจว่าจะเติมน้ำมันเท่าใด",
+      "context": "",
+      "aspects": {
+        "input": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_1dkxf6",
+              "text": "แผนการบินและข้อมูลสภาพอากาศ"
+            }
+          ]
+        },
+        "output": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_zrbxm7",
+              "text": "ปริมาณน้ำมันที่ต้องการ"
+            }
+          ]
+        },
+        "precondition": {
+          "status": "unknown",
+          "items": []
+        },
+        "resource": {
+          "status": "unknown",
+          "items": []
+        },
+        "control": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_zumjy8",
+              "text": "นโยบายน้ำมันเชื้อเพลิง"
+            }
+          ]
+        },
+        "time": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_mz1h89",
+              "text": "ก่อนคำขอเติมน้ำมัน"
+            }
+          ]
+        }
+      },
+      "variability": [],
+      "evidenceIds": [],
+      "assumptionIds": [
+        "as_ex_1"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "fn_3fklr3",
+      "name": "บรีฟลูกเรือ",
+      "description": "",
+      "context": "",
+      "aspects": {
+        "input": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_ztk2ia",
+              "text": "ปริมาณน้ำมันที่ต้องการ"
+            }
+          ]
+        },
+        "output": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_ejzcdb",
+              "text": "ลูกเรือรับทราบแผน"
+            }
+          ]
+        },
+        "precondition": {
+          "status": "unknown",
+          "items": []
+        },
+        "resource": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_4ue12c",
+              "text": "เวลาสำหรับการบรีฟ"
+            }
+          ]
+        },
+        "control": {
+          "status": "unknown",
+          "items": []
+        },
+        "time": {
+          "status": "unknown",
+          "items": []
+        }
+      },
+      "variability": [],
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "fn_9ryfr4",
+      "name": "เติมน้ำมันอากาศยาน",
+      "description": "",
+      "context": "",
+      "aspects": {
+        "input": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_omb9xd",
+              "text": "คำขอเติมน้ำมัน"
+            }
+          ]
+        },
+        "output": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_21ak8e",
+              "text": "เติมน้ำมันแล้ว"
+            }
+          ]
+        },
+        "precondition": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_27brzg",
+              "text": "อากาศยานจอดนิ่งและหนุนล้อแล้ว"
+            }
+          ]
+        },
+        "resource": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_68y5xf",
+              "text": "รถน้ำมันและผู้ปฏิบัติงาน"
+            }
+          ]
+        },
+        "control": {
+          "status": "unknown",
+          "items": []
+        },
+        "time": {
+          "status": "none",
+          "items": []
+        }
+      },
+      "variability": [
+        {
+          "id": "vr_wye37l",
+          "text": "เวลาเริ่มเติมน้ำมันอาจแปรผันตามความพร้อมของรถน้ำมัน (ตัวอย่างประกอบ)",
+          "state": "anticipated",
+          "aspect": "time",
+          "evidenceIds": [],
+          "assumptionIds": [],
+          "notes": ""
+        }
+      ],
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "fn_i9yb45",
+      "name": "ตรวจปริมาณน้ำมันก่อนออกเดินทาง",
+      "description": "",
+      "context": "",
+      "aspects": {
+        "input": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_zp1ukh",
+              "text": "เติมน้ำมันแล้ว"
+            }
+          ]
+        },
+        "output": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_whcu3i",
+              "text": "ยืนยันปริมาณน้ำมันแล้ว"
+            }
+          ]
+        },
+        "precondition": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_531gsj",
+              "text": "ลูกเรือรับทราบแผน"
+            }
+          ]
+        },
+        "resource": {
+          "status": "unknown",
+          "items": []
+        },
+        "control": {
+          "status": "described",
+          "items": [
+            {
+              "id": "ai_v5o1sk",
+              "text": "รายการตรวจก่อนออกเดินทาง"
+            }
+          ]
+        },
+        "time": {
+          "status": "unknown",
+          "items": []
+        }
+      },
+      "variability": [],
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    }
+  ],
+  "couplings": [
+    {
+      "id": "cp_uyrpvm",
+      "from": {
+        "functionId": "fn_58irt2",
+        "aspect": "output"
+      },
+      "to": {
+        "functionId": "fn_9ryfr4",
+        "aspect": "input"
+      },
+      "text": "ปริมาณน้ำมันสำหรับคำขอ",
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "cp_gp2vvn",
+      "from": {
+        "functionId": "fn_58irt2",
+        "aspect": "output"
+      },
+      "to": {
+        "functionId": "fn_3fklr3",
+        "aspect": "input"
+      },
+      "text": "",
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "cp_mtqd5o",
+      "from": {
+        "functionId": "fn_3fklr3",
+        "aspect": "output"
+      },
+      "to": {
+        "functionId": "fn_i9yb45",
+        "aspect": "precondition"
+      },
+      "text": "",
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    },
+    {
+      "id": "cp_p4h4kp",
+      "from": {
+        "functionId": "fn_9ryfr4",
+        "aspect": "output"
+      },
+      "to": {
+        "functionId": "fn_i9yb45",
+        "aspect": "input"
+      },
+      "text": "ปริมาณน้ำมันบนอากาศยาน",
+      "evidenceIds": [],
+      "assumptionIds": [],
+      "notes": ""
+    }
+  ],
+  "evidence": [],
+  "assumptions": [
+    {
+      "id": "as_ex_1",
+      "statement": "นโยบายน้ำมันเชื้อเพลิงถูกใช้เหมือนกันทุกเที่ยวบิน (ตัวอย่างประกอบ ยังไม่ได้ทบทวน)",
+      "kind": "HYPOTHESISED",
+      "owner": "",
+      "reason": "",
+      "howToVerify": "เทียบกับวิธีที่นโยบายถูกนำไปใช้จริง",
+      "impactIfFalse": "",
+      "confidence": null,
+      "reviewed": false
+    }
+  ]
+}

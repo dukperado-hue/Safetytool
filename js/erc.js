@@ -10,14 +10,28 @@ export function pickMatrix(file, id) {
   return list.find((m) => m.id === (id || file.default)) || null;
 }
 
+/**
+ * Wording of a matrix, a row or the file in the interface language. The Thai wording lives beside the English in the same JSON
+ * (`th: { … }`); scores, bands and ids are language-free. A field with no Thai text falls back to the English, never to nothing.
+ */
+export function ercText(obj, key, lang) {
+  if (!obj) return undefined;
+  const th = lang === 'th' && obj.th && obj.th[key];
+  return th || obj[key];
+}
+
+/** 'unverified' | 'reference-only' | null — how far the table's source can be trusted. Shown with the table, never hidden. */
+export const ercSourceStatus = (matrix) => (matrix && matrix.sourceStatus) || null;
+
 /** @returns {{score:number, band:string, outcome:string, action:string|null}|null} null when either answer is missing. */
-export function ercLookup(matrix, outcomeId, barrierId) {
+export function ercLookup(matrix, outcomeId, barrierId, lang) {
   if (!matrix || !outcomeId || !barrierId) return null;
   const row = matrix.rows.find((r) => r.id === outcomeId);
   const ci = matrix.columns.findIndex((c) => c.id === barrierId);
   if (!row || ci < 0) return null;
   const cell = row.cells[ci];
-  return { score: cell.score, band: cell.band, outcome: row.outcome, action: (matrix.bands && matrix.bands[cell.band]) || null };
+  const bandsTh = lang === 'th' && matrix.th && matrix.th.bands;
+  return { score: cell.score, band: cell.band, outcome: ercText(row, 'outcome', lang), action: (bandsTh && bandsTh[cell.band]) || (matrix.bands && matrix.bands[cell.band]) || null };
 }
 
 /** Structural check of an `erc` block against a matrix. Returns error strings. */

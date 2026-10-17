@@ -1,0 +1,94 @@
+{
+  "schema": "safetytool.hfacs/1",
+  "meta": {
+    "title": "ตัวอย่างประกอบ HFACS: แตะพื้นไกลเกินไปบนทางวิ่งเปียก (สมมติ)",
+    "scope": "ตัวอย่างสมมติเพื่อการสอน ไม่ใช่เหตุการณ์จริง ใช้ 4 ระดับ 17 หมวดของ Shappell & Wiegmann (2000), DOT/FAA/AM-00/7 ช่องหลักฐานเขียนว่า \"สมมติ\" ไว้โดยตั้งใจ",
+    "author": "",
+    "illustrative": true,
+    "createdAt": "2026-10-15T00:00:00.000Z",
+    "updatedAt": "2026-10-15T00:00:00.000Z"
+  },
+  "event": {
+    "id": "ev_r2n011",
+    "text": "เครื่องบินใบพัดแตะพื้นไกลเกินไปบนทางวิ่งเปียกและหยุดเลยปลายทางวิ่ง (ตัวอย่างสมมติ)"
+  },
+  "factors": [
+    {
+      "id": "hf_fc4z82",
+      "text": "ชั่วโมงฝึกทบทวนเรื่องการลงจอดบนทางวิ่งเปียกถูกลดลงเพื่อประหยัดค่าใช้จ่าย",
+      "category": "resource-management",
+      "evidence": "สมมติขึ้นสำหรับตัวอย่างนี้",
+      "influences": [
+        "hf_xocl74"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_w2zgq3",
+      "text": "ขั้นตอนปฏิบัติของผู้ให้บริการไม่มีเกณฑ์การเข้าหาที่มีเสถียรภาพ (stabilised approach) และไม่บังคับให้เรียกโกอะราวด์",
+      "category": "operational-process",
+      "evidence": "สมมติขึ้นสำหรับตัวอย่างนี้",
+      "influences": [
+        "hf_xocl74"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_xocl74",
+      "text": "การตรวจประเมินระหว่างการบินจริง (line check) ไม่ได้สังเกตว่าลูกเรือคำนวณระยะลงจอดอย่างไร",
+      "category": "inadequate-supervision",
+      "evidence": "สมมติขึ้นสำหรับตัวอย่างนี้",
+      "influences": [
+        "hf_b0j2t6"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_npzbe5",
+      "text": "รายงานการแตะพื้นไกลเกินไปที่เกิดซ้ำจากฐานเดียวกันถูกบันทึกไว้แต่ไม่มีการดำเนินการ",
+      "category": "failed-to-correct-known-problem",
+      "evidence": "สมมติขึ้นสำหรับตัวอย่างนี้",
+      "influences": [
+        "hf_9cloj7"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_b0j2t6",
+      "text": "ลูกเรือมุ่งทำเวลาให้ทันกำหนดถึงหลุมจอด",
+      "category": "adverse-mental-states",
+      "evidence": "สมมติขึ้นสำหรับตัวอย่างนี้",
+      "influences": [
+        "hf_vdowg8"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_9cloj7",
+      "text": "การเรียกเตือนเรื่องความเร็วเกินของนักบินผู้ช่วยไม่ได้รับการตอบรับ และไม่ได้บรีฟเกณฑ์การโกอะราวด์",
+      "category": "crew-resource-mismanagement",
+      "evidence": "สมมติขึ้นสำหรับตัวอย่างนี้",
+      "influences": [
+        "hf_vdowg8",
+        "hf_xyud59"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "hf_vdowg8",
+      "text": "ลงจอดต่อจากการเข้าหาที่ไม่มีเสถียรภาพ",
+      "category": "decision-errors",
+      "evidence": "สมมติขึ้นสำหรับตัวอย่างนี้",
+      "influences": [],
+      "notes": ""
+    },
+    {
+      "id": "hf_xyud59",
+      "text": "เหยียบเบรกช้าหลังแตะพื้น",
+      "category": "skill-based-errors",
+      "evidence": "สมมติขึ้นสำหรับตัวอย่างนี้",
+      "influences": [],
+      "notes": ""
+    }
+  ]
+}

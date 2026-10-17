@@ -202,3 +202,96 @@ test('Swiss cheese is yellow: tab colour, slice fill, dark text on it', () => {
   assert.match(css, /#m-swiss\[aria-pressed=true\]\{background:#f5c400;color:#1b1500/);
   assert.match(readFileSync(new URL('../js/render.js', import.meta.url), 'utf8'), /--cheese:#ffe680/);
 });
+
+// ---- Thai examples (HFACS, FRAM, STAMP) and the Thai ERC with its source-status warning
+import * as HF from '../js/hfacs.js';
+import * as ST from '../js/stamp.js';
+import * as FR from '../js/fram.js';
+import { ercText, ercLookup, ercSourceStatus, pickMatrix } from '../js/erc.js';
+
+const SHAPE = (o) => JSON.stringify(o, (k, v) => (typeof v === 'string' ? '' : v));   // structure and ids stay, text is ignored
+const TEXT_KEYS = ['title', 'scope', 'text', 'name', 'description', 'statement', 'howToVerify', 'limitations', 'processModel', 'constraint', 'context', 'evidence'];
+const texts = (o, out = []) => { if (Array.isArray(o)) o.forEach((x) => texts(x, out)); else if (o && typeof o === 'object') Object.entries(o).forEach(([k, v]) => (typeof v === 'string' && TEXT_KEYS.includes(k) && v.trim() ? out.push(v) : texts(v, out))); return out; };
+
+for (const [type, validate] of [['hfacs', HF.validateHfacs], ['stamp', ST.validateStamp], ['fram', FR.validateFram]]) {
+  test(`Thai example (${type}): valid, same structure and ids as the English one, every text in Thai, still flagged as an example`, () => {
+    const en = json(`../data/example-${type}.json`); const th = json(`../data/example-${type}.th.json`);
+    assert.deepEqual(validate(th), [], 'Thai example validates');
+    assert.equal(SHAPE(th), SHAPE(en), 'same structure, ids and links');
+    const bad = texts(th).filter((s) => !/[ก-๙]/.test(s));
+    assert.deepEqual(bad, [], 'texts with no Thai');
+    assert.equal(th.meta.illustrative, true);
+    assert.match(th.meta.title, /สมมติ|ตัวอย่างประกอบ/);
+  });
+}
+
+test('wiring (source): the Example button loads the Thai file for HFACS, FRAM, STAMP when the interface is Thai, else the English file; a missing Thai file falls back to English', () => {
+  assert.match(app, /const THAI_EXAMPLES = \['hfacs', 'fram', 'stamp'\]/);
+  assert.match(app, /lang === 'th' && THAI_EXAMPLES\.includes\(type\)/);
+  assert.match(app, /\.replace\(\/\\\.json\$\/, '\.th\.json'\)/);
+  const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+  for (const t of ['hfacs', 'fram', 'stamp']) assert.ok(sw.includes(`data/example-${t}.th.json`), t);
+});
+
+const erc = json('../data/erc-matrix.json');
+test('ERC (Thai): every matrix, question, outcome row and band action has Thai wording; scores, bands and ids are untouched', () => {
+  for (const mx of erc.matrices) {
+    assert.ok(mx.th && mx.th.name && mx.th.status, mx.id + ' name/status');
+    for (const r of mx.rows) assert.ok(r.th && r.th.outcome && r.th.definition, mx.id + '/' + r.id);
+    if (mx.bands && Object.values(mx.bands).some(Boolean)) for (const b of Object.keys(mx.bands)) assert.ok(mx.th.bands && mx.th.bands[b], mx.id + ' band ' + b);
+  }
+  const org = pickMatrix(erc, 'org-reference');
+  assert.ok(org.th.question1 && org.th.question2);
+  assert.equal(ercLookup(org, 'catastrophic', 'notEffective', 'th').score, 2500);
+  assert.equal(ercLookup(org, 'catastrophic', 'notEffective', 'th').band, 'red');
+  assert.match(ercLookup(org, 'major', 'limited', 'th').outcome, /[ก-๙]/);
+  assert.equal(ercLookup(org, 'major', 'limited', 'en').outcome, 'Major accident');
+  assert.equal(ercLookup(org, 'major', 'limited').outcome, 'Major accident', 'no language given: English as before');
+  const atsb = pickMatrix(erc, 'atsb-2013');
+  assert.match(ercLookup(atsb, 'catastrophic', 'notEffective', 'th').action, /สอบสวน/);
+});
+
+test('ERC: a field with no Thai text falls back to the English, never to nothing', () => {
+  assert.equal(ercText({ a: 'English', th: {} }, 'a', 'th'), 'English');
+  assert.equal(ercText({ a: 'English', th: { a: 'ไทย' } }, 'a', 'th'), 'ไทย');
+  assert.equal(ercText({ a: 'English', th: { a: 'ไทย' } }, 'a', 'en'), 'English');
+  assert.equal(ercText(null, 'a', 'th'), undefined);
+});
+
+test('ERC: the transcribed tables carry a source status (unverified / reference-only) and it is shown on screen and in the report', () => {
+  assert.equal(ercSourceStatus(pickMatrix(erc, 'org-reference')), 'unverified');
+  assert.equal(ercSourceStatus(pickMatrix(erc, 'atsb-2013')), 'reference-only');
+  assert.equal(ercSourceStatus(null), null);
+  const sim = readFileSync(new URL('../js/simtab.js', import.meta.url), 'utf8');
+  assert.match(sim, /ยังไม่ยืนยันแหล่งที่มา/); assert.match(sim, /Source not verified/);
+  assert.match(sim, /ercSourceStatus\(mx\)/);
+  const m = M.normalize(json('../data/example-wildlife.json'));
+  for (const lang of ['th', 'en']) {
+    const html = buildReport(m, { lang, sections: ['erc'], ercFile: erc });
+    assert.match(html, lang === 'th' ? /ยังไม่ยืนยันแหล่งที่มา/ : /Source not verified/, lang);
+  }
+  m.erc = { matrix: 'org-reference', outcome: 'major', barriers: 'limited', rationale: '' };
+  const th = buildReport(m, { lang: 'th', sections: ['erc'], ercFile: erc });
+  assert.ok(th.includes('ยังไม่ยืนยันแหล่งที่มา') && /อุบัติเหตุรุนแรง/.test(th) && /จำกัด \(Limited\)/.test(th));
+});
+
+// ---- resize: debounced redraw, refit unless the user positioned the diagram
+import { debounce } from '../js/keepfocus.js';
+test('debounce: many calls become one, with the last arguments, after the delay', async () => {
+  const calls = [];
+  const f = debounce((x) => calls.push(x), 30);
+  f(1); f(2); f(3);
+  assert.deepEqual(calls, []);
+  await new Promise((r) => setTimeout(r, 80));
+  assert.deepEqual(calls, [3]);
+  f(4); await new Promise((r) => setTimeout(r, 80));
+  assert.deepEqual(calls, [3, 4]);
+});
+
+test('wiring (source): resize and rotation redraw the diagram, debounced; refit only while the view is "fitted"; pan, zoom and centring clear that', () => {
+  assert.match(app, /const onResize = debounce\(\(\) => \{[\s\S]*drawDiagram\(\{ fit: state\.viewFitted !== false \}\)/);
+  assert.match(app, /addEventListener\('resize', onResize\)/);
+  assert.match(app, /addEventListener\('orientationchange', onResize\)/);
+  assert.match(app, /state\.viewFitted = true;/);
+  assert.ok((app.match(/state\.viewFitted = false;/g) || []).length >= 4, 'pinch, drag, wheel, centre-on');
+});

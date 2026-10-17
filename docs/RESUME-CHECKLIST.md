@@ -13,6 +13,7 @@ State: nothing committed or pushed. Base commit `0e19262`. Run `npm test` first.
 - [x] Close button stays in view while the sheet body scrolls (894).
 - [x] Thai typeface loads (Thai characters only; now Sarabun).
 - [x] Export checks (downloads captured, not saved): SVG and report HTML embed the font; PNG is produced (5190×2178); Thai report has no `ct_` text (ids only in SVG attributes), codes show CT-01.
+- [x] Resize / rotation: debounced redraw, diagram refits (unless the user zoomed), all 7 diagram types, 894x567 <-> 1280x720 <-> 560x800 (resize event dispatched by script after the iframe changed size; the browser tool throttles real resize events, so also watch it once by hand on a real window).
 - [x] Swiss tab and slices are yellow (rgb 245,196,0 / 255,230,128), dark text.
 
 ## Done in code, covered only by tests (not clicked in a browser)
@@ -28,8 +29,9 @@ State: nothing committed or pushed. Base commit `0e19262`. Run `npm test` first.
 - [ ] Offline/service worker with the new files (sw.js VERSION is v14; cache list updated and tested by the existing precache test).
 
 ## Known gaps / not started (agreed scope: do not start until stabilised)
-- ERC wording: still English, source status not shown in Thai.
-- English example text in HFACS / FRAM / STAMP data files.
+- [x] ERC Thai wording + source-status warning (unverified / reference-only) on screen and in the report (uncommitted, checked in Chrome).
+- [x] Thai examples for HFACS / FRAM / STAMP, chosen by interface language (uncommitted, checked in Chrome).
+- Still English only: Shell / Pyramid examples, ERC page "method" text is stored in Thai (methodTh) but not displayed anywhere yet.
 - Persona picker, Thai persona examples, assistant character, gallery redesign, sync.
 - Shared `localStorage` origin with other github.io projects (risk noted by the trial).
 

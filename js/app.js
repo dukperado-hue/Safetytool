@@ -12,7 +12,7 @@ import * as FR from './fram.js';
 import * as PY from './pyramid.js';
 import * as IC from './interchange.js';
 import * as SO from './safeopen.js';
-import { keepFocus } from './keepfocus.js';
+import { keepFocus, debounce } from './keepfocus.js';
 import { modelExample } from './modelintro.js';
 import { embeddedFontCss, loadThaiFont } from './fonts.js';
 import * as FP from './fptabs.js';
@@ -230,6 +230,7 @@ function fitView() {
   const { w, h } = stageSize();
   const k = Math.min(w / state.last.width, h / state.last.height, 1.4);
   state.view = { k, x: (w - state.last.width * k) / 2, y: (h - state.last.height * k) / 2 };
+  state.viewFitted = true;   // until the user pans/zooms: a resize then refits the diagram to the new size
   applyView();
 }
 const explain = (kind) => (state.help ? explainShort(state.type, kind, state.lang) : '');
@@ -953,9 +954,14 @@ function toCsv() {
   return '﻿' + rows.join('\r\n');
 }
 
+/** Models whose example also exists in Thai (data/example-<type>.th.json); the other examples are a single file. */
+const THAI_EXAMPLES = ['hfacs', 'fram', 'stamp'];
+const exampleFile = (type, lang) => (lang === 'th' && THAI_EXAMPLES.includes(type) ? TYPES[type].example.replace(/\.json$/, '.th.json') : TYPES[type].example);
+
 async function loadExample() {
   try {
-    const r = await fetch(spec().example, { cache: 'no-cache' });
+    let r = await fetch(exampleFile(state.type, state.lang), { cache: 'no-cache' });
+    if (!r.ok && exampleFile(state.type, state.lang) !== spec().example) r = await fetch(spec().example, { cache: 'no-cache' });   // no Thai file: use the English one rather than nothing
     if (!r.ok) throw new Error(String(r.status));
     openGuarded(await r.json());
   } catch (e) {
@@ -1012,6 +1018,7 @@ function centerOn(id) {
   const { w, h } = stageSize();
   const k = Math.max(state.view.k, 0.8);
   const cy = narrowMQ.matches && state.panelOpen ? h * 0.22 : h / 2;   // on a phone the details sheet covers the lower part
+  state.viewFitted = false;
   state.view = { k, x: w / 2 - (it.x + it.w / 2) * k, y: cy - (it.y + it.h / 2) * k };
   applyView();
 }
@@ -1193,6 +1200,7 @@ function bind() {
       const r = stage.getBoundingClientRect();
       const k1 = Math.min(3, Math.max(0.1, pinch.k * (g.d / pinch.d)));
       const px = pinch.cx - r.left; const py = pinch.cy - r.top;
+      state.viewFitted = false;
       state.view.k = k1;
       state.view.x = px - (px - pinch.vx) * (k1 / pinch.k) + (g.cx - pinch.cx);
       state.view.y = py - (py - pinch.vy) * (k1 / pinch.k) + (g.cy - pinch.cy);
@@ -1202,6 +1210,7 @@ function bind() {
     if (!drag) return;
     const dx = ev.clientX - drag.x; const dy = ev.clientY - drag.y;
     if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+    state.viewFitted = false;
     state.view.x = drag.vx + dx; state.view.y = drag.vy + dy; applyView();
   });
   stage.addEventListener('pointerup', (ev) => { endPointer(ev); if (drag && drag.moved) ev.stopPropagation(); drag = null; });
@@ -1211,13 +1220,21 @@ function bind() {
     const px = ev.clientX - r.left; const py = ev.clientY - r.top;
     const k0 = state.view.k;
     const k1 = Math.min(3, Math.max(0.1, k0 * (ev.deltaY < 0 ? 1.1 : 1 / 1.1)));
+    state.viewFitted = false;
     state.view.x = px - (px - state.view.x) * (k1 / k0);
     state.view.y = py - (py - state.view.y) * (k1 / k0);
     state.view.k = k1;
     applyView();
   }, { passive: false });
 
-  window.addEventListener('resize', () => { if (state.tab === 'diagram') drawDiagram(); });
+  // Window resized or device rotated: the stage has a new size, so redraw the diagram at that size. A diagram the user has not
+  // moved or zoomed is refitted to the new stage; one the user positioned keeps its own zoom and position. Debounced: a drag-resize
+  // fires many events. Other tabs are plain flowing HTML and re-flow by themselves; the details sheet follows its media query.
+  const onResize = debounce(() => {
+    if (state.tab === 'diagram' && state.last) drawDiagram({ fit: state.viewFitted !== false });
+  }, 120);
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
   document.addEventListener('keydown', (ev) => {
     if (ev.target.closest('input,textarea,select')) return;
     if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z') { ev.preventDefault(); if (ev.shiftKey) doRedo(); else doUndo(); }

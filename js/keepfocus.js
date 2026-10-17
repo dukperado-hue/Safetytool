@@ -51,3 +51,9 @@ export function keepFocus(roots, doc, rebuild) {
   rebuild();
   if (snap) restoreFocus(root, snap);
 }
+
+/** Run `fn` once, `ms` after the last call (the trailing call wins): a drag-resize fires many events but redraws once. */
+export function debounce(fn, ms) {
+  let timer = null;
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => { timer = null; fn(...args); }, ms); };
+}
